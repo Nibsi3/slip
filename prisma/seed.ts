@@ -73,14 +73,63 @@ async function main() {
   console.log(`Worker user: ${worker2.phone} / worker123`);
   console.log(`Worker QR code: demo-naledi-dlamini`);
 
+  // Create demo QR codes linked to demo workers
+  const thaboWorker = await prisma.worker.findFirst({ where: { user: { phone: "0662995533" } } });
+  const nalediWorker = await prisma.worker.findFirst({ where: { user: { phone: "0829876543" } } });
+
+  if (thaboWorker) {
+    await prisma.qRCode.upsert({
+      where: { token: "DEMO0001" },
+      update: {},
+      create: {
+        token: "DEMO0001",
+        workerId: thaboWorker.id,
+        batchId: "batch-demo",
+        status: "ACTIVE",
+        activatedAt: new Date(),
+      },
+    });
+    console.log("Demo QR (active): /qr/DEMO0001 → Thabo");
+  }
+
+  if (nalediWorker) {
+    await prisma.qRCode.upsert({
+      where: { token: "DEMO0002" },
+      update: {},
+      create: {
+        token: "DEMO0002",
+        workerId: nalediWorker.id,
+        batchId: "batch-demo",
+        status: "ACTIVE",
+        activatedAt: new Date(),
+      },
+    });
+    console.log("Demo QR (active): /qr/DEMO0002 → Naledi");
+  }
+
+  // Create some inactive demo QR codes
+  for (let i = 3; i <= 5; i++) {
+    const token = `DEMO000${i}`;
+    await prisma.qRCode.upsert({
+      where: { token },
+      update: {},
+      create: {
+        token,
+        batchId: "batch-demo",
+        status: "INACTIVE",
+      },
+    });
+  }
+  console.log("Demo QR (inactive): /qr/DEMO0003, /qr/DEMO0004, /qr/DEMO0005");
+
   console.log("\nSeeding complete!");
   console.log("\nTest accounts:");
   console.log("  Admin: cameronfalck03@gmail.com / !!AnCam123");
   console.log("  Worker 1 (Thabo): 0662995533 / worker123");
   console.log("  Worker 2 (Naledi): 0829876543 / worker123");
-  console.log("\nTip URLs:");
-  console.log("  http://localhost:3000/tip/demo-thabo-molefe");
-  console.log("  http://localhost:3000/tip/demo-naledi-dlamini");
+  console.log("\nQR Code URLs:");
+  console.log("  Active: /qr/DEMO0001 (Thabo), /qr/DEMO0002 (Naledi)");
+  console.log("  Inactive (activation test): /qr/DEMO0003");
 }
 
 main()

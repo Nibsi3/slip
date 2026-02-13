@@ -80,6 +80,7 @@ model Worker {
   ledgerEntries LedgerEntry[]
   withdrawals   Withdrawal[]
   tips          Tip[]
+  qrCodes       QRCode[]
 }
 
 model Tip {
@@ -163,4 +164,21 @@ model AuditLog {
   details   Json?
   ipAddress String?
   createdAt DateTime @default(now())
+}
+
+enum QRCodeStatus {
+  INACTIVE
+  ACTIVE
+  DISABLED
+}
+
+model QRCode {
+  id          String       @id @default(cuid())
+  token       String       @unique
+  workerId    String?
+  worker      Worker?      @relation(fields: [workerId], references: [id])
+  batchId     String?
+  status      QRCodeStatus @default(INACTIVE)
+  createdAt   DateTime     @default(now())
+  activatedAt DateTime?
 }
