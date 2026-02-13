@@ -29,6 +29,9 @@ export default function HomePage() {
             <Link href="#faq" className="hidden md:inline-flex text-sm text-white/50 hover:text-white transition-colors">
               FAQ
             </Link>
+            <Link href="/auth/login" className="btn-secondary !py-2 !px-3 sm:!px-4 !text-xs">
+              Log In
+            </Link>
             <Link href="/auth/register" className="btn-primary !py-2 !px-3 sm:!px-4 !text-xs">
               Get Started
             </Link>
@@ -399,9 +402,6 @@ export default function HomePage() {
                   <div className="flex flex-col gap-3 sm:items-end">
                     <Link href="/auth/register" className="btn-primary !py-4 !px-10 text-base w-full sm:w-auto">
                       Get started free
-                    </Link>
-                    <Link href="/auth/login" className="btn-secondary !py-4 !px-10 text-base w-full sm:w-auto">
-                      Sign in
                     </Link>
                   </div>
                 </div>
