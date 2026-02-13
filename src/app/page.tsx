@@ -29,9 +29,6 @@ export default function HomePage() {
             <Link href="#faq" className="hidden md:inline-flex text-sm text-white/50 hover:text-white transition-colors">
               FAQ
             </Link>
-            <Link href="/auth/login" className="btn-secondary !py-2 !px-3 sm:!px-4 !text-xs">
-              Log In
-            </Link>
             <Link href="/auth/register" className="btn-primary !py-2 !px-3 sm:!px-4 !text-xs">
               Get Started
             </Link>
