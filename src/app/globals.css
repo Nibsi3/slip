@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-white antialiased;
+    background: #030306;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-sm px-6 py-3 text-sm font-semibold shadow-btn transition-all disabled:opacity-40 disabled:cursor-not-allowed;
+    color: #030306;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 255, 255, 0.78) 100%
+    );
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.96) 0%,
+      rgba(255, 255, 255, 0.84) 100%
+    );
+    @apply shadow-glow-sm;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-sm px-6 py-3 text-sm font-semibold text-muted-50 transition-all ring-1 ring-inset ring-white/10 disabled:opacity-40 disabled:cursor-not-allowed;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: rgba(255,255,255,0.08);
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center rounded-sm bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-btn transition-all hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .input-field {
+    @apply block w-full rounded-sm border-0 px-4 py-3 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-muted-300 focus:ring-1 focus:ring-accent/50 focus:shadow-glow-sm sm:text-sm sm:leading-6 transition-all;
+    background: rgba(255,255,255,0.04);
+  }
+  .card {
+    @apply rounded-none p-6 ring-1 ring-white/[0.06];
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(16px);
+  }
+  .card-glow {
+    @apply rounded-none p-6 ring-1 ring-white/[0.08];
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 0 40px rgba(20,167,249,0.05), 0 0 90px rgba(20,167,249,0.03), 0 1px 2px rgba(0,0,0,0.4);
+  }
+  .glass {
+    @apply ring-1 ring-white/[0.06];
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(20px);
+  }
+}
