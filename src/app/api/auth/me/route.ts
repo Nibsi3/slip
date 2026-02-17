@@ -23,6 +23,8 @@ export async function GET() {
               id: user.worker.id,
               qrCode: user.worker.qrCode,
               walletBalance: user.worker.walletBalance,
+              availableBalance: user.worker.availableBalance,
+              balanceCap: user.worker.balanceCap,
               employerName: user.worker.employerName,
               jobTitle: user.worker.jobTitle,
               isActive: user.worker.isActive,

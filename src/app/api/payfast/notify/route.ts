@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getPayFastConfig, validateITN, verifyITNSignature } from "@/lib/payfast";
+import {
+  checkBalanceCap,
+  createSettlementHold,
+  processSettlementClears,
+  recalculateReserve,
+  runAmlChecks,
+  recordFraudEvent,
+} from "@/lib/security";
 
 export async function POST(request: NextRequest) {
   try {
@@ -62,6 +70,74 @@ export async function POST(request: NextRequest) {
     }
 
     if (paymentStatus === "COMPLETE") {
+      const netAmount = Number(tip.netAmount);
+
+      // --- Security: Balance cap enforcement ---
+      const capCheck = await checkBalanceCap(tip.workerId, netAmount);
+      if (!capCheck.allowed) {
+        // Tip payment succeeded but worker is at cap — hold funds, flag for admin
+        await recordFraudEvent({
+          type: "BALANCE_CAP_EXCEEDED",
+          workerId: tip.workerId,
+          tipId: tip.id,
+          riskScore: 50,
+          action: "HOLD",
+          details: {
+            netAmount,
+            currentBalance: capCheck.currentBalance,
+            balanceCap: capCheck.balanceCap,
+            excessAmount: capCheck.excessAmount,
+          },
+        });
+
+        await db.auditLog.create({
+          data: {
+            action: "TIP_BALANCE_CAP_HOLD",
+            entity: "Tip",
+            entityId: tip.id,
+            details: {
+              paymentId,
+              netAmount,
+              currentBalance: capCheck.currentBalance,
+              balanceCap: capCheck.balanceCap,
+            },
+          },
+        });
+
+        // Still mark tip as completed but don't credit wallet
+        await db.tip.update({
+          where: { id: tip.id },
+          data: { status: "COMPLETED", pfPaymentId: pfPaymentId || null },
+        });
+
+        console.log(`Tip ${tip.id} completed but HELD: worker ${tip.workerId} at balance cap`);
+        return new NextResponse("OK");
+      }
+
+      // --- Security: AML checks ---
+      const amlResult = await runAmlChecks(tip.workerId, netAmount, "TIP");
+      let settlementRisk: "low" | "medium" | "high" = "low";
+      let isFraudHeld = false;
+
+      if (amlResult.hasAlerts) {
+        if (amlResult.highestRiskLevel === "CRITICAL" || amlResult.highestRiskLevel === "HIGH") {
+          settlementRisk = "high";
+          isFraudHeld = amlResult.highestRiskLevel === "CRITICAL";
+        } else if (amlResult.highestRiskLevel === "MEDIUM") {
+          settlementRisk = "medium";
+        }
+
+        await recordFraudEvent({
+          type: "AML_ALERT",
+          workerId: tip.workerId,
+          tipId: tip.id,
+          riskScore: amlResult.highestRiskLevel === "CRITICAL" ? 90 : 50,
+          action: isFraudHeld ? "HOLD" : "FLAG",
+          details: { alerts: amlResult.alerts },
+        });
+      }
+
+      // --- Core transaction: mark tip completed, create ledger, credit wallet ---
       await db.$transaction(async (tx) => {
         await tx.tip.update({
           where: { id: tip.id },
@@ -85,6 +161,8 @@ export async function POST(request: NextRequest) {
           },
         });
 
+        // Credit walletBalance (total balance) but NOT availableBalance
+        // Available balance is released after settlement delay clears
         await tx.worker.update({
           where: { id: tip.workerId },
           data: {
@@ -92,6 +170,21 @@ export async function POST(request: NextRequest) {
           },
         });
       });
+
+      // --- Security: Settlement delay (24-72h hold before funds are withdrawable) ---
+      const { clearsAt } = await createSettlementHold(
+        tip.id,
+        tip.workerId,
+        tip.netAmount,
+        settlementRisk,
+        isFraudHeld
+      );
+
+      // --- Security: Recalculate chargeback reserve ---
+      await recalculateReserve();
+
+      // --- Opportunistically clear any matured settlement holds ---
+      await processSettlementClears();
 
       await db.auditLog.create({
         data: {
@@ -102,12 +195,16 @@ export async function POST(request: NextRequest) {
             paymentId,
             pfPaymentId,
             amountGross,
-            netAmount: Number(tip.netAmount),
+            netAmount,
+            settlementClearsAt: clearsAt.toISOString(),
+            settlementRisk,
+            isFraudHeld,
+            amlAlerts: amlResult.alerts.length,
           },
         },
       });
 
-      console.log(`Tip ${tip.id} completed: R${Number(tip.netAmount)} credited to worker ${tip.workerId}`);
+      console.log(`Tip ${tip.id} completed: R${netAmount} credited to worker ${tip.workerId} (settlement clears ${clearsAt.toISOString()})`);
     } else if (paymentStatus === "CANCELLED") {
       await db.tip.update({
         where: { id: tip.id },

@@ -4,6 +4,19 @@ import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { Decimal } from "@prisma/client/runtime/library";
 import { processPayout } from "@/lib/payouts";
+import {
+  scoreWithdrawalTransaction,
+  recordFraudEvent,
+  recordVelocityEvent,
+  checkWithdrawalVelocity,
+  getAvailableBalance,
+  processSettlementClears,
+  recalculateReserve,
+  isWithdrawalSafeForReserve,
+  runAmlChecks,
+  MAX_WITHDRAWAL_PER_TX_ZAR,
+  getWithdrawalDailyCap,
+} from "@/lib/security";
 
 const withdrawSchema = z.object({
   amount: z.number().min(20),
@@ -20,6 +33,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = withdrawSchema.parse(body);
 
+    const ipAddress = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+                      request.headers.get("x-real-ip") || "unknown";
+
     const worker = await db.worker.findUnique({
       where: { userId: session.user.id },
       include: { user: { select: { firstName: true, lastName: true } } },
@@ -29,8 +45,122 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Worker not found" }, { status: 404 });
     }
 
-    if (Number(worker.walletBalance) < data.amount) {
-      return NextResponse.json({ error: "Insufficient balance" }, { status: 400 });
+    // --- Security: Per-transaction limit ---
+    if (data.amount > MAX_WITHDRAWAL_PER_TX_ZAR) {
+      return NextResponse.json(
+        { error: `Maximum withdrawal per transaction is R${MAX_WITHDRAWAL_PER_TX_ZAR}` },
+        { status: 400 }
+      );
+    }
+
+    // --- Security: Process any matured settlement holds first ---
+    await processSettlementClears();
+
+    // --- Security: Check AVAILABLE (cleared) balance, not total wallet ---
+    const availableBalance = await getAvailableBalance(worker.id);
+    if (availableBalance < data.amount) {
+      const totalBalance = Number(worker.walletBalance);
+      const pendingAmount = totalBalance - availableBalance;
+      return NextResponse.json(
+        {
+          error: `Insufficient cleared funds. Available: R${availableBalance.toFixed(2)}` +
+            (pendingAmount > 0 ? ` (R${pendingAmount.toFixed(2)} still settling)` : ""),
+        },
+        { status: 400 }
+      );
+    }
+
+    // --- Security: Velocity limits (daily withdrawal count & amount) ---
+    const velocityCheck = await checkWithdrawalVelocity(worker.id, data.amount);
+    if (!velocityCheck.allowed) {
+      await db.auditLog.create({
+        data: {
+          userId: session.user.id,
+          action: "WITHDRAWAL_VELOCITY_BLOCKED",
+          entity: "Withdrawal",
+          details: {
+            amount: data.amount,
+            reason: velocityCheck.reason,
+            counts: velocityCheck.counts,
+          },
+          ipAddress,
+        },
+      });
+      return NextResponse.json({ error: velocityCheck.reason }, { status: 429 });
+    }
+
+    // --- Security: Chargeback reserve check ---
+    const reserveCheck = await isWithdrawalSafeForReserve(data.amount);
+    if (!reserveCheck.safe) {
+      return NextResponse.json(
+        { error: "Withdrawal temporarily unavailable due to platform reserve requirements. Please try a smaller amount." },
+        { status: 400 }
+      );
+    }
+
+    // --- Security: Fraud scoring ---
+    const fraudResult = await scoreWithdrawalTransaction({
+      workerId: worker.id,
+      amount: data.amount,
+      ipAddress,
+    });
+
+    if (fraudResult.blocked) {
+      await recordFraudEvent({
+        type: "WITHDRAWAL_FLAGGED",
+        workerId: worker.id,
+        ipAddress,
+        riskScore: fraudResult.score,
+        action: "BLOCK",
+        details: { factors: fraudResult.factors, amount: data.amount },
+      });
+      return NextResponse.json(
+        { error: "This withdrawal cannot be processed at this time. Please contact support." },
+        { status: 403 }
+      );
+    }
+
+    if (fraudResult.action === "HOLD") {
+      await recordFraudEvent({
+        type: "WITHDRAWAL_FLAGGED",
+        workerId: worker.id,
+        ipAddress,
+        riskScore: fraudResult.score,
+        action: "HOLD",
+        details: { factors: fraudResult.factors, amount: data.amount },
+      });
+      return NextResponse.json(
+        { error: "This withdrawal requires additional review. It has been queued for processing." },
+        { status: 202 }
+      );
+    }
+
+    if (fraudResult.action === "FLAG") {
+      await recordFraudEvent({
+        type: "WITHDRAWAL_FLAGGED",
+        workerId: worker.id,
+        ipAddress,
+        riskScore: fraudResult.score,
+        action: "FLAG",
+        details: { factors: fraudResult.factors, amount: data.amount },
+      });
+    }
+
+    // --- Security: AML checks ---
+    const amlResult = await runAmlChecks(worker.id, data.amount, "WITHDRAWAL");
+    if (amlResult.hasAlerts && (amlResult.highestRiskLevel === "CRITICAL" || amlResult.highestRiskLevel === "HIGH")) {
+      await recordFraudEvent({
+        type: "AML_ALERT",
+        workerId: worker.id,
+        ipAddress,
+        riskScore: 70,
+        action: "HOLD",
+        details: { alerts: amlResult.alerts, amount: data.amount },
+      });
+      return NextResponse.json(
+        { error: "This withdrawal requires additional compliance review." },
+        { status: 202 }
+      );
     }
 
     if (data.method === "EFT" && (!data.bankName || !data.bankAccountNo)) {
@@ -54,7 +184,10 @@ export async function POST(request: NextRequest) {
     const accountNo = data.bankAccountNo || worker.bankAccountNo || "";
     const branchCode = data.bankBranchCode || worker.bankBranchCode || "";
 
-    // Step 1: Create withdrawal + deduct wallet in a transaction
+    // --- Record velocity event ---
+    await recordVelocityEvent(worker.id, "WITHDRAWAL", data.amount, ipAddress);
+
+    // Step 1: Create withdrawal + deduct BOTH walletBalance and availableBalance atomically
     const withdrawal = await db.$transaction(async (tx: Parameters<Parameters<typeof db.$transaction>[0]>[0]) => {
       const w = await tx.withdrawal.create({
         data: {
@@ -87,7 +220,10 @@ export async function POST(request: NextRequest) {
 
       await tx.worker.update({
         where: { id: worker.id },
-        data: { walletBalance: { decrement: data.amount } },
+        data: {
+          walletBalance: { decrement: data.amount },
+          availableBalance: { decrement: data.amount },
+        },
       });
 
       return w;
@@ -129,6 +265,9 @@ export async function POST(request: NextRequest) {
         }
       });
 
+      // --- Security: Recalculate chargeback reserve after withdrawal ---
+      await recalculateReserve();
+
       await db.auditLog.create({
         data: {
           userId: session.user.id,
@@ -141,14 +280,16 @@ export async function POST(request: NextRequest) {
             netAmount,
             reference: payoutResult.reference,
             providerRef: payoutResult.providerRef,
+            fraudScore: fraudResult.score,
           },
+          ipAddress,
         },
       });
 
       const updated = await db.withdrawal.findUnique({ where: { id: withdrawal.id } });
       return NextResponse.json({ withdrawal: updated });
     } else {
-      // Payout failed → refund wallet, mark FAILED
+      // Payout failed → refund BOTH walletBalance and availableBalance, mark FAILED
       await db.$transaction(async (tx: Parameters<Parameters<typeof db.$transaction>[0]>[0]) => {
         await tx.withdrawal.update({
           where: { id: withdrawal.id },
@@ -167,7 +308,10 @@ export async function POST(request: NextRequest) {
 
         await tx.worker.update({
           where: { id: worker.id },
-          data: { walletBalance: { increment: data.amount } },
+          data: {
+            walletBalance: { increment: data.amount },
+            availableBalance: { increment: data.amount },
+          },
         });
       });
 

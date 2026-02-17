@@ -78,10 +78,17 @@ model Worker {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  ledgerEntries LedgerEntry[]
-  withdrawals   Withdrawal[]
-  tips          Tip[]
-  qrCodes       QRCode[]
+  availableBalance Decimal  @default(0) @db.Decimal(12, 2)
+  balanceCap       Decimal  @default(2000) @db.Decimal(12, 2)
+
+  ledgerEntries    LedgerEntry[]
+  withdrawals      Withdrawal[]
+  tips             Tip[]
+  qrCodes          QRCode[]
+  fraudEvents      FraudEvent[]
+  velocityRecords  VelocityRecord[]
+  settlementHolds  SettlementHold[]
+  amlAlerts        AmlAlert[]
 }
 
 model Tip {
@@ -103,7 +110,8 @@ model Tip {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  ledgerEntry LedgerEntry?
+  ledgerEntry    LedgerEntry?
+  settlementHold SettlementHold?
 }
 
 model LedgerEntry {
@@ -182,4 +190,145 @@ model QRCode {
   status      QRCodeStatus @default(INACTIVE)
   createdAt   DateTime     @default(now())
   activatedAt DateTime?
+}
+
+// ---------------------------------------------------------------------------
+// Security & Fraud Prevention Models
+// ---------------------------------------------------------------------------
+
+enum FraudEventType {
+  TIP_FLAGGED
+  WITHDRAWAL_FLAGGED
+  VELOCITY_BREACH
+  DEVICE_ANOMALY
+  IP_ANOMALY
+  SAME_DEVICE_DETECTED
+  SAME_IP_DETECTED
+  BALANCE_CAP_EXCEEDED
+  AML_ALERT
+  GEO_JUMP_DETECTED
+  HIGH_RISK_BIN
+  CHARGEBACK
+}
+
+enum FraudEventStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+enum FraudAction {
+  ALLOW
+  FLAG
+  HOLD
+  BLOCK
+}
+
+model FraudEvent {
+  id            String           @id @default(cuid())
+  type          FraudEventType
+  status        FraudEventStatus @default(OPEN)
+  action        FraudAction      @default(FLAG)
+  riskScore     Int              @default(0)
+  workerId      String?
+  worker        Worker?          @relation(fields: [workerId], references: [id])
+  tipId         String?
+  withdrawalId  String?
+  ipAddress     String?
+  deviceId      String?
+  details       Json?
+  resolvedBy    String?
+  resolvedAt    DateTime?
+  resolution    String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([workerId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model DeviceFingerprint {
+  id              String   @id @default(cuid())
+  fingerprintHash String
+  userAgent       String?
+  platform        String?
+  screenRes       String?
+  timezone        String?
+  language        String?
+  ipAddress       String?
+  workerId        String?
+  tipperSessionId String?
+  isKnownProxy    Boolean  @default(false)
+  isKnownVPN      Boolean  @default(false)
+  geoCountry      String?
+  geoCity         String?
+  geoLat          Float?
+  geoLon          Float?
+  createdAt       DateTime @default(now())
+
+  @@index([fingerprintHash])
+  @@index([ipAddress])
+  @@index([workerId])
+  @@index([tipperSessionId])
+}
+
+model VelocityRecord {
+  id         String   @id @default(cuid())
+  workerId   String
+  worker     Worker   @relation(fields: [workerId], references: [id])
+  action     String   // TIP_RECEIVED, WITHDRAWAL, TIP_SENT
+  amount     Decimal  @db.Decimal(12, 2)
+  ipAddress  String?
+  deviceId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([workerId, action, createdAt])
+  @@index([ipAddress, createdAt])
+}
+
+model ChargebackReserve {
+  id              String   @id @default(cuid())
+  totalBalance    Decimal  @default(0) @db.Decimal(12, 2)
+  reservePercent  Decimal  @default(0.075) @db.Decimal(5, 4)
+  reserveAmount   Decimal  @default(0) @db.Decimal(12, 2)
+  lastCalculated  DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SettlementHold {
+  id           String    @id @default(cuid())
+  tipId        String    @unique
+  tip          Tip       @relation(fields: [tipId], references: [id])
+  workerId     String
+  worker       Worker    @relation(fields: [workerId], references: [id])
+  amount       Decimal   @db.Decimal(12, 2)
+  clearsAt     DateTime
+  clearedAt    DateTime?
+  isFraudHeld  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  @@index([workerId, clearsAt])
+  @@index([clearsAt])
+}
+
+model AmlAlert {
+  id          String   @id @default(cuid())
+  workerId    String
+  worker      Worker   @relation(fields: [workerId], references: [id])
+  alertType   String   // LARGE_TRANSACTION, RAPID_ACCUMULATION, STRUCTURING, ROUND_AMOUNTS
+  riskLevel   String   // LOW, MEDIUM, HIGH, CRITICAL
+  details     Json?
+  isReviewed  Boolean  @default(false)
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([workerId])
+  @@index([isReviewed])
+  @@index([createdAt])
 }
