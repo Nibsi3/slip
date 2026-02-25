@@ -15,10 +15,9 @@ const applySchema = z.object({
   workLocation: z.string().optional(),
   city: z.string().min(1, "City is required"),
   province: z.string().optional(),
-  bankName: z.string().min(1, "Bank name is required"),
-  bankAccountNo: z.string().min(1, "Account number is required"),
-  bankBranchCode: z.string().min(1, "Branch code is required"),
-  phoneForIM: z.string().optional(),
+  bankName: z.string().optional().or(z.literal("")),
+  bankAccountNo: z.string().optional().or(z.literal("")),
+  bankBranchCode: z.string().optional().or(z.literal("")),
 });
 
 function normalisePhone(raw: string): string {
@@ -71,10 +70,10 @@ export async function POST(request: NextRequest) {
           create: {
             employerName: data.employerName || null,
             jobTitle: data.jobTitle,
-            bankName: data.bankName,
-            bankAccountNo: data.bankAccountNo,
-            bankBranchCode: data.bankBranchCode,
-            phoneForIM: data.phoneForIM ? normalisePhone(data.phoneForIM) : phone,
+            bankName: data.bankName || null,
+            bankAccountNo: data.bankAccountNo || null,
+            bankBranchCode: data.bankBranchCode || null,
+            phoneForIM: phone,
             isActive: false, // Pending admin approval
           },
         },
@@ -112,9 +111,18 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error("Application error:", err);
+    // Handle Prisma unique constraint violations
+    if (typeof err === "object" && err !== null && "code" in err && (err as { code: string }).code === "P2002") {
+      return NextResponse.json(
+        { error: "An account with these details already exists. Please sign in instead." },
+        { status: 400 }
+      );
+    }
+    console.error("Application error code:", (err as any)?.code);
+    console.error("Application error meta:", JSON.stringify((err as any)?.meta));
+    console.error("Application error message:", (err as any)?.message);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: (err as any)?.message || "Internal server error" },
       { status: 500 }
     );
   }

@@ -196,6 +196,7 @@ enum QRCodeStatus {
   INACTIVE
   ACTIVE
   DISABLED
+  CANCELLED
 }
 
 model QRCode {
@@ -204,9 +205,11 @@ model QRCode {
   workerId    String?
   worker      Worker?      @relation(fields: [workerId], references: [id])
   batchId     String?
-  status      QRCodeStatus @default(INACTIVE)
-  createdAt   DateTime     @default(now())
-  activatedAt DateTime?
+  status       QRCodeStatus @default(INACTIVE)
+  createdAt    DateTime     @default(now())
+  activatedAt  DateTime?
+  cancelReason String?
+  cancelledAt  DateTime?
 }
 
 // ---------------------------------------------------------------------------

@@ -16,7 +16,6 @@ export default function HomePage() {
             <Image src="/logo.png" alt="Slip a Tip" width={56} height={56} quality={95} priority className="h-11 w-11 object-contain" />
           </Link>
           <div className="flex items-center gap-2 sm:gap-5">
-            <Link href="#how-it-works" className="hidden md:inline-flex text-sm text-white/50 hover:text-white transition-colors">How it works</Link>
             <GuidesDropdown />
             <Link href="#pricing" className="hidden md:inline-flex text-sm text-white/50 hover:text-white transition-colors">Pricing</Link>
             <Link href="#faq" className="hidden md:inline-flex text-sm text-white/50 hover:text-white transition-colors">FAQ</Link>

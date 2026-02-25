@@ -43,6 +43,10 @@
     @apply block w-full rounded-xl border-0 px-4 py-3 text-white shadow-sm ring-1 ring-inset ring-white/[0.09] placeholder:text-muted-300 focus:ring-1 focus:ring-accent/50 focus:shadow-glow-sm sm:text-sm sm:leading-6 transition-all outline-none;
     background: rgba(255,255,255,0.04);
   }
+  select.input-field option {
+    background: #1a1a2e;
+    color: #fff;
+  }
   .card {
     @apply rounded-2xl p-6 ring-1 ring-white/[0.07];
     background: rgba(255,255,255,0.03);

@@ -22,8 +22,7 @@ export default function WithdrawPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [amount, setAmount] = useState("");
-  const [method, setMethod] = useState<"INSTANT_MONEY" | "EFT">("INSTANT_MONEY");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  
   const [bankName, setBankName] = useState("");
   const [bankAccountNo, setBankAccountNo] = useState("");
   const [bankBranchCode, setBankBranchCode] = useState("");
@@ -39,7 +38,6 @@ export default function WithdrawPage() {
 
   useEffect(() => {
     if (worker && !initialized) {
-      if (worker.phoneForIM) setPhoneNumber(worker.phoneForIM);
       if (worker.bankName) setBankName(worker.bankName);
       if (worker.bankAccountNo) setBankAccountNo(worker.bankAccountNo);
       if (worker.bankBranchCode) setBankBranchCode(worker.bankBranchCode);
@@ -61,11 +59,10 @@ export default function WithdrawPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: parseFloat(amount),
-          method,
-          phoneNumber: method === "INSTANT_MONEY" ? phoneNumber : undefined,
-          bankName: method === "EFT" ? bankName : undefined,
-          bankAccountNo: method === "EFT" ? bankAccountNo : undefined,
-          bankBranchCode: method === "EFT" ? bankBranchCode : undefined,
+          method: "EFT",
+          bankName,
+          bankAccountNo,
+          bankBranchCode,
         }),
       });
 
@@ -73,9 +70,7 @@ export default function WithdrawPage() {
       if (!res.ok) throw new Error(data.error || "Withdrawal failed");
 
       const ref = data.withdrawal?.reference;
-      if (method === "INSTANT_MONEY" && ref) {
-        setSuccess(`Your Instant Money voucher PIN is: ${ref} — Go to any ATM to collect your cash.`);
-      } else if (method === "EFT" && ref) {
+      if (ref) {
         setSuccess(`EFT sent! Reference: ${ref} — It may take 1-2 business days to reflect.`);
       } else {
         setSuccess("Withdrawal processed successfully!");
@@ -117,29 +112,8 @@ export default function WithdrawPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-muted mb-2">Method</label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setMethod("INSTANT_MONEY")}
-                  className={`py-2.5 text-sm text-center font-medium transition-all ${
-                    method === "INSTANT_MONEY"
-                      ? "bg-accent text-white"
-                      : "bg-surface-300 text-muted-50 hover:bg-surface-200"
-                  }`}
-                >
-                  Instant Money
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMethod("EFT")}
-                  className={`py-2.5 text-sm text-center font-medium transition-all ${
-                    method === "EFT"
-                      ? "bg-accent text-white"
-                      : "bg-surface-300 text-muted-50 hover:bg-surface-200"
-                  }`}
-                >
-                  EFT Transfer
-                </button>
+              <div className="py-2.5 text-sm text-center font-medium bg-accent text-white">
+                EFT Transfer
               </div>
             </div>
 
@@ -169,59 +143,41 @@ export default function WithdrawPage() {
               )}
             </div>
 
-            {method === "INSTANT_MONEY" && (
+            <div>
+              <label className="block text-sm font-medium text-muted mb-1">Bank Name</label>
+              <input
+                type="text"
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                className="input-field"
+                placeholder="e.g. Standard Bank"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-muted mb-1">Phone Number</label>
+                <label className="block text-sm font-medium text-muted mb-1">Account No.</label>
                 <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  type="text"
+                  value={bankAccountNo}
+                  onChange={(e) => setBankAccountNo(e.target.value)}
                   className="input-field"
-                  placeholder="e.g. 066 299 5533"
+                  placeholder="Account number"
                   required
                 />
               </div>
-            )}
-
-            {method === "EFT" && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-muted mb-1">Bank Name</label>
-                  <input
-                    type="text"
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    className="input-field"
-                    placeholder="e.g. Standard Bank"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-muted mb-1">Account No.</label>
-                    <input
-                      type="text"
-                      value={bankAccountNo}
-                      onChange={(e) => setBankAccountNo(e.target.value)}
-                      className="input-field"
-                      placeholder="Account number"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted mb-1">Branch Code</label>
-                    <input
-                      type="text"
-                      value={bankBranchCode}
-                      onChange={(e) => setBankBranchCode(e.target.value)}
-                      className="input-field"
-                      placeholder="Branch code"
-                      required
-                    />
-                  </div>
-                </div>
-              </>
-            )}
+              <div>
+                <label className="block text-sm font-medium text-muted mb-1">Branch Code</label>
+                <input
+                  type="text"
+                  value={bankBranchCode}
+                  onChange={(e) => setBankBranchCode(e.target.value)}
+                  className="input-field"
+                  placeholder="Branch code"
+                  required
+                />
+              </div>
+            </div>
 
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">{error}</div>

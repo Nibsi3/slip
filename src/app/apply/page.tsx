@@ -7,7 +7,7 @@ import Image from "next/image";
 const STEPS = [
   { id: 1, label: "Personal Info" },
   { id: 2, label: "Work Details" },
-  { id: 3, label: "Bank & FICA" },
+  { id: 3, label: "Bank (Optional)" },
   { id: 4, label: "Consent & Submit" },
 ];
 
@@ -33,7 +33,6 @@ export default function ApplyPage() {
     bankName: "",
     bankAccountNo: "",
     bankBranchCode: "",
-    phoneForIM: "",
     consent1: false,
     consent2: false,
     consent3: false,
@@ -67,12 +66,7 @@ export default function ApplyPage() {
         return;
       }
     }
-    if (step === 3) {
-      if (!form.bankName || !form.bankAccountNo || !form.bankBranchCode) {
-        setError("Please fill in your bank details");
-        return;
-      }
-    }
+    // Step 3 bank details are optional — users can skip
     setError("");
     setStep((s) => Math.min(s + 1, 4));
   }
@@ -85,7 +79,7 @@ export default function ApplyPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!form.consent1 || !form.consent2 || !form.consent3 || !form.consent4 || !form.consent5 || !form.consent6) {
-      setError("You must accept all consent items to proceed");
+      setError("Please accept all consent items to proceed");
       return;
     }
     setError("");
@@ -109,7 +103,6 @@ export default function ApplyPage() {
           bankName: form.bankName,
           bankAccountNo: form.bankAccountNo,
           bankBranchCode: form.bankBranchCode,
-          phoneForIM: form.phoneForIM,
         }),
       });
       const data = await res.json();
@@ -254,7 +247,7 @@ export default function ApplyPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/50 mb-1.5">Province</label>
-                    <select value={form.province} onChange={(e) => update("province", e.target.value)} className="input-field">
+                    <select value={form.province} onChange={(e) => update("province", e.target.value)} className="input-field" style={{ color: form.province ? 'white' : 'rgba(255,255,255,0.3)' }}>
                       <option value="">Select...</option>
                       <option value="GP">Gauteng</option>
                       <option value="WC">Western Cape</option>
@@ -278,14 +271,14 @@ export default function ApplyPage() {
                   <div className="flex items-start gap-3">
                     <svg className="h-5 w-5 text-accent shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
                     <p className="text-xs text-white/50 leading-relaxed">
-                      Your bank account must be in your legal name. This is verified as part of our FICA compliance. You will need to upload your ID, selfie, and proof of address before you can withdraw funds.
+                      Bank details are <strong className="text-white/70">optional</strong> at this stage. You can add or update them later from Dashboard &rarr; Settings before your first withdrawal.
                     </p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/50 mb-1.5">Bank Name *</label>
-                  <select value={form.bankName} onChange={(e) => update("bankName", e.target.value)} className="input-field" required>
+                  <label className="block text-sm font-medium text-white/50 mb-1.5">Bank Name</label>
+                  <select value={form.bankName} onChange={(e) => update("bankName", e.target.value)} className="input-field" style={{ color: form.bankName ? 'white' : 'rgba(255,255,255,0.3)' }}>
                     <option value="">Select your bank...</option>
                     <option value="ABSA">ABSA</option>
                     <option value="Capitec">Capitec</option>
@@ -301,18 +294,13 @@ export default function ApplyPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/50 mb-1.5">Account Number *</label>
-                    <input type="text" required value={form.bankAccountNo} onChange={(e) => update("bankAccountNo", e.target.value)} className="input-field" placeholder="Account number" />
+                    <label className="block text-sm font-medium text-white/50 mb-1.5">Account Number</label>
+                    <input type="text" value={form.bankAccountNo} onChange={(e) => update("bankAccountNo", e.target.value)} className="input-field" placeholder="Account number" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/50 mb-1.5">Branch Code *</label>
-                    <input type="text" required value={form.bankBranchCode} onChange={(e) => update("bankBranchCode", e.target.value)} className="input-field" placeholder="Branch code" />
+                    <label className="block text-sm font-medium text-white/50 mb-1.5">Branch Code</label>
+                    <input type="text" value={form.bankBranchCode} onChange={(e) => update("bankBranchCode", e.target.value)} className="input-field" placeholder="Branch code" />
                   </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/50 mb-1.5">Phone for Instant Money</label>
-                  <input type="tel" value={form.phoneForIM} onChange={(e) => update("phoneForIM", e.target.value)} className="input-field" placeholder="Same as above or different number" />
-                  <p className="text-[11px] text-white/25 mt-1">Used for ATM cash withdrawals via Instant Money</p>
                 </div>
               </div>
             )}

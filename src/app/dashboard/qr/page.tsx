@@ -153,6 +153,100 @@ export default function QRCodePage() {
           ))}
         </div>
       </div>
+
+      {/* Cancel QR Code */}
+      <CancelQR onCancelled={() => window.location.reload()} />
+    </div>
+  );
+}
+
+function CancelQR({ onCancelled }: { onCancelled: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [details, setDetails] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const reasons = [
+    { value: "LOST", label: "Lost", desc: "I lost my QR code card" },
+    { value: "STOLEN", label: "Stolen", desc: "My QR code card was stolen" },
+    { value: "DAMAGED", label: "Damaged", desc: "My card is damaged and can't be scanned" },
+    { value: "NO_LONGER_NEEDED", label: "No longer needed", desc: "I don't need a physical card anymore" },
+    { value: "OTHER", label: "Other", desc: "Another reason" },
+  ];
+
+  async function handleCancel() {
+    if (!reason) { setError("Please select a reason"); return; }
+    setError("");
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/workers/me/qr/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason, details: details || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to cancel QR code");
+      setOpen(false);
+      onCancelled();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to cancel");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <div className="card border-red-500/10">
+        <div className="flex items-start gap-3">
+          <svg className="h-5 w-5 text-red-400/60 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-white">Cancel QR Code</h3>
+            <p className="text-xs text-muted mt-1">If your QR code card is lost, stolen, or damaged, cancel it here. A new digital QR code will be generated immediately.</p>
+            <button onClick={() => setOpen(true)} className="mt-3 text-xs font-medium text-red-400 hover:text-red-300 transition-colors">
+              Cancel my QR code &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card ring-red-500/20">
+      <h3 className="text-sm font-bold text-white mb-3">Cancel QR Code</h3>
+      <p className="text-xs text-muted mb-4">This will deactivate your current QR code and generate a new one. Anyone with your old QR code will no longer be able to use it.</p>
+
+      <div className="space-y-2 mb-4">
+        {reasons.map(r => (
+          <label key={r.value} className={`flex items-start gap-3 rounded-xl p-3 ring-1 cursor-pointer transition-all ${reason === r.value ? "ring-red-500/30" : "ring-white/[0.06] hover:ring-white/[0.1]"}`} style={{ background: reason === r.value ? "rgba(239,68,68,0.05)" : "rgba(255,255,255,0.02)" }}>
+            <input type="radio" name="cancelReason" value={r.value} checked={reason === r.value} onChange={() => setReason(r.value)} className="mt-0.5 h-3.5 w-3.5 text-red-500 focus:ring-red-500 shrink-0" />
+            <div>
+              <div className="text-xs font-medium text-white">{r.label}</div>
+              <div className="text-[11px] text-muted">{r.desc}</div>
+            </div>
+          </label>
+        ))}
+      </div>
+
+      {(reason === "OTHER" || reason === "STOLEN") && (
+        <div className="mb-4">
+          <label className="block text-xs font-medium text-muted mb-1">{reason === "STOLEN" ? "Details (optional — e.g. where/when)" : "Please describe"}</label>
+          <textarea value={details} onChange={e => setDetails(e.target.value)} className="input-field" rows={2} placeholder="Add any details..." />
+        </div>
+      )}
+
+      {error && <div className="mb-3 bg-red-500/10 border border-red-500/20 rounded-xl p-2 text-xs text-red-400">{error}</div>}
+
+      <div className="flex gap-3">
+        <button onClick={() => { setOpen(false); setReason(""); setDetails(""); setError(""); }} className="btn-secondary flex-1 !py-2.5 !text-xs">
+          Go Back
+        </button>
+        <button onClick={handleCancel} disabled={submitting || !reason} className="flex-1 py-2.5 text-xs inline-flex items-center justify-center rounded-xl bg-red-600 px-4 font-semibold text-white transition-all hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed">
+          {submitting ? "Cancelling..." : "Cancel QR Code"}
+        </button>
+      </div>
     </div>
   );
 }
