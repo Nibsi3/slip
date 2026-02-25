@@ -48,7 +48,7 @@ function LoginForm() {
         <div className="rounded-2xl p-8 ring-1 ring-white/[0.08]" style={{ background: "rgba(8,8,14,0.9)", backdropFilter: "blur(24px)" }}>
           <div className="mb-8 flex items-center gap-3">
             <Link href="/" className="inline-flex items-center gap-3">
-              <Image src="/logo/logo.png" alt="Slip a Tip" width={44} height={44} priority className="h-11 w-11 object-contain" />
+              <Image src="/logo.png" alt="Slip a Tip" width={44} height={44} quality={95} priority className="h-11 w-11 object-contain" />
               <span className="text-base font-semibold text-white/70 tracking-wide">slip a tip</span>
             </Link>
           </div>

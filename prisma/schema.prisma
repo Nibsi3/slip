@@ -44,6 +44,13 @@ enum WithdrawalStatus {
   FAILED
 }
 
+enum DocStatus {
+  NOT_SUBMITTED
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String?  @unique
@@ -80,6 +87,16 @@ model Worker {
 
   availableBalance Decimal  @default(0) @db.Decimal(12, 2)
   balanceCap       Decimal  @default(2000) @db.Decimal(12, 2)
+
+  // Document verification (FICA)
+  docIdUrl         String?
+  docAddressUrl    String?
+  docSelfieUrl     String?
+  docStatus        DocStatus @default(NOT_SUBMITTED)
+  docRejectReason  String?
+  docSubmittedAt   DateTime?
+  docReviewedAt    DateTime?
+  docReviewedBy    String?
 
   ledgerEntries    LedgerEntry[]
   withdrawals      Withdrawal[]

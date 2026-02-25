@@ -91,7 +91,7 @@ export default function ActivateQRPage() {
     <div className="min-h-screen flex flex-col" style={{ background: "#030306" }}>
       {/* Header */}
       <div className="px-6 pt-8 pb-4 text-center">
-        <Image src="/logo.png" alt="Slip a Tip" width={100} height={32} priority className="h-7 w-auto mx-auto" />
+        <Image src="/logo.png" alt="Slip a Tip" width={36} height={36} quality={95} priority className="h-9 w-9 object-contain mx-auto" />
         <p className="text-white/40 text-xs mt-2">Activate your QR code</p>
       </div>
 

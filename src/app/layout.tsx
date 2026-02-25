@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   description:
     "Send tips instantly to service workers across South Africa. Scan, tap, tip.",
   icons: {
-    icon: "/logo/logo.png",
-    apple: "/logo/logo.png",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
 };
 

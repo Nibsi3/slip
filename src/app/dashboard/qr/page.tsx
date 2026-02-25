@@ -48,7 +48,7 @@ export default function QRCodePage() {
             setQrImage(canvas.toDataURL("image/png"));
           };
           logo.crossOrigin = "anonymous";
-          logo.src = "/logo/logo.png";
+          logo.src = "/logo.png";
         };
         qrImg.src = qrDataUrl;
       } else {
@@ -140,7 +140,7 @@ export default function QRCodePage() {
           {[
             { n: "1", t: "Print or display", d: "Print this QR code and place it where customers can see it, or show it on your phone." },
             { n: "2", t: "Customer scans", d: "Customers open their phone camera and scan — no app needed." },
-            { n: "3", t: "They tip", d: "They select an amount (R10–R200 or custom) and pay securely via PayFast." },
+            { n: "3", t: "They tip", d: "They select an amount (R10–R200 or custom) and pay securely via Paystack." },
             { n: "4", t: "You get paid", d: "The tip lands in your wallet instantly, ready to withdraw." },
           ].map((s) => (
             <div key={s.n} className="flex gap-4">

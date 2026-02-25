@@ -145,13 +145,13 @@ export default function WithdrawPage() {
 
             <div>
               <label className="block text-sm font-medium text-muted mb-1">
-                Amount (min R20)
+                Amount (min R100)
               </label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-300 font-semibold">R</span>
                 <input
                   type="number"
-                  min={20}
+                  min={100}
                   max={balance}
                   step="0.01"
                   value={amount}
@@ -232,7 +232,7 @@ export default function WithdrawPage() {
 
             <button
               type="submit"
-              disabled={submitting || balance < 20}
+              disabled={submitting || balance < 100}
               className="btn-primary"
             >
               {submitting ? "Processing..." : "Withdraw Now"}

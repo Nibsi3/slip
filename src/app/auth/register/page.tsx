@@ -63,7 +63,7 @@ export default function RegisterPage() {
         <div className="rounded-2xl p-8 ring-1 ring-white/[0.08]" style={{ background: "rgba(8,8,14,0.9)", backdropFilter: "blur(24px)" }}>
           <div className="mb-8 flex items-center gap-3">
             <Link href="/" className="inline-flex items-center gap-3">
-              <Image src="/logo/logo.png" alt="Slip a Tip" width={44} height={44} priority className="h-11 w-11 object-contain" />
+              <Image src="/logo.png" alt="Slip a Tip" width={44} height={44} quality={95} priority className="h-11 w-11 object-contain" />
               <span className="text-base font-semibold text-white/70 tracking-wide">slip a tip</span>
             </Link>
           </div>
@@ -161,11 +161,24 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-surface-100">
+          <p className="mt-4 text-[11px] text-white/25 text-center leading-relaxed">
+            By creating an account, you agree to our{" "}
+            <Link href="/legal/terms" className="text-accent/60 hover:text-accent transition-colors">Terms & Conditions</Link>,{" "}
+            <Link href="/legal/privacy" className="text-accent/60 hover:text-accent transition-colors">Privacy Policy</Link>, and{" "}
+            <Link href="/legal/fica" className="text-accent/60 hover:text-accent transition-colors">FICA requirements</Link>.
+          </p>
+
+          <div className="mt-6 pt-5 border-t border-surface-100 space-y-3">
             <p className="text-center text-sm text-muted-200">
               Already have an account?{" "}
               <Link href="/auth/login" className="font-semibold text-accent hover:text-accent-300 transition-colors">
                 Sign in
+              </Link>
+            </p>
+            <p className="text-center text-xs text-white/25">
+              Don&rsquo;t have a QR code?{" "}
+              <Link href="/apply" className="font-semibold text-accent/70 hover:text-accent transition-colors">
+                Apply as a service worker
               </Link>
             </p>
           </div>

@@ -19,7 +19,7 @@ import {
 } from "@/lib/security";
 
 const withdrawSchema = z.object({
-  amount: z.number().min(20),
+  amount: z.number().min(100),
   method: z.enum(["INSTANT_MONEY", "EFT"]),
   bankName: z.string().optional(),
   bankAccountNo: z.string().optional(),
@@ -43,6 +43,16 @@ export async function POST(request: NextRequest) {
 
     if (!worker) {
       return NextResponse.json({ error: "Worker not found" }, { status: 404 });
+    }
+
+    // --- Document verification gate ---
+    if (worker.docStatus !== "APPROVED") {
+      const msg = worker.docStatus === "PENDING_REVIEW"
+        ? "Your documents are still under review. You can withdraw once verified."
+        : worker.docStatus === "REJECTED"
+          ? "Your documents were rejected. Please re-upload from Dashboard → Documents."
+          : "You must upload and verify your documents before withdrawing. Go to Dashboard → Documents.";
+      return NextResponse.json({ error: msg }, { status: 403 });
     }
 
     // --- Security: Per-transaction limit ---

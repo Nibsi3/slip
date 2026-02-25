@@ -72,7 +72,7 @@ export default function TipPage() {
       const { actionUrl, params: pfParams } = data.payfast;
 
       // Stop all pending requests (HMR, websockets) to prevent page reload
-      // racing with the PayFast form POST
+      // racing with the payment gateway form POST
       window.stop();
 
       const form = document.createElement("form");
@@ -125,7 +125,7 @@ export default function TipPage() {
       {/* Header */}
       <div className="relative z-10 flex items-center justify-center px-6 pt-8 pb-2">
         <div className="flex items-center gap-2 opacity-60">
-          <img src="/logo/logo.png" alt="Slip a Tip" className="h-6 w-6 object-contain" />
+          <img src="/logo.png" alt="Slip a Tip" className="h-6 w-6 object-contain" />
           <span className="text-xs font-semibold text-white/60 tracking-widest uppercase">slip a tip</span>
         </div>
       </div>
@@ -258,7 +258,7 @@ export default function TipPage() {
                 <svg className="h-3.5 w-3.5 text-white/20" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                 </svg>
-                <p className="text-center text-[11px] text-white/25">Secured by PayFast &middot; Card details never stored</p>
+                <p className="text-center text-[11px] text-white/25">Secured by Paystack &middot; 3D Secure &middot; Card details never stored</p>
               </div>
             </form>
           </div>

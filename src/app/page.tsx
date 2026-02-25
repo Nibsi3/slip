@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import ScrollReveal from "@/components/ScrollReveal";
+import GuidesDropdown from "@/components/GuidesDropdown";
+import AnimatedDemo from "@/components/AnimatedDemo";
 
 export default function HomePage() {
   return (
@@ -11,13 +13,14 @@ export default function HomePage() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.05]" style={{ background: "rgba(3,3,6,0.75)", backdropFilter: "blur(24px)" }}>
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2.5">
-            <Image src="/logo/logo.png" alt="Slip a Tip" width={40} height={40} priority className="h-9 w-9 object-contain" />
-            <span className="hidden sm:block text-sm font-semibold text-white/80 tracking-wide">slip a tip</span>
+            <Image src="/logo.png" alt="Slip a Tip" width={56} height={56} quality={95} priority className="h-11 w-11 object-contain" />
           </Link>
           <div className="flex items-center gap-2 sm:gap-5">
             <Link href="#how-it-works" className="hidden md:inline-flex text-sm text-white/50 hover:text-white transition-colors">How it works</Link>
+            <GuidesDropdown />
             <Link href="#pricing" className="hidden md:inline-flex text-sm text-white/50 hover:text-white transition-colors">Pricing</Link>
             <Link href="#faq" className="hidden md:inline-flex text-sm text-white/50 hover:text-white transition-colors">FAQ</Link>
+            <Link href="/apply" className="hidden md:inline-flex text-sm text-white/50 hover:text-white transition-colors">Apply</Link>
             <Link href="/auth/login" className="btn-secondary !py-2 !px-3 sm:!px-4 !text-xs">Log In</Link>
             <Link href="/auth/register" className="btn-primary !py-2 !px-3 sm:!px-4 !text-xs">Get Started</Link>
           </div>
@@ -30,9 +33,10 @@ export default function HomePage() {
           {/* Background image */}
           <div className="absolute inset-0 z-0">
             <Image
-              src="/photos/ec628e67-bca5-465e-8434-f4b09e9dd1f8_3840w.webp"
+              src="/photos/9df0b484-9692-44cf-be76-f2660b61a30d_3840w.jpg"
               alt=""
               fill
+              quality={95}
               priority
               className="object-cover object-center"
               style={{ opacity: 0.45 }}
@@ -48,7 +52,7 @@ export default function HomePage() {
                 <ScrollReveal>
                   <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium text-white/70 ring-1 ring-white/[0.12] mb-8" style={{ background: "rgba(20,167,249,0.07)" }}>
                     <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse inline-block" />
-                    Built for South Africa &middot; Powered by PayFast
+                    Built for South Africa &middot; Powered by Paystack
                   </div>
                 </ScrollReveal>
 
@@ -76,8 +80,8 @@ export default function HomePage() {
                     <Link href="/auth/register" className="btn-primary !py-4 !px-10 text-base">
                       Get started free
                     </Link>
-                    <Link href="/tip/demo-thabo-molefe" className="btn-secondary !py-4 !px-10 text-base">
-                      Try a demo
+                    <Link href="#demo" className="btn-secondary !py-4 !px-10 text-base">
+                      Watch demo
                     </Link>
                   </div>
                 </ScrollReveal>
@@ -182,6 +186,26 @@ export default function HomePage() {
           <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#030306] to-transparent z-10" />
         </section>
 
+        {/* ===== ANIMATED DEMO ===== */}
+        <section id="demo" className="relative py-24 sm:py-32 overflow-hidden">
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 50% at 50% 50%, rgba(20,167,249,0.04) 0%, transparent 70%)" }} />
+          <div className="relative mx-auto max-w-7xl px-6">
+            <ScrollReveal>
+              <div className="text-center mb-14">
+                <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium text-white/70 ring-1 ring-white/[0.12] mb-6" style={{ background: "rgba(20,167,249,0.07)" }}>
+                  <svg className="h-3.5 w-3.5 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" /></svg>
+                  See it in action
+                </div>
+                <h2 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight">How tipping works</h2>
+                <p className="mt-4 text-white/40 max-w-lg mx-auto">Watch the full flow — from QR scan to money in the worker&rsquo;s wallet — in under 20 seconds.</p>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={0.15}>
+              <AnimatedDemo />
+            </ScrollReveal>
+          </div>
+        </section>
+
         {/* ===== HOW IT WORKS ===== */}
         <section id="how-it-works" className="relative py-24 sm:py-32 overflow-hidden">
           <div className="relative mx-auto max-w-7xl px-6">
@@ -190,9 +214,10 @@ export default function HomePage() {
               <ScrollReveal direction="left">
                 <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
                   <Image
-                    src="/photos/43a67fb3-28e3-460c-8430-22c3098f4b95_3840w.jpg"
+                    src="/photos/a7bd2085-6bb2-4d53-81fb-315f00278443_3840w.jpg"
                     alt="Scanning a QR code with a phone"
                     fill
+                    quality={95}
                     className="object-cover object-center"
                   />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(3,3,6,0.4) 0%, rgba(3,3,6,0.1) 60%, rgba(3,3,6,0.5) 100%)" }} />
@@ -225,7 +250,7 @@ export default function HomePage() {
                   {[
                     { step: "01", title: "Scan QR code", desc: "Customer opens their phone camera and scans the worker's unique QR code. No app installs needed." },
                     { step: "02", title: "Pick an amount", desc: "Choose from quick amounts (R10, R20, R50, R100, R200) or enter a custom tip amount." },
-                    { step: "03", title: "Pay via PayFast", desc: "Secure checkout via PayFast. The tip lands in the worker's digital wallet instantly." },
+                    { step: "03", title: "Pay securely", desc: "Secure 3D Secure checkout via Paystack. The tip is automatically split — 90% to the worker, 10% platform fee." },
                   ].map((item, i) => (
                     <ScrollReveal key={item.step} delay={i * 0.12}>
                       <div className="flex gap-5">
@@ -242,10 +267,12 @@ export default function HomePage() {
                 </div>
 
                 <ScrollReveal delay={0.4}>
-                  <div className="mt-10">
-                    <Link href="/tip/demo-thabo-molefe" className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:text-accent-300 transition-colors">
-                      Try a live demo
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                  <div className="mt-10 flex flex-col sm:flex-row gap-3">
+                    <Link href="/guide/workers" className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:text-accent-300 transition-colors">
+                      Worker guide <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                    </Link>
+                    <Link href="/guide/customers" className="inline-flex items-center gap-2 text-sm font-medium text-white/40 hover:text-white transition-colors">
+                      Customer guide <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                     </Link>
                   </div>
                 </ScrollReveal>
@@ -274,6 +301,7 @@ export default function HomePage() {
                     src="/photos/ec628e67-bca5-465e-8434-f4b09e9dd1f8_3840w.webp"
                     alt="Digital payment card"
                     fill
+                    quality={95}
                     className="object-cover object-center"
                   />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(3,3,6,0.9) 0%, rgba(3,3,6,0.4) 60%, rgba(3,3,6,0.1) 100%)" }} />
@@ -365,6 +393,7 @@ export default function HomePage() {
               src="/photos/6f3bae5c-fdc6-4ff7-8902-1fb813c40789_3840w.jpg"
               alt=""
               fill
+              quality={95}
               className="object-cover object-center"
               style={{ opacity: 0.12 }}
             />
@@ -412,7 +441,7 @@ export default function HomePage() {
                   <div className="space-y-4 text-sm mb-8">
                     {[
                       "Personal QR code & tip page",
-                      "PayFast secure checkout",
+                      "Paystack 3D Secure checkout",
                       "Worker dashboard & wallet",
                       "Full tip history & audit trail",
                       "Withdraw via Instant Money or EFT",
@@ -452,11 +481,12 @@ export default function HomePage() {
                   <p className="mt-4 text-white/40 text-sm leading-relaxed">Everything you need to know about Slip a Tip.</p>
 
                   {/* Small decorative image */}
-                  <div className="mt-8 relative rounded-2xl overflow-hidden aspect-square max-w-[220px]">
+                  <div className="mt-8 relative rounded-2xl overflow-hidden aspect-square max-w-[320px] sm:max-w-[360px]">
                     <Image
-                      src="/photos/7903a45e-dd44-4949-9a34-557c9019229d_3840w.jpg"
-                      alt="Phone with payment card"
+                      src="/photos/grok-image-24fb0006-f981-41f9-b49c-bc4e4523c764.jpeg"
+                      alt="Common questions"
                       fill
+                      quality={95}
                       className="object-cover object-center"
                     />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(3,3,6,0.1), rgba(3,3,6,0.5))" }} />
@@ -468,11 +498,11 @@ export default function HomePage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
                   { q: "Do customers need an app?", a: "No. They scan the QR code with their phone camera and tip directly in the browser. Zero friction." },
-                  { q: "Is it secure?", a: "All payments are handled by PayFast. Slip a Tip never sees or stores card details." },
+                  { q: "Is it secure?", a: "All payments are handled by Paystack (PCI-DSS Level 1) with 3D Secure authentication. Slip a Tip never sees or stores card details. Liability shifts to the card issuer." },
                   { q: "How do withdrawals work?", a: "Request a withdrawal from your dashboard. Choose Instant Money (collect at any ATM) or EFT to your bank." },
                   { q: "What does it cost?", a: "Signing up is completely free. A 10% platform fee is deducted only when you withdraw your tips." },
                   { q: "Who can use Slip a Tip?", a: "Any worker in the service industry — waiters, baristas, porters, car guards, delivery riders, and more." },
-                  { q: "How fast do tips arrive?", a: "Tips are credited to your wallet as soon as PayFast confirms the payment, usually within seconds." },
+                  { q: "How fast do tips arrive?", a: "Tips appear in your wallet instantly. Funds become available for withdrawal after a 72-hour settlement cooldown period for fraud protection." },
                 ].map((item, i) => (
                   <ScrollReveal key={item.q} delay={i * 0.07}>
                     <div className="rounded-2xl p-5 h-full ring-1 ring-white/[0.07]" style={{ background: "rgba(255,255,255,0.025)" }}>
@@ -494,6 +524,7 @@ export default function HomePage() {
               src="/photos/586fe153-4525-4bc0-b6ff-39cbac276d12_3840w.jpg"
               alt=""
               fill
+              quality={95}
               className="object-cover object-center"
               style={{ opacity: 0.18 }}
             />
@@ -504,7 +535,7 @@ export default function HomePage() {
             <ScrollReveal>
               <div className="rounded-3xl p-10 sm:p-16 ring-1 ring-white/[0.09] text-center" style={{ background: "rgba(8,8,14,0.8)", backdropFilter: "blur(32px)" }}>
                 <div className="mx-auto mb-6 h-16 w-16 rounded-2xl overflow-hidden ring-1 ring-white/10">
-                  <Image src="/logo/logo.png" alt="Slip a Tip" width={64} height={64} className="w-full h-full object-contain" />
+                  <Image src="/logo.png" alt="Slip a Tip" width={64} height={64} quality={95} className="w-full h-full object-contain" />
                 </div>
                 <h2 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight">Start receiving tips today</h2>
                 <p className="mt-5 text-white/40 max-w-lg mx-auto leading-relaxed">
@@ -514,8 +545,8 @@ export default function HomePage() {
                   <Link href="/auth/register" className="btn-primary !py-4 !px-12 text-base !rounded-xl">
                     Get started free
                   </Link>
-                  <Link href="/tip/demo-thabo-molefe" className="btn-secondary !py-4 !px-10 text-base !rounded-xl">
-                    View demo
+                  <Link href="#demo" className="btn-secondary !py-4 !px-10 text-base !rounded-xl">
+                    Watch demo
                   </Link>
                 </div>
                 <p className="mt-5 text-xs text-white/25">No credit card required &middot; Free forever</p>
@@ -526,20 +557,69 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.05] py-10">
+      <footer className="border-t border-white/[0.06] pt-16 pb-10" style={{ background: "rgba(6,6,10,0.6)" }}>
         <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <Image src="/logo/logo.png" alt="Slip a Tip" width={32} height={32} className="h-8 w-8 object-contain opacity-70" />
-              <span className="text-sm font-medium text-white/30">Slip a Tip</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
+            {/* Brand */}
+            <div className="col-span-2 md:col-span-1">
+              <Link href="/" className="flex items-center gap-2.5 mb-4">
+                <Image src="/logo.png" alt="Slip a Tip" width={40} height={40} quality={95} className="h-10 w-10 object-contain" />
+              </Link>
+              <p className="text-xs text-white/35 leading-relaxed max-w-[220px]">
+                Digital tipping for South Africa&rsquo;s service industry. Scan, tap, tip.
+              </p>
+              <div className="mt-5 flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-[10px] text-green-400/70 font-medium">All systems operational</span>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/25">
-              <Link href="/auth/register" className="hover:text-white transition-colors">Create account</Link>
-              <Link href="/auth/login" className="hover:text-white transition-colors">Sign in</Link>
-              <Link href="/tip/demo-thabo-molefe" className="hover:text-white transition-colors">Demo</Link>
-              <Link href="/dashboard/contact" className="hover:text-white transition-colors">Contact</Link>
+
+            {/* Product */}
+            <div>
+              <h4 className="text-[10px] font-semibold text-white/50 uppercase tracking-[0.15em] mb-4">Product</h4>
+              <ul className="space-y-2.5">
+                <li><Link href="#how-it-works" className="text-xs text-white/30 hover:text-white transition-colors">How it works</Link></li>
+                <li><Link href="#demo" className="text-xs text-white/30 hover:text-white transition-colors">Demo</Link></li>
+                <li><Link href="#pricing" className="text-xs text-white/30 hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="#faq" className="text-xs text-white/30 hover:text-white transition-colors">FAQ</Link></li>
+                <li><Link href="/apply" className="text-xs text-white/30 hover:text-white transition-colors">Apply as worker</Link></li>
+              </ul>
             </div>
-            <span className="text-xs text-white/20">&copy; {new Date().getFullYear()} Slip a Tip. Built for South Africa.</span>
+
+            {/* Guides */}
+            <div>
+              <h4 className="text-[10px] font-semibold text-white/50 uppercase tracking-[0.15em] mb-4">Guides</h4>
+              <ul className="space-y-2.5">
+                <li><Link href="/guide/workers" className="text-xs text-white/30 hover:text-white transition-colors">For Workers</Link></li>
+                <li><Link href="/guide/customers" className="text-xs text-white/30 hover:text-white transition-colors">For Customers</Link></li>
+                <li><Link href="/auth/register" className="text-xs text-white/30 hover:text-white transition-colors">Create account</Link></li>
+                <li><Link href="/auth/login" className="text-xs text-white/30 hover:text-white transition-colors">Sign in</Link></li>
+                <li><Link href="/dashboard/contact" className="text-xs text-white/30 hover:text-white transition-colors">Contact us</Link></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="text-[10px] font-semibold text-white/50 uppercase tracking-[0.15em] mb-4">Legal</h4>
+              <ul className="space-y-2.5">
+                <li><Link href="/legal/terms" className="text-xs text-white/30 hover:text-white transition-colors">Terms & Conditions</Link></li>
+                <li><Link href="/legal/privacy" className="text-xs text-white/30 hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/legal/popia" className="text-xs text-white/30 hover:text-white transition-colors">POPIA</Link></li>
+                <li><Link href="/legal/paia" className="text-xs text-white/30 hover:text-white transition-colors">PAIA</Link></li>
+                <li><Link href="/legal/fica" className="text-xs text-white/30 hover:text-white transition-colors">FICA</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span className="text-[10px] text-white/20">&copy; {new Date().getFullYear()} Slip a Tip (Pty) Ltd. All rights reserved.</span>
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] text-white/15">Secured by</span>
+              <span className="text-[10px] text-white/30 font-medium">Paystack</span>
+              <span className="text-[10px] text-white/15">&middot;</span>
+              <span className="text-[10px] text-white/15">Built in South Africa</span>
+            </div>
           </div>
         </div>
       </footer>

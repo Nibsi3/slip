@@ -51,7 +51,7 @@ function ThankYouContent() {
           </div>
 
           <p className="mt-8 text-xs text-muted-300">
-            Payment processed securely by PayFast. You can close this page.
+            Payment processed securely by Paystack. You can close this page.
           </p>
         </div>
       </div>
