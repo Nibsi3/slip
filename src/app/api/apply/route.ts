@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { sendNewApplicationEmail } from "@/lib/email";
 
 const applySchema = z.object({
   firstName: z.string().min(1, "First name is required").max(50),
@@ -100,6 +101,18 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Notify admin of new application
+    await sendNewApplicationEmail({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email || null,
+      phone,
+      jobTitle: data.jobTitle,
+      employerName: data.employerName || null,
+      city: data.city,
+      province: data.province || null,
+    });
+
     return NextResponse.json({
       success: true,
       message: "Application submitted successfully. You will be notified once approved.",
@@ -118,11 +131,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error("Application error code:", (err as any)?.code);
-    console.error("Application error meta:", JSON.stringify((err as any)?.meta));
-    console.error("Application error message:", (err as any)?.message);
+    console.error("Application error:", err);
     return NextResponse.json(
-      { error: (err as any)?.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

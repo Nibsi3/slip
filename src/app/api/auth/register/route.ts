@@ -3,6 +3,7 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { createSession } from "@/lib/auth";
+import { sendNewRegistrationEmail } from "@/lib/email";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, "First name is required").max(50),
@@ -64,6 +65,13 @@ export async function POST(request: NextRequest) {
     });
 
     await createSession(user.id, user.role);
+
+    await sendNewRegistrationEmail({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone || phone,
+    });
 
     return NextResponse.json({
       user: {

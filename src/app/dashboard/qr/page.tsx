@@ -154,8 +154,145 @@ export default function QRCodePage() {
         </div>
       </div>
 
+      {/* Request Physical QR Card */}
+      <PhysicalQRRequest />
+
       {/* Cancel QR Code */}
       <CancelQR onCancelled={() => window.location.reload()} />
+    </div>
+  );
+}
+
+function PhysicalQRRequest() {
+  const [info, setInfo] = useState<{ isFreeEligible: boolean; fee: number; physicalQrCount: number; requests: { id: string; status: string; isFree: boolean; feeCharged: number; createdAt: string; adminNotes?: string; dispatchedAt?: string }[] } | null>(null);
+  const [open, setOpen] = useState(false);
+  const [address, setAddress] = useState("");
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    fetch("/api/workers/me/qr/physical")
+      .then(r => r.json())
+      .then(setInfo)
+      .catch(console.error);
+  }, [success]);
+
+  async function handleRequest() {
+    setError("");
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/workers/me/qr/physical", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address, notes }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setSuccess(data.message);
+      setOpen(false);
+      setAddress("");
+      setNotes("");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to submit request");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (!info) return null;
+
+  const pendingRequest = info.requests.find(r => r.status === "PENDING");
+
+  const statusColor: Record<string, string> = {
+    PENDING: "text-yellow-400",
+    APPROVED: "text-blue-400",
+    DISPATCHED: "text-green-400",
+    REJECTED: "text-red-400",
+  };
+
+  return (
+    <div className="card">
+      <div className="flex items-start gap-3 mb-4">
+        <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(20,167,249,0.1)" }}>
+          <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" /></svg>
+        </div>
+        <div className="flex-1">
+          <h3 className="text-sm font-bold text-white">Request a Physical QR Card</h3>
+          <p className="text-xs text-muted mt-0.5">
+            {info.isFreeEligible
+              ? "Your first physical QR card is free! We'll print and dispatch it to you."
+              : `Additional physical QR cards cost R${info.fee}. The fee is deducted from your wallet.`}
+          </p>
+        </div>
+        {info.isFreeEligible && (
+          <span className="px-2 py-0.5 rounded-full bg-green-900/30 text-green-400 text-[10px] font-bold uppercase tracking-wide shrink-0">Free</span>
+        )}
+      </div>
+
+      {success && (
+        <div className="mb-4 px-3 py-2.5 rounded-xl bg-green-900/20 border border-green-700/30 text-xs text-green-400">{success}</div>
+      )}
+
+      {/* Previous requests */}
+      {info.requests.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {info.requests.slice(0, 3).map(req => (
+            <div key={req.id} className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.03)" }}>
+              <div>
+                <span className={`text-xs font-medium ${statusColor[req.status] || "text-muted"}`}>{req.status}</span>
+                <span className="text-[11px] text-muted-300 ml-2">{req.isFree ? "Free" : `R${Number(req.feeCharged).toFixed(2)}`}</span>
+                {req.adminNotes && <p className="text-[11px] text-muted mt-0.5">{req.adminNotes}</p>}
+              </div>
+              <span className="text-[11px] text-muted-300">{new Date(req.createdAt).toLocaleDateString("en-ZA")}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {pendingRequest ? (
+        <p className="text-xs text-yellow-400/80">You have a pending request. We&apos;ll process it shortly.</p>
+      ) : open ? (
+        <div className="space-y-3 mt-2">
+          <div>
+            <label className="block text-xs text-muted mb-1">Delivery Address <span className="text-muted-300">(optional)</span></label>
+            <input
+              type="text"
+              value={address}
+              onChange={e => setAddress(e.target.value)}
+              className="input-field !py-2 !text-sm"
+              placeholder="e.g. 123 Main St, Cape Town, 8001"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-muted mb-1">Notes <span className="text-muted-300">(optional)</span></label>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              className="input-field !py-2 !text-sm resize-none"
+              rows={2}
+              placeholder="Any special instructions..."
+            />
+          </div>
+          {error && <div className="px-3 py-2 rounded-xl bg-red-900/20 border border-red-700/30 text-xs text-red-400">{error}</div>}
+          {!info.isFreeEligible && (
+            <div className="px-3 py-2 rounded-xl bg-yellow-900/20 border border-yellow-700/30 text-xs text-yellow-400/80">
+              R{info.fee} will be deducted from your wallet balance.
+            </div>
+          )}
+          <div className="flex gap-2">
+            <button onClick={handleRequest} disabled={submitting} className="btn-primary !py-2 !text-sm flex-1">
+              {submitting ? "Submitting…" : info.isFreeEligible ? "Request Free Card" : `Request Card — R${info.fee}`}
+            </button>
+            <button onClick={() => { setOpen(false); setError(""); }} className="btn-secondary !py-2 !text-sm">Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <button onClick={() => setOpen(true)} className="btn-secondary !py-2 !text-sm w-full">
+          {info.physicalQrCount === 0 ? "Request Your Free Physical Card" : "Request Another Card (R50)"}
+        </button>
+      )}
     </div>
   );
 }

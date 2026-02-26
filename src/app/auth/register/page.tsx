@@ -68,8 +68,11 @@ export default function RegisterPage() {
             </Link>
           </div>
 
-          <h1 className="text-2xl font-bold text-white">Create your account</h1>
-          <p className="mt-1 text-sm text-muted">Start receiving digital tips today</p>
+          <h1 className="text-2xl font-bold text-white">Activate your QR code</h1>
+          <p className="mt-1 text-sm text-muted">For workers who received a physical QR card</p>
+          <div className="mt-3 px-3 py-2 rounded-lg bg-accent/10 border border-accent/20 text-xs text-accent/80">
+            This page is only for workers with a <strong>physical QR code card</strong>. If you don&apos;t have one, <Link href="/apply" className="underline font-semibold">apply here instead</Link>.
+          </div>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -176,9 +179,9 @@ export default function RegisterPage() {
               </Link>
             </p>
             <p className="text-center text-xs text-white/25">
-              Don&rsquo;t have a QR code?{" "}
+              No physical QR card?{" "}
               <Link href="/apply" className="font-semibold text-accent/70 hover:text-accent transition-colors">
-                Apply as a service worker
+                Apply to get a digital QR code
               </Link>
             </p>
           </div>

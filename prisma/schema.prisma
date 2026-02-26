@@ -98,14 +98,41 @@ model Worker {
   docReviewedAt    DateTime?
   docReviewedBy    String?
 
-  ledgerEntries    LedgerEntry[]
-  withdrawals      Withdrawal[]
-  tips             Tip[]
-  qrCodes          QRCode[]
-  fraudEvents      FraudEvent[]
-  velocityRecords  VelocityRecord[]
-  settlementHolds  SettlementHold[]
-  amlAlerts        AmlAlert[]
+  physicalQrCount  Int      @default(0)
+
+  ledgerEntries       LedgerEntry[]
+  withdrawals         Withdrawal[]
+  tips                Tip[]
+  qrCodes             QRCode[]
+  fraudEvents         FraudEvent[]
+  velocityRecords     VelocityRecord[]
+  settlementHolds     SettlementHold[]
+  amlAlerts           AmlAlert[]
+  physicalQrRequests  PhysicalQRRequest[]
+}
+
+enum PhysicalQRStatus {
+  PENDING
+  APPROVED
+  DISPATCHED
+  REJECTED
+}
+
+model PhysicalQRRequest {
+  id          String           @id @default(cuid())
+  workerId    String
+  worker      Worker           @relation(fields: [workerId], references: [id])
+  status      PhysicalQRStatus @default(PENDING)
+  isFree      Boolean          @default(false)
+  feeCharged  Decimal          @default(0) @db.Decimal(12, 2)
+  address     String?
+  notes       String?
+  adminNotes  String?
+  dispatchedAt DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([workerId])
 }
 
 model Tip {
