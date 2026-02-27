@@ -4,12 +4,16 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { createSession } from "@/lib/auth";
 import { sendNewRegistrationEmail } from "@/lib/email";
+import { checkRegisterIpLimit } from "@/lib/rate-limit";
+
+const TERMS_VERSION = "v1.0";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, "First name is required").max(50),
   lastName: z.string().min(1, "Last name is required").max(50),
   phone: z.string().min(9, "Valid phone number is required"),
   password: z.string().min(6, "Password must be at least 6 characters").max(100),
+  termsAccepted: z.boolean().refine((v) => v === true, { message: "You must accept the terms and conditions" }),
 });
 
 function normalisePhone(raw: string): string {
@@ -21,8 +25,18 @@ function normalisePhone(raw: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
     const body = await request.json();
     const data = registerSchema.parse(body);
+
+    // --- Rate limiting: max 5 registrations per IP per hour ---
+    const ipLimit = checkRegisterIpLimit(ip);
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many registration attempts from this network. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     const phone = normalisePhone(data.phone);
 
@@ -38,13 +52,17 @@ export async function POST(request: NextRequest) {
 
     const passwordHash = await hash(data.password, 12);
 
-    const user = await db.user.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = await (db.user.create as any)({
       data: {
         firstName: data.firstName,
         lastName: data.lastName,
         phone,
         passwordHash,
         role: "WORKER",
+        termsAcceptedAt: new Date(),
+        termsVersion: TERMS_VERSION,
+        termsIpAddress: ip,
         worker: {
           create: {
             phoneForIM: phone,

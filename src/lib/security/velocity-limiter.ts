@@ -132,6 +132,29 @@ export async function checkTipSentVelocity(ipAddress: string): Promise<VelocityC
 }
 
 /**
+ * Progressive withdrawal limits based on account age.
+ * - 0–7 days:   no withdrawals (7-day waiting period)
+ * - 7–30 days:  R500/day, max 1 withdrawal/day
+ * - 30+ days:   standard limits (R2000/day, 3 withdrawals/day)
+ */
+function getWithdrawalLimitsForWorker(workerCreatedAt: Date): {
+  maxPerDay: number;
+  maxWithdrawalsPerDay: number;
+  waitDays: number;
+} {
+  const ageMs = Date.now() - workerCreatedAt.getTime();
+  const ageDays = ageMs / (1000 * 60 * 60 * 24);
+
+  if (ageDays < 7) {
+    return { maxPerDay: 0, maxWithdrawalsPerDay: 0, waitDays: Math.ceil(7 - ageDays) };
+  }
+  if (ageDays < 30) {
+    return { maxPerDay: 500, maxWithdrawalsPerDay: 1, waitDays: 0 };
+  }
+  return { maxPerDay: MAX_DAILY_WITHDRAWAL_ZAR, maxWithdrawalsPerDay: MAX_WITHDRAWALS_PER_DAY, waitDays: 0 };
+}
+
+/**
  * Check withdrawal velocity limits for a worker.
  */
 export async function checkWithdrawalVelocity(
@@ -140,6 +163,25 @@ export async function checkWithdrawalVelocity(
 ): Promise<VelocityCheckResult> {
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // Fetch worker to check account age for progressive limits
+  const worker = await db.worker.findUnique({
+    where: { id: workerId },
+    select: { createdAt: true },
+  });
+
+  const limits = worker
+    ? getWithdrawalLimitsForWorker(worker.createdAt)
+    : { maxPerDay: MAX_DAILY_WITHDRAWAL_ZAR, maxWithdrawalsPerDay: MAX_WITHDRAWALS_PER_DAY, waitDays: 0 };
+
+  // Block entirely during 7-day waiting period
+  if (limits.waitDays > 0) {
+    return {
+      allowed: false,
+      reason: `Withdrawals are not available for the first 7 days after registration. ${limits.waitDays} day(s) remaining.`,
+      counts: { tipsLastHour: 0, tipsLastDay: 0, tipsLastWeek: 0, withdrawalsToday: 0, dailyWithdrawalTotal: 0 },
+    };
+  }
 
   const [withdrawalsToday, dailyAgg] = await Promise.all([
     db.velocityRecord.count({
@@ -161,14 +203,14 @@ export async function checkWithdrawalVelocity(
     dailyWithdrawalTotal,
   };
 
-  if (withdrawalsToday >= MAX_WITHDRAWALS_PER_DAY) {
-    return { allowed: false, reason: `Max withdrawals per day exceeded (${MAX_WITHDRAWALS_PER_DAY})`, counts };
+  if (withdrawalsToday >= limits.maxWithdrawalsPerDay) {
+    return { allowed: false, reason: `Max withdrawals per day exceeded (${limits.maxWithdrawalsPerDay})`, counts };
   }
 
-  if (dailyWithdrawalTotal + requestedAmount > MAX_DAILY_WITHDRAWAL_ZAR) {
+  if (dailyWithdrawalTotal + requestedAmount > limits.maxPerDay) {
     return {
       allowed: false,
-      reason: `Daily withdrawal limit of R${MAX_DAILY_WITHDRAWAL_ZAR} would be exceeded (already withdrawn R${dailyWithdrawalTotal.toFixed(2)} today)`,
+      reason: `Daily withdrawal limit of R${limits.maxPerDay} would be exceeded (already withdrawn R${dailyWithdrawalTotal.toFixed(2)} today)`,
       counts,
     };
   }

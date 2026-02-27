@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { randomUUID } from "crypto";
+import { uploadDocument, getMimeType } from "@/lib/storage";
 
 export async function GET() {
   try {
@@ -66,12 +64,13 @@ export async function POST(request: NextRequest) {
 
     // Validate file sizes (max 10MB each)
     const maxSize = 10 * 1024 * 1024;
+    const allowedExts = ["jpg", "jpeg", "png", "pdf", "webp", "heic"];
     for (const [name, file] of [["ID", idDoc], ["Address", addressDoc], ["Selfie", selfieDoc]] as [string, File][]) {
       if (file.size > maxSize) {
         return NextResponse.json({ error: `${name} file is too large. Maximum 10MB.` }, { status: 400 });
       }
       const ext = file.name.split(".").pop()?.toLowerCase();
-      if (!["jpg", "jpeg", "png", "pdf", "webp", "heic"].includes(ext || "")) {
+      if (!allowedExts.includes(ext || "")) {
         return NextResponse.json(
           { error: `${name} file type not supported. Use JPG, PNG, PDF, or WEBP.` },
           { status: 400 }
@@ -79,22 +78,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Save files to /public/uploads/documents/{workerId}/
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "documents", worker.id);
-    await mkdir(uploadDir, { recursive: true });
-
-    async function saveFile(file: File, prefix: string): Promise<string> {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const filename = `${prefix}-${randomUUID()}.${ext}`;
-      const filepath = path.join(uploadDir, filename);
+    // Upload to Cloudflare R2 (private — never publicly accessible)
+    async function uploadToR2(file: File, prefix: string): Promise<string> {
       const buffer = Buffer.from(await file.arrayBuffer());
-      await writeFile(filepath, buffer);
-      return `/uploads/documents/${worker!.id}/${filename}`;
+      const contentType = getMimeType(file.name);
+      const { key } = await uploadDocument(worker!.id, prefix, buffer, file.name, contentType);
+      return key;
     }
 
-    const docIdUrl = await saveFile(idDoc, "id");
-    const docAddressUrl = await saveFile(addressDoc, "address");
-    const docSelfieUrl = await saveFile(selfieDoc, "selfie");
+    const docIdUrl = await uploadToR2(idDoc, "id");
+    const docAddressUrl = await uploadToR2(addressDoc, "address");
+    const docSelfieUrl = await uploadToR2(selfieDoc, "selfie");
 
     await db.worker.update({
       where: { id: worker.id },

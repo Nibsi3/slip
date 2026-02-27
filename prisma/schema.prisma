@@ -24,6 +24,8 @@ enum TipStatus {
 enum TransactionType {
   TIP
   PAYOUT
+  CHARGEBACK
+  CHARGEBACK_REVERSAL
 }
 
 enum LedgerStatus {
@@ -60,9 +62,19 @@ model User {
   firstName    String
   lastName     String
   idNumber     String?
-  isVerified   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isVerified            Boolean   @default(false)
+  loginAttempts         Int       @default(0)
+  lockedUntil           DateTime?
+  resetToken            String?
+  resetTokenExpiresAt   DateTime?
+  termsAcceptedAt       DateTime?
+  termsVersion          String?
+  termsIpAddress        String?
+  totpSecret            String?
+  totpEnabled           Boolean   @default(false)
+  backupCodes           String[]
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   worker    Worker?
   sessions  Session[]
@@ -87,6 +99,7 @@ model Worker {
 
   availableBalance Decimal  @default(0) @db.Decimal(12, 2)
   balanceCap       Decimal  @default(2000) @db.Decimal(12, 2)
+  chargebackDebt   Decimal  @default(0) @db.Decimal(12, 2)
 
   // Document verification (FICA)
   docIdUrl         String?
@@ -145,9 +158,10 @@ model Tip {
   netAmount       Decimal   @db.Decimal(12, 2)
   currency        String    @default("ZAR")
   status          TipStatus @default(PENDING)
-  paymentMethod   String    @default("payfast")
+  paymentMethod   String    @default("paystack")
   paymentId       String    @unique
   pfPaymentId     String?
+  paystackRef     String?
   customerName    String?
   customerEmail   String?
   customerMessage String?
@@ -256,6 +270,7 @@ enum FraudEventType {
   GEO_JUMP_DETECTED
   HIGH_RISK_BIN
   CHARGEBACK
+  DUPLICATE_CARD
 }
 
 enum FraudEventStatus {

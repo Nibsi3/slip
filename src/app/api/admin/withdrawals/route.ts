@@ -162,10 +162,13 @@ export async function PUT(request: NextRequest) {
           });
         }
 
-        // Refund the worker's wallet
+        // Refund the worker's wallet (both balances were decremented at withdrawal time)
         await tx.worker.update({
           where: { id: withdrawal.workerId },
-          data: { walletBalance: { increment: withdrawal.amount } },
+          data: {
+            walletBalance: { increment: withdrawal.amount },
+            availableBalance: { increment: withdrawal.amount },
+          },
         });
       });
 

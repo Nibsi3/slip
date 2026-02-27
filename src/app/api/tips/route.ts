@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { generatePayFastForm } from "@/lib/payfast";
+import { initializeTransaction } from "@/lib/paystack";
 import { generatePaymentId, calculateFees, getAppUrl } from "@/lib/utils";
 import {
   scoreTipTransaction,
@@ -125,6 +125,7 @@ export async function POST(request: NextRequest) {
         feeGateway,
         netAmount,
         paymentId,
+        paymentMethod: "paystack",
         customerName: data.customerName,
         customerEmail: data.customerEmail,
         customerMessage: data.customerMessage,
@@ -141,22 +142,20 @@ export async function POST(request: NextRequest) {
     const cancelUrl = new URL(`/tip/${data.qrCode}`, appUrl);
     cancelUrl.searchParams.set("cancelled", "true");
 
-    const notifyUrl = new URL(`/api/payfast/notify`, appUrl);
-    const payfast = generatePayFastForm({
+    const paystack = await initializeTransaction({
       paymentId: tip.paymentId,
       amount: data.amount,
       itemName: `Tip for ${workerName}`,
       workerName,
-      returnUrl: returnUrl.toString().replace(/\+/g, "%20"),
+      returnUrl: returnUrl.toString(),
       cancelUrl: cancelUrl.toString(),
-      notifyUrl: notifyUrl.toString(),
       customerEmail: data.customerEmail,
       customerName: data.customerName,
     });
 
     return NextResponse.json({
       tip: { id: tip.id, paymentId: tip.paymentId },
-      payfast,
+      paystack,
       fraudScore: fraudResult.score,
     });
   } catch (err) {

@@ -4,26 +4,50 @@ import { hash } from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Seeding database...");
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "Seed script must not be run in production. " +
+      "Create the admin account manually via the database or a secure one-time script."
+    );
+  }
 
-  // Create admin user
-  const adminPassword = await hash("!!AnCam123", 12);
+  const adminEmail = process.env.SEED_ADMIN_EMAIL;
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      "SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD environment variables must be set to run seed. " +
+      "Add them to your .env file."
+    );
+  }
+
+  console.log("Seeding database (development only)...");
+
+  // Create admin user from env vars
+  const adminHash = await hash(adminPassword, 12);
   const admin = await prisma.user.upsert({
-    where: { email: "cameronfalck03@gmail.com" },
+    where: { email: adminEmail },
     update: {},
     create: {
-      email: "cameronfalck03@gmail.com",
-      firstName: "Cameron",
-      lastName: "Falck",
-      passwordHash: adminPassword,
+      email: adminEmail,
+      firstName: "Admin",
+      lastName: "User",
+      passwordHash: adminHash,
       role: "ADMIN",
       isVerified: true,
     },
   });
   console.log(`Admin user: ${admin.email}`);
 
-  // Create demo worker - Thabo
-  const workerPassword = await hash("worker123", 12);
+  // Demo workers (development only — use SEED_WORKER_PASSWORD env var)
+  const workerPassword = process.env.SEED_WORKER_PASSWORD;
+  if (!workerPassword) {
+    console.log("SEED_WORKER_PASSWORD not set — skipping demo worker creation.");
+    return;
+  }
+
+  const workerHash = await hash(workerPassword, 12);
+
   const worker = await prisma.user.upsert({
     where: { phone: "0662995533" },
     update: {},
@@ -31,7 +55,7 @@ async function main() {
       firstName: "Thabo",
       lastName: "Molefe",
       phone: "0662995533",
-      passwordHash: workerPassword,
+      passwordHash: workerHash,
       role: "WORKER",
       isVerified: true,
       worker: {
@@ -44,12 +68,8 @@ async function main() {
       },
     },
   });
-  console.log(`Worker user: ${worker.phone} / worker123`);
-  console.log(`Worker QR code: DEMO0001`);
-  console.log(`Tip URL: /tip/DEMO0001 (via /qr/DEMO0001)`);
+  console.log(`Demo worker: ${worker.phone}`);
 
-  // Create second demo worker - Naledi
-  const worker2Password = await hash("worker123", 12);
   const worker2 = await prisma.user.upsert({
     where: { phone: "0829876543" },
     update: {},
@@ -57,7 +77,7 @@ async function main() {
       firstName: "Naledi",
       lastName: "Dlamini",
       phone: "0829876543",
-      passwordHash: worker2Password,
+      passwordHash: workerHash,
       role: "WORKER",
       isVerified: true,
       worker: {
@@ -70,10 +90,8 @@ async function main() {
       },
     },
   });
-  console.log(`Worker user: ${worker2.phone} / worker123`);
-  console.log(`Worker QR code: DEMO0002`);
+  console.log(`Demo worker: ${worker2.phone}`);
 
-  // Create demo QR codes linked to demo workers
   const thaboWorker = await prisma.worker.findFirst({ where: { user: { phone: "0662995533" } } });
   const nalediWorker = await prisma.worker.findFirst({ where: { user: { phone: "0829876543" } } });
 
@@ -89,7 +107,6 @@ async function main() {
         activatedAt: new Date(),
       },
     });
-    console.log("Demo QR (active): /qr/DEMO0001 → Thabo");
   }
 
   if (nalediWorker) {
@@ -104,32 +121,20 @@ async function main() {
         activatedAt: new Date(),
       },
     });
-    console.log("Demo QR (active): /qr/DEMO0002 → Naledi");
   }
 
-  // Create some inactive demo QR codes
   for (let i = 3; i <= 5; i++) {
     const token = `DEMO000${i}`;
     await prisma.qRCode.upsert({
       where: { token },
       update: {},
-      create: {
-        token,
-        batchId: "batch-demo",
-        status: "INACTIVE",
-      },
+      create: { token, batchId: "batch-demo", status: "INACTIVE" },
     });
   }
-  console.log("Demo QR (inactive): /qr/DEMO0003, /qr/DEMO0004, /qr/DEMO0005");
 
   console.log("\nSeeding complete!");
-  console.log("\nTest accounts:");
-  console.log("  Admin: cameronfalck03@gmail.com / !!AnCam123");
-  console.log("  Worker 1 (Thabo): 0662995533 / worker123");
-  console.log("  Worker 2 (Naledi): 0829876543 / worker123");
-  console.log("\nQR Code URLs:");
-  console.log("  Active: /qr/DEMO0001 (Thabo), /qr/DEMO0002 (Naledi)");
-  console.log("  Inactive (activation test): /qr/DEMO0003");
+  console.log("  QR codes: /qr/DEMO0001 (Thabo), /qr/DEMO0002 (Naledi)");
+  console.log("  Inactive QRs: /qr/DEMO0003, /qr/DEMO0004, /qr/DEMO0005");
 }
 
 main()
