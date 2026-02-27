@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
     // Rate limit: max 5 OTP requests per IP per 15 minutes
-    const ipLimit = checkRateLimit(`otp:ip:${ip}`, 5, 15 * 60 * 1000);
+    const ipLimit = await checkRateLimit(`otp:ip:${ip}`, 5, 15 * 60 * 1000);
     if (!ipLimit.allowed) {
       return NextResponse.json(
         { error: "Too many OTP requests. Please wait before trying again." },
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const phone = normalisePhone(data.phone);
 
     // Rate limit per phone: max 3 OTP requests per phone per 15 minutes
-    const phoneLimit = checkRateLimit(`otp:phone:${phone}`, 3, 15 * 60 * 1000);
+    const phoneLimit = await checkRateLimit(`otp:phone:${phone}`, 3, 15 * 60 * 1000);
     if (!phoneLimit.allowed) {
       return NextResponse.json(
         { error: "Too many OTP requests for this number. Please wait before trying again." },
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { sessionKey, code, cooldownActive } = generateOtp(phone);
+    const { sessionKey, code, cooldownActive } = await generateOtp(phone);
 
     if (cooldownActive) {
       return NextResponse.json({
@@ -59,32 +59,28 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // --- Send OTP via SMS ---
-    // Using Paystack's Customer Validation or a dedicated SMS provider
-    // For now, log the OTP in development and send via available channels
+    // --- Send OTP via Demakatso SMS ---
     if (process.env.NODE_ENV !== "production") {
       console.log(`[DEV] OTP for ${phone}: ${code}`);
     }
 
-    // Attempt to send via SMS provider if configured
-    const smsApiKey = process.env.SMS_API_KEY;
+    const smsUsername = process.env.SMS_USERNAME;
+    const smsPassword = process.env.SMS_PASSWORD;
     const smsApiUrl = process.env.SMS_API_URL;
-    if (smsApiKey && smsApiUrl) {
+    if (smsUsername && smsPassword && smsApiUrl) {
       try {
-        await fetch(smsApiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${smsApiKey}`,
-          },
-          body: JSON.stringify({
-            to: phone.startsWith("0") ? `+27${phone.slice(1)}` : phone,
-            message: `Your Slip a Tip verification code is: ${code}. Valid for 10 minutes. Do not share this code.`,
-          }),
+        const internationalPhone = phone.startsWith("0") ? `+27${phone.slice(1)}` : phone;
+        const params = new URLSearchParams({
+          username: smsUsername,
+          password: smsPassword,
+          to: internationalPhone,
+          from: "SlipATip",
+          message: `Your Slip a Tip verification code is: ${code}. Valid for 10 minutes. Do not share this code.`,
         });
+        await fetch(`${smsApiUrl}?${params.toString()}`, { method: "GET" });
       } catch (smsErr) {
         console.error("SMS send failed:", smsErr);
-        // Don't block the flow — code is still valid for dev/test
+        // Don't block the flow — code is still valid
       }
     }
 

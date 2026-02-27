@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
     // Rate limit: max 10 OTP verify attempts per IP per 15 minutes
-    const ipLimit = checkRateLimit(`otp-verify:ip:${ip}`, 10, 15 * 60 * 1000);
+    const ipLimit = await checkRateLimit(`otp-verify:ip:${ip}`, 10, 15 * 60 * 1000);
     if (!ipLimit.allowed) {
       return NextResponse.json(
         { error: "Too many verification attempts. Please wait before trying again." },
@@ -24,14 +24,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = schema.parse(body);
 
-    const result = verifyOtp(data.sessionKey, data.code);
+    const result = await verifyOtp(data.sessionKey, data.code);
 
     if (!result.valid) {
       return NextResponse.json({ error: result.reason }, { status: 400 });
     }
 
     // Return the verified phone so the registration form can proceed
-    const phone = getOtpPhone(data.sessionKey);
+    const phone = await getOtpPhone(data.sessionKey);
 
     return NextResponse.json({
       verified: true,

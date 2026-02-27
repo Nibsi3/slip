@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const data = schema.parse(body);
 
     // Rate limit: max 5 reset requests per IP per hour
-    const rateLimit = checkPasswordResetLimit(ip);
+    const rateLimit = await checkPasswordResetLimit(ip);
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: "Too many reset requests. Please try again later." },

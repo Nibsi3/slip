@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
     // --- Rate limiting: max 5 applications per IP per hour ---
-    const ipLimit = checkApplyIpLimit(ip);
+    const ipLimit = await checkApplyIpLimit(ip);
     if (!ipLimit.allowed) {
       return NextResponse.json(
         { error: "Too many application attempts from this network. Please try again later." },

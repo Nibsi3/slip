@@ -155,12 +155,9 @@ export async function POST(request: NextRequest) {
 
     const workerName = `${worker.user.firstName} ${worker.user.lastName}`;
 
-    const returnUrl = new URL(`/tip/${data.qrCode}/thank-you`, appUrl);
-    returnUrl.searchParams.set("amount", data.amount.toString());
-    returnUrl.searchParams.set("name", workerName);
+    const returnUrl = new URL(`/tip/success`, appUrl);
 
-    const cancelUrl = new URL(`/tip/${data.qrCode}`, appUrl);
-    cancelUrl.searchParams.set("cancelled", "true");
+    const cancelUrl = new URL(`/tip/failed`, appUrl);
 
     const paystack = await initializeTransaction({
       paymentId: tip.paymentId,

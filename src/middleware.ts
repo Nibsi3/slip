@@ -13,6 +13,9 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const protectedRoutes = ["/dashboard", "/admin"];
 const authRoutes = ["/auth/login", "/auth/register"];
+const CSRF_MUTATION_METHODS = ["POST", "PATCH", "PUT", "DELETE"];
+// API paths that are exempt from CSRF (webhooks, public endpoints, cron)
+const CSRF_EXEMPT = ["/api/paystack/webhook", "/api/cron/", "/api/tips", "/api/contact", "/api/apply", "/api/qrcodes/activate", "/api/auth/login", "/api/auth/register", "/api/auth/forgot-password", "/api/auth/reset-password", "/api/auth/otp/", "/api/auth/2fa/verify", "/api/auth/csrf", "/api/health"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -55,9 +58,27 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // --- CSRF protection for authenticated mutation requests ---
+  if (
+    pathname.startsWith("/api/") &&
+    CSRF_MUTATION_METHODS.includes(request.method) &&
+    payload && // only for authenticated requests
+    !CSRF_EXEMPT.some((exempt) => pathname.startsWith(exempt))
+  ) {
+    const csrfCookie = request.cookies.get("csrf-token")?.value;
+    const csrfHeader = request.headers.get("x-csrf-token");
+
+    if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
+      return NextResponse.json(
+        { error: "CSRF token missing or invalid. Please refresh the page." },
+        { status: 403 }
+      );
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/auth/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/auth/:path*", "/api/:path*"],
 };

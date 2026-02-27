@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const data = registerSchema.parse(body);
 
     // --- Rate limiting: max 5 registrations per IP per hour ---
-    const ipLimit = checkRegisterIpLimit(ip);
+    const ipLimit = await checkRegisterIpLimit(ip);
     if (!ipLimit.allowed) {
       return NextResponse.json(
         { error: "Too many registration attempts from this network. Please try again later." },

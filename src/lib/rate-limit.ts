@@ -1,24 +1,9 @@
 /**
- * In-memory sliding window rate limiter.
- * Used to protect auth endpoints from brute force attacks.
- *
- * For multi-instance deployments, replace the Map with Redis (e.g. Upstash).
+ * Redis-backed sliding window rate limiter.
+ * Uses INCR + EXPIRE for atomic, distributed rate limiting.
  */
 
-interface WindowEntry {
-  count: number;
-  resetAt: number;
-}
-
-const windows = new Map<string, WindowEntry>();
-
-// Sweep stale entries every 5 minutes to prevent memory growth
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of windows.entries()) {
-    if (entry.resetAt < now) windows.delete(key);
-  }
-}, 5 * 60 * 1000);
+import { redis } from "@/lib/redis";
 
 export interface RateLimitResult {
   allowed: boolean;
@@ -28,33 +13,39 @@ export interface RateLimitResult {
 
 /**
  * Check and increment a rate limit window.
- * @param key    Unique key (e.g. "login:1.2.3.4" or "login:0821234567")
- * @param max    Max requests allowed in the window
+ * @param key       Unique key (e.g. "login:1.2.3.4")
+ * @param max       Max requests allowed in the window
  * @param windowMs  Window duration in milliseconds
  */
-export function checkRateLimit(key: string, max: number, windowMs: number): RateLimitResult {
-  const now = Date.now();
-  const entry = windows.get(key);
+export async function checkRateLimit(
+  key: string,
+  max: number,
+  windowMs: number
+): Promise<RateLimitResult> {
+  const redisKey = `rl:${key}`;
+  const windowSec = Math.ceil(windowMs / 1000);
 
-  if (!entry || entry.resetAt < now) {
-    windows.set(key, { count: 1, resetAt: now + windowMs });
-    return { allowed: true, remaining: max - 1, resetAt: new Date(now + windowMs) };
+  const count = await redis.incr(redisKey);
+
+  if (count === 1) {
+    await redis.expire(redisKey, windowSec);
   }
 
-  entry.count += 1;
+  const ttl = await redis.ttl(redisKey);
+  const resetAt = new Date(Date.now() + ttl * 1000);
 
-  if (entry.count > max) {
-    return { allowed: false, remaining: 0, resetAt: new Date(entry.resetAt) };
+  if (count > max) {
+    return { allowed: false, remaining: 0, resetAt };
   }
 
-  return { allowed: true, remaining: max - entry.count, resetAt: new Date(entry.resetAt) };
+  return { allowed: true, remaining: max - count, resetAt };
 }
 
 /**
  * Reset the rate limit window for a key (e.g. on successful login).
  */
-export function resetRateLimit(key: string): void {
-  windows.delete(key);
+export async function resetRateLimit(key: string): Promise<void> {
+  await redis.del(`rl:${key}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -62,31 +53,31 @@ export function resetRateLimit(key: string): void {
 // ---------------------------------------------------------------------------
 
 /** Max 10 login attempts per IP per 15 minutes */
-export function checkLoginIpLimit(ip: string): RateLimitResult {
+export async function checkLoginIpLimit(ip: string): Promise<RateLimitResult> {
   return checkRateLimit(`login:ip:${ip}`, 10, 15 * 60 * 1000);
 }
 
 /** Max 5 failed login attempts per identifier (phone/email) per 30 minutes → lockout */
-export function checkLoginIdentifierLimit(identifier: string): RateLimitResult {
+export async function checkLoginIdentifierLimit(identifier: string): Promise<RateLimitResult> {
   return checkRateLimit(`login:id:${identifier}`, 5, 30 * 60 * 1000);
 }
 
 /** Max 5 registration attempts per IP per hour */
-export function checkRegisterIpLimit(ip: string): RateLimitResult {
+export async function checkRegisterIpLimit(ip: string): Promise<RateLimitResult> {
   return checkRateLimit(`register:ip:${ip}`, 5, 60 * 60 * 1000);
 }
 
 /** Max 5 password reset requests per IP per hour */
-export function checkPasswordResetLimit(ip: string): RateLimitResult {
+export async function checkPasswordResetLimit(ip: string): Promise<RateLimitResult> {
   return checkRateLimit(`reset:ip:${ip}`, 5, 60 * 60 * 1000);
 }
 
 /** Max 5 application submissions per IP per hour */
-export function checkApplyIpLimit(ip: string): RateLimitResult {
+export async function checkApplyIpLimit(ip: string): Promise<RateLimitResult> {
   return checkRateLimit(`apply:ip:${ip}`, 5, 60 * 60 * 1000);
 }
 
 /** Max 10 QR activation attempts per IP per hour */
-export function checkActivateIpLimit(ip: string): RateLimitResult {
+export async function checkActivateIpLimit(ip: string): Promise<RateLimitResult> {
   return checkRateLimit(`activate:ip:${ip}`, 10, 60 * 60 * 1000);
 }

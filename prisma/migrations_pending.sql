@@ -58,6 +58,12 @@ ALTER TABLE "User"
 -- TransactionType enum: add FORFEITURE
 ALTER TYPE "TransactionType" ADD VALUE IF NOT EXISTS 'FORFEITURE';
 
+-- Email verification fields on User
+ALTER TABLE "User"
+  ADD COLUMN IF NOT EXISTS "emailVerified"        BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS "emailVerifyToken"     TEXT,
+  ADD COLUMN IF NOT EXISTS "emailVerifyExpiresAt" TIMESTAMP(3);
+
 -- =============================================================================
 -- Done. Remember to run `npx prisma generate` after applying this.
 -- =============================================================================

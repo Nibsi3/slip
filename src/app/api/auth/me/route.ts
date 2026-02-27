@@ -18,6 +18,7 @@ export async function GET() {
         phone: user.phone,
         role: user.role,
         isVerified: user.isVerified,
+        totpEnabled: user.totpEnabled,
         worker: user.worker
           ? {
               id: user.worker.id,

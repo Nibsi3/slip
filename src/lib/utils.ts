@@ -17,9 +17,9 @@ export function generatePaymentId(): string {
 export function calculateFees(amount: number) {
   // Platform fee: 10% of tip amount
   const platformFeeRate = 0.10;
-  // Paystack fee: ~2.9% + R1.00 per transaction (approximate)
-  const gatewayFeeRate = 0.035;
-  const gatewayFeeFixed = 2.0;
+  // Paystack ZA fee: 2.9% + R1.00, capped at R1000 per transaction
+  const gatewayFeeRate = 0.029;
+  const gatewayFeeFixed = 1.0;
 
   const feePlatform = Math.round(amount * platformFeeRate * 100) / 100;
   const feeGateway =

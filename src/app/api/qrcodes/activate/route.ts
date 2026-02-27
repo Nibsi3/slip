@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
     // --- Rate limiting: max 10 activation attempts per IP per hour ---
-    const ipLimit = checkActivateIpLimit(ip);
+    const ipLimit = await checkActivateIpLimit(ip);
     if (!ipLimit.allowed) {
       return NextResponse.json(
         { error: "Too many activation attempts from this network. Please try again later." },

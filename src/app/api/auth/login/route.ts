@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const data = loginSchema.parse(body);
 
     // --- Rate limiting: IP-based ---
-    const ipLimit = checkLoginIpLimit(ip);
+    const ipLimit = await checkLoginIpLimit(ip);
     if (!ipLimit.allowed) {
       return NextResponse.json(
         { error: "Too many login attempts. Please try again later." },
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     // --- Rate limiting: identifier-based ---
-    const identifierLimit = checkLoginIdentifierLimit(data.identifier.toLowerCase());
+    const identifierLimit = await checkLoginIdentifierLimit(data.identifier.toLowerCase());
     if (!identifierLimit.allowed) {
       return NextResponse.json(
         { error: "Too many failed attempts for this account. Please wait 30 minutes before trying again." },
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       where: { id: user.id },
       data: { loginAttempts: 0, lockedUntil: null },
     });
-    resetRateLimit(`login:id:${data.identifier.toLowerCase()}`);
+    await resetRateLimit(`login:id:${data.identifier.toLowerCase()}`);
 
     // --- P1.4: Enforce 2FA for admins ---
     const totpEnabled = user.totpEnabled;

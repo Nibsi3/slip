@@ -320,6 +320,31 @@ export async function sendForfeitureWarningEmail(worker: {
   }
 }
 
+// ─── Email verification ─────────────────────────────────────────────────────
+export async function sendEmailVerification(email: string, firstName: string, verifyUrl: string) {
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: "Verify your email — Slip a Tip",
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0a0a0f;color:#e0e0e0;padding:32px;border-radius:12px;">
+          <img src="${APP_URL}/logo.png" alt="Slip a Tip" style="height:40px;margin-bottom:24px;" />
+          <h2 style="color:#fff;margin:0 0 8px;">Verify Your Email</h2>
+          <p style="color:#888;margin:0 0 24px;">Hi ${firstName}, please verify your email address by clicking the button below.</p>
+          <div style="margin-bottom:32px;">
+            <a href="${verifyUrl}" style="background:#7c3aed;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;">Verify Email →</a>
+          </div>
+          <p style="color:#555;font-size:12px;">This link expires in 24 hours. If you did not request this, please ignore this email.</p>
+          <p style="color:#555;font-size:12px;margin-top:32px;">Slip a Tip · slipatip.co.za</p>
+        </div>
+      `,
+    });
+  } catch (err) {
+    console.error("sendEmailVerification failed:", err);
+  }
+}
+
 // ─── Worker notification: account deactivated ────────────────────────────────
 export async function sendDeactivationEmail(worker: {
   firstName: string;
