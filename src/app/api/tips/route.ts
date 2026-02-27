@@ -10,6 +10,8 @@ import {
   recordFingerprint,
   extractFingerprintFromRequest,
   checkBalanceCap,
+  checkTipSentVelocity,
+  checkTipReceivedVelocity,
 } from "@/lib/security";
 
 const tipSchema = z.object({
@@ -41,6 +43,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Worker not found or inactive" },
         { status: 404 }
+      );
+    }
+
+    // --- Security: Velocity check (per sending IP) ---
+    const sentVelocity = await checkTipSentVelocity(ipAddress);
+    if (!sentVelocity.allowed) {
+      return NextResponse.json(
+        { error: sentVelocity.reason || "Too many tips from this network. Please try again later." },
+        { status: 429 }
+      );
+    }
+
+    // --- Security: Velocity check (per receiving worker) ---
+    const receivedVelocity = await checkTipReceivedVelocity(worker.id);
+    if (!receivedVelocity.allowed) {
+      return NextResponse.json(
+        { error: "This worker is temporarily unable to receive tips. Please try again later." },
+        { status: 429 }
       );
     }
 
@@ -156,7 +176,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       tip: { id: tip.id, paymentId: tip.paymentId },
       paystack,
-      fraudScore: fraudResult.score,
     });
   } catch (err) {
     if (err instanceof z.ZodError) {

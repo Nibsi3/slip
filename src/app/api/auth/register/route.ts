@@ -52,8 +52,7 @@ export async function POST(request: NextRequest) {
 
     const passwordHash = await hash(data.password, 12);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = await (db.user.create as any)({
+    const user = await db.user.create({
       data: {
         firstName: data.firstName,
         lastName: data.lastName,

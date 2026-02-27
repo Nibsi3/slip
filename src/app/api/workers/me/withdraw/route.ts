@@ -16,6 +16,7 @@ import {
   runAmlChecks,
   MAX_WITHDRAWAL_PER_TX_ZAR,
   getWithdrawalDailyCap,
+  WITHDRAWAL_FEE_PERCENT,
 } from "@/lib/security";
 
 const withdrawSchema = z.object({
@@ -187,7 +188,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const fee = Number((data.amount * 0.10).toFixed(2));
+    const fee = Number((data.amount * WITHDRAWAL_FEE_PERCENT).toFixed(2));
     const netAmount = Number((data.amount - fee).toFixed(2));
     const phone = data.phoneNumber || worker.phoneForIM || "";
     const bank = data.bankName || worker.bankName || "";

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { sendForfeitureWarningEmail } from "@/lib/email";
 
 /**
  * DB maintenance cron endpoint.
@@ -109,7 +110,7 @@ export async function GET(request: NextRequest) {
           await tx.ledgerEntry.create({
             data: {
               workerId: worker.id,
-              transactionType: "PAYOUT",
+              transactionType: "FORFEITURE",
               amount: balance,
               feePlatform: 0,
               feeGateway: 0,
@@ -140,6 +141,12 @@ export async function GET(request: NextRequest) {
             details: { balance, lastActivity: lastActivity.toISOString(), daysUntilForfeiture: 10 },
           },
         });
+        await sendForfeitureWarningEmail({
+          firstName: worker.user.firstName,
+          email: worker.user.email,
+          balance,
+          daysUntilForfeiture: 10,
+        });
         warned170++;
       } else if (lastActivity < day150 && worker.user.email) {
         // 150-day warning
@@ -151,6 +158,12 @@ export async function GET(request: NextRequest) {
             entityId: worker.id,
             details: { balance, lastActivity: lastActivity.toISOString(), daysUntilForfeiture: 30 },
           },
+        });
+        await sendForfeitureWarningEmail({
+          firstName: worker.user.firstName,
+          email: worker.user.email,
+          balance,
+          daysUntilForfeiture: 30,
         });
         warned150++;
       }

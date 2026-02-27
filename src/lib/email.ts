@@ -257,7 +257,7 @@ export async function sendContactEmail(data: {
             <tr><td style="padding:8px 0;color:#888;">Subject</td><td style="padding:8px 0;color:#fff;">${data.subject}</td></tr>
           </table>
           <div style="margin-top:16px;background:#1a1a2e;padding:16px;border-radius:8px;border-left:3px solid #7c3aed;">
-            <p style="color:#e0e0e0;margin:0;white-space:pre-wrap;">${data.message}</p>
+            <p style="color:#e0e0e0;margin:0;white-space:pre-wrap;">${data.message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;")}</p>
           </div>
         </div>
       `,
@@ -283,6 +283,40 @@ export async function sendContactEmail(data: {
     });
   } catch (err) {
     console.error("sendContactEmail failed:", err);
+  }
+}
+
+// ─── Worker notification: balance forfeiture warning ───────────────────────────
+export async function sendForfeitureWarningEmail(worker: {
+  firstName: string;
+  email: string;
+  balance: number;
+  daysUntilForfeiture: number;
+}) {
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: worker.email,
+      subject: `⚠️ Your Slip a Tip balance will be forfeited in ${worker.daysUntilForfeiture} days`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0a0a0f;color:#e0e0e0;padding:32px;border-radius:12px;">
+          <img src="${APP_URL}/logo.png" alt="Slip a Tip" style="height:40px;margin-bottom:24px;" />
+          <h2 style="color:#f59e0b;margin:0 0 8px;">⚠️ Action Required: Balance Forfeiture Warning</h2>
+          <p style="color:#888;margin:0 0 24px;">Hi ${worker.firstName}, your Slip a Tip wallet has been inactive for a while.</p>
+          <div style="background:#1a1a2e;padding:20px;border-radius:8px;border-left:4px solid #f59e0b;margin-bottom:24px;">
+            <p style="color:#f59e0b;font-size:18px;font-weight:600;margin:0 0 8px;">R${worker.balance.toFixed(2)} will be forfeited in ${worker.daysUntilForfeiture} days</p>
+            <p style="color:#888;margin:0;font-size:13px;">Under our Terms of Service, balances are forfeited after 180 days of inactivity.</p>
+          </div>
+          <p style="color:#e0e0e0;margin:0 0 24px;">To prevent forfeiture, log in to your account and make a withdrawal or any activity.</p>
+          <div style="margin-bottom:32px;">
+            <a href="${APP_URL}/auth/login" style="background:#7c3aed;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;">Log In to Withdraw →</a>
+          </div>
+          <p style="color:#555;font-size:12px;margin-top:32px;">Slip a Tip · slipatip.co.za</p>
+        </div>
+      `,
+    });
+  } catch (err) {
+    console.error("sendForfeitureWarningEmail failed:", err);
   }
 }
 

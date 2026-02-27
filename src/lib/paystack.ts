@@ -85,7 +85,13 @@ export function verifyWebhookSignature(
 ): boolean {
   const secret = process.env.PAYSTACK_WEBHOOK_SECRET;
   if (!secret) {
-    console.warn("PAYSTACK_WEBHOOK_SECRET not set — skipping webhook signature verification");
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "FATAL: PAYSTACK_WEBHOOK_SECRET is not set in production. " +
+        "All webhook requests are being rejected to prevent forgery."
+      );
+    }
+    console.warn("PAYSTACK_WEBHOOK_SECRET not set — skipping webhook signature verification (development only)");
     return true;
   }
   const hash = crypto
@@ -229,6 +235,44 @@ export async function initiateTransfer(params: {
 
   return {
     transferCode: json.data.transfer_code as string,
+    status: json.data.status as string,
+  };
+}
+
+export async function refundTransaction(params: {
+  transactionId: number;
+  amount?: number;
+}): Promise<{ refundId: string; status: string } | null> {
+  const secretKey = getPaystackSecretKey();
+
+  const body: Record<string, unknown> = { transaction: params.transactionId };
+  if (params.amount !== undefined) {
+    body.amount = Math.round(params.amount * 100);
+  }
+
+  const response = await fetch("https://api.paystack.co/refund", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${secretKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error(`Paystack refund failed: ${response.status} ${error}`);
+    return null;
+  }
+
+  const json = await response.json();
+  if (!json.status) {
+    console.error(`Paystack refund error: ${json.message}`);
+    return null;
+  }
+
+  return {
+    refundId: String(json.data.id),
     status: json.data.status as string,
   };
 }

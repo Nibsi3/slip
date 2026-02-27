@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { db } from "@/lib/db";
-import { verifyWebhookSignature, verifyTransaction, type PaystackWebhookEvent } from "@/lib/paystack";
+import { verifyWebhookSignature, verifyTransaction, refundTransaction, type PaystackWebhookEvent } from "@/lib/paystack";
 import {
   checkBalanceCap,
   createSettlementHold,
@@ -130,6 +130,30 @@ async function handleChargeSuccess(event: PaystackWebhookEvent) {
       });
 
       await db.tip.update({ where: { id: tip.id }, data: { status: "FAILED" } });
+
+      // Auto-refund the customer — they paid but the tip is blocked
+      const refundResult = await refundTransaction({ transactionId: verified.id, amount: Number(tip.amount) });
+      if (refundResult) {
+        console.log(`Card cooldown: auto-refunded tip ${tip.id} (refundId: ${refundResult.refundId})`);
+      } else {
+        console.error(`Card cooldown: FAILED to auto-refund tip ${tip.id} — manual refund required`);
+      }
+
+      await db.auditLog.create({
+        data: {
+          action: "CARD_COOLDOWN_REFUND",
+          entity: "Tip",
+          entityId: tip.id,
+          details: {
+            reference,
+            cardFingerprint,
+            minutesRemaining: minutesLeft,
+            refundStatus: refundResult?.status ?? "FAILED",
+            refundId: refundResult?.refundId ?? null,
+          },
+        },
+      });
+
       console.log(`Card cooldown active for tip ${tip.id} — ${minutesLeft}min remaining`);
       return;
     }

@@ -18,6 +18,7 @@
     "@aws-sdk/client-s3": "^3.999.0",
     "@aws-sdk/s3-request-presigner": "^3.999.0",
     "@prisma/client": "^5.22.0",
+    "@sentry/nextjs": "^10.40.0",
     "@types/speakeasy": "^2.0.10",
     "bcryptjs": "^2.4.3",
     "date-fns": "^3.6.0",

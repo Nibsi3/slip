@@ -168,6 +168,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 // DELETE /api/admin/workers?workerId=xxx
+// Soft-delete: deactivates the worker and anonymises PII, preserving all financial history.
 export async function DELETE(request: NextRequest) {
   try {
     const session = await requireAuth(["ADMIN", "SUPER_ADMIN"]);
@@ -182,20 +183,50 @@ export async function DELETE(request: NextRequest) {
     });
     if (!worker) return NextResponse.json({ error: "Worker not found" }, { status: 404 });
 
+    const deletedName = `${worker.user.firstName} ${worker.user.lastName}`;
+    const deletedAt = new Date().toISOString();
+
+    // Soft-delete: deactivate worker, anonymise PII on the User record
+    await db.$transaction(async (tx) => {
+      // Deactivate the worker profile
+      await tx.worker.update({
+        where: { id: workerId },
+        data: { isActive: false },
+      });
+
+      // Anonymise PII — keep IDs and financial data intact for audit purposes
+      await tx.user.update({
+        where: { id: worker.userId },
+        data: {
+          email: null,
+          phone: null,
+          firstName: "[Deleted]",
+          lastName: "[Deleted]",
+          idNumber: null,
+          passwordHash: "[DELETED]",
+          resetToken: null,
+          resetTokenExpiresAt: null,
+          totpSecret: null,
+          totpEnabled: false,
+          backupCodes: [],
+        },
+      });
+
+      // Delete all active sessions
+      await tx.session.deleteMany({ where: { userId: worker.userId } });
+    });
+
     await db.auditLog.create({
       data: {
         userId: session.user.id,
-        action: "DELETE_WORKER",
+        action: "SOFT_DELETE_WORKER",
         entity: "Worker",
         entityId: workerId,
-        details: { deletedName: `${worker.user.firstName} ${worker.user.lastName}`, deletedEmail: worker.user.email },
+        details: { deletedName, deletedEmail: worker.user.email, deletedAt },
       },
     });
 
-    // Cascade delete via user (Worker.user has onDelete: Cascade)
-    await db.user.delete({ where: { id: worker.userId } });
-
-    return NextResponse.json({ success: true, message: "Worker deleted" });
+    return NextResponse.json({ success: true, message: "Worker account deleted and data anonymised" });
   } catch (err) {
     if (err instanceof Error && (err.message === "UNAUTHORIZED" || err.message === "FORBIDDEN")) {
       return NextResponse.json({ error: err.message }, { status: err.message === "UNAUTHORIZED" ? 401 : 403 });

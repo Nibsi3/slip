@@ -94,8 +94,21 @@ export async function deleteSession() {
 
   if (token) {
     await db.session.deleteMany({ where: { token } });
+    sessionCache.delete(token);
     cookieStore.delete("session");
   }
+}
+
+/**
+ * Invalidate all sessions for a user (e.g. after password reset).
+ * Deletes from DB and purges all matching in-memory cache entries.
+ */
+export async function invalidateUserSessions(userId: string): Promise<void> {
+  const sessions = await db.session.findMany({ where: { userId }, select: { token: true } });
+  for (const s of sessions) {
+    sessionCache.delete(s.token);
+  }
+  await db.session.deleteMany({ where: { userId } });
 }
 
 export async function requireAuth(allowedRoles?: string[]) {

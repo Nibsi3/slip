@@ -7,8 +7,9 @@
 // Balance & Account Limits
 // ---------------------------------------------------------------------------
 export const BALANCE_CAP_ZAR = 2000;
-export const MIN_WITHDRAWAL_ZAR = 20;
+export const MIN_WITHDRAWAL_ZAR = 100;
 export const MAX_WITHDRAWAL_PER_TX_ZAR = 2000;
+export const WITHDRAWAL_FEE_PERCENT = 0.10;
 export const MAX_DAILY_WITHDRAWAL_ZAR = 2000;
 
 // ---------------------------------------------------------------------------

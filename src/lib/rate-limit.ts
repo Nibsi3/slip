@@ -80,3 +80,13 @@ export function checkRegisterIpLimit(ip: string): RateLimitResult {
 export function checkPasswordResetLimit(ip: string): RateLimitResult {
   return checkRateLimit(`reset:ip:${ip}`, 5, 60 * 60 * 1000);
 }
+
+/** Max 5 application submissions per IP per hour */
+export function checkApplyIpLimit(ip: string): RateLimitResult {
+  return checkRateLimit(`apply:ip:${ip}`, 5, 60 * 60 * 1000);
+}
+
+/** Max 10 QR activation attempts per IP per hour */
+export function checkActivateIpLimit(ip: string): RateLimitResult {
+  return checkRateLimit(`activate:ip:${ip}`, 10, 60 * 60 * 1000);
+}

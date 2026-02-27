@@ -26,6 +26,7 @@ enum TransactionType {
   PAYOUT
   CHARGEBACK
   CHARGEBACK_REVERSAL
+  FORFEITURE
 }
 
 enum LedgerStatus {

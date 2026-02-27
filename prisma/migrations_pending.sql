@@ -55,6 +55,9 @@ ALTER TABLE "User"
   ADD COLUMN IF NOT EXISTS "totpEnabled"  BOOLEAN NOT NULL DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS "backupCodes"  TEXT[] DEFAULT '{}';
 
+-- TransactionType enum: add FORFEITURE
+ALTER TYPE "TransactionType" ADD VALUE IF NOT EXISTS 'FORFEITURE';
+
 -- =============================================================================
 -- Done. Remember to run `npx prisma generate` after applying this.
 -- =============================================================================

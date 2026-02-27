@@ -93,7 +93,8 @@ export default function WithdrawPage() {
 
   const balance = Number(worker.walletBalance);
   const amountNum = parseFloat(amount) || 0;
-  const fee = Number((amountNum * 0.10).toFixed(2));
+  const PLATFORM_FEE_RATE = 0.10;
+  const fee = Number((amountNum * PLATFORM_FEE_RATE).toFixed(2));
   const net = Number((amountNum - fee).toFixed(2));
 
   return (
@@ -136,9 +137,12 @@ export default function WithdrawPage() {
                 />
               </div>
               {amount && amountNum > 0 && (
-                <div className="mt-2 p-3 bg-surface-300 text-xs space-y-1">
-                  <div className="flex justify-between"><span className="text-muted">Fee (10%)</span><span className="text-white">R{fee.toFixed(2)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted">You receive</span><span className="text-accent font-semibold">R{net.toFixed(2)}</span></div>
+                <div className="mt-2 p-3 bg-surface-300 text-xs space-y-1.5">
+                  <div className="flex justify-between"><span className="text-muted">Withdrawal amount</span><span className="text-white">R{amountNum.toFixed(2)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted">Platform fee (10%)</span><span className="text-white">&minus;R{fee.toFixed(2)}</span></div>
+                  <div className="h-px bg-surface-100 my-1" />
+                  <div className="flex justify-between font-semibold"><span className="text-muted">You receive via EFT</span><span className="text-accent">R{net.toFixed(2)}</span></div>
+                  <p className="text-[10px] text-muted-300 mt-1">Bank processing fees (EFT or virtual card) are charged by your bank, not by Slip a Tip.</p>
                 </div>
               )}
             </div>

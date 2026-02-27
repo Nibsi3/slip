@@ -3,6 +3,7 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { sendNewApplicationEmail } from "@/lib/email";
+import { checkApplyIpLimit } from "@/lib/rate-limit";
 
 const applySchema = z.object({
   firstName: z.string().min(1, "First name is required").max(50),
@@ -30,6 +31,17 @@ function normalisePhone(raw: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+
+    // --- Rate limiting: max 5 applications per IP per hour ---
+    const ipLimit = checkApplyIpLimit(ip);
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many application attempts from this network. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const data = applySchema.parse(body);
 
@@ -97,7 +109,7 @@ export async function POST(request: NextRequest) {
           city: data.city,
           province: data.province || null,
         },
-        ipAddress: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown",
+        ipAddress: ip,
       },
     });
 

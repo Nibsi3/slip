@@ -3,6 +3,7 @@ import { z } from "zod";
 import { hash } from "bcryptjs";
 import { createHash } from "crypto";
 import { db } from "@/lib/db";
+import { invalidateUserSessions } from "@/lib/auth";
 
 const schema = z.object({
   token: z.string().min(1, "Reset token is required"),
@@ -18,8 +19,7 @@ export async function POST(request: NextRequest) {
     // Hash the incoming token to compare with stored hash
     const hashedToken = createHash("sha256").update(data.token).digest("hex");
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = await (db.user.findFirst as any)({
+    const user = await db.user.findFirst({
       where: {
         resetToken: hashedToken,
         resetTokenExpiresAt: { gt: new Date() },
@@ -36,8 +36,7 @@ export async function POST(request: NextRequest) {
     const passwordHash = await hash(data.password, 12);
 
     // Update password, clear reset token, reset login attempts
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (db.user.update as any)({
+    await db.user.update({
       where: { id: user.id },
       data: {
         passwordHash,
@@ -48,8 +47,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Invalidate ALL existing sessions for this user
-    await db.session.deleteMany({ where: { userId: user.id } });
+    // Invalidate ALL existing sessions for this user (DB + in-memory cache)
+    await invalidateUserSessions(user.id);
 
     await db.auditLog.create({
       data: {

@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 const TIP_AMOUNTS = [10, 20, 50, 100, 200];
 const MIN_TIP = 5;
 const MAX_TIP = 5000;
+const PLATFORM_FEE_RATE = 0.10;
 
 interface WorkerInfo {
   firstName: string;
@@ -69,24 +70,12 @@ export default function TipPage() {
       }
 
       const data = await res.json();
-      const { actionUrl, params: pfParams } = data.payfast;
-
-      // Stop all pending requests (HMR, websockets) to prevent page reload
-      // racing with the payment gateway form POST
-      window.stop();
-
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = actionUrl;
-      for (const [key, value] of Object.entries(pfParams)) {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = value as string;
-        form.appendChild(input);
+      // Redirect to Paystack payment page
+      if (data.paystack?.authorizationUrl) {
+        window.location.href = data.paystack.authorizationUrl;
+      } else {
+        throw new Error("Payment gateway unavailable");
       }
-      document.body.appendChild(form);
-      form.submit();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Payment failed");
       setSubmitting(false);
@@ -222,6 +211,27 @@ export default function TipPage() {
                       autoFocus
                     />
                   </div>
+                </div>
+              )}
+
+              {/* Fee transparency */}
+              {tipAmount >= MIN_TIP && (
+                <div className="rounded-xl p-3 space-y-1.5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 mb-2">Fee breakdown</p>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-white/40">Tip amount</span>
+                    <span className="text-white/70">R{tipAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-white/40">Platform fee (10%)</span>
+                    <span className="text-white/70">−R{(tipAmount * PLATFORM_FEE_RATE).toFixed(2)}</span>
+                  </div>
+                  <div className="h-px my-1" style={{ background: "rgba(255,255,255,0.06)" }} />
+                  <div className="flex justify-between text-xs font-semibold">
+                    <span className="text-white/50">{worker?.firstName} receives</span>
+                    <span className="text-green-400">~R{(tipAmount * (1 - PLATFORM_FEE_RATE)).toFixed(2)}</span>
+                  </div>
+                  <p className="text-[10px] text-white/20 mt-1">Gateway processing fees are deducted separately by Paystack.</p>
                 </div>
               )}
 

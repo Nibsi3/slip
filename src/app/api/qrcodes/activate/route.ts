@@ -3,6 +3,9 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { createSession } from "@/lib/auth";
+import { checkActivateIpLimit } from "@/lib/rate-limit";
+
+const TERMS_VERSION = "v1.0";
 
 const activateSchema = z.object({
   token: z.string().min(1, "QR code token is required"),
@@ -15,6 +18,7 @@ const activateSchema = z.object({
   bankName: z.string().max(100).optional(),
   bankAccountNo: z.string().max(50).optional(),
   bankBranchCode: z.string().max(20).optional(),
+  termsAccepted: z.boolean().refine((v) => v === true, { message: "You must accept the terms and conditions" }),
 });
 
 function normalisePhone(raw: string): string {
@@ -26,6 +30,17 @@ function normalisePhone(raw: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+
+    // --- Rate limiting: max 10 activation attempts per IP per hour ---
+    const ipLimit = checkActivateIpLimit(ip);
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many activation attempts from this network. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const data = activateSchema.parse(body);
 
@@ -64,8 +79,7 @@ export async function POST(request: NextRequest) {
     const passwordHash = await hash(data.password, 12);
 
     // Create user + worker + link QR code in a transaction
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = await db.$transaction(async (tx: any) => {
+    const user = await db.$transaction(async (tx) => {
       const newUser = await tx.user.create({
         data: {
           firstName: data.firstName,
@@ -73,6 +87,9 @@ export async function POST(request: NextRequest) {
           phone,
           passwordHash,
           role: "WORKER",
+          termsAcceptedAt: new Date(),
+          termsVersion: TERMS_VERSION,
+          termsIpAddress: ip,
           worker: {
             create: {
               qrCode: data.token,
@@ -108,8 +125,8 @@ export async function POST(request: NextRequest) {
         action: "QR_ACTIVATE",
         entity: "QRCode",
         entityId: qrCode.id,
-        details: { token: data.token },
-        ipAddress: request.headers.get("x-forwarded-for") || "unknown",
+        details: { token: data.token, termsVersion: TERMS_VERSION },
+        ipAddress: ip,
       },
     });
 
