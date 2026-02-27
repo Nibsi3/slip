@@ -83,16 +83,12 @@ export function verifyWebhookSignature(
   rawBody: string,
   signature: string
 ): boolean {
-  const secret = process.env.PAYSTACK_WEBHOOK_SECRET;
+  const secret = process.env.PAYSTACK_WEBHOOK_SECRET || process.env.PAYSTACK_SECRET_KEY;
   if (!secret) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(
-        "FATAL: PAYSTACK_WEBHOOK_SECRET is not set in production. " +
-        "All webhook requests are being rejected to prevent forgery."
-      );
-    }
-    console.warn("PAYSTACK_WEBHOOK_SECRET not set — skipping webhook signature verification (development only)");
-    return true;
+    throw new Error(
+      "FATAL: PAYSTACK_SECRET_KEY is not set. " +
+      "Cannot verify webhook signatures."
+    );
   }
   const hash = crypto
     .createHmac("sha512", secret)

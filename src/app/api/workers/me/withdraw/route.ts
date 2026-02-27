@@ -195,9 +195,6 @@ export async function POST(request: NextRequest) {
     const accountNo = data.bankAccountNo || worker.bankAccountNo || "";
     const branchCode = data.bankBranchCode || worker.bankBranchCode || "";
 
-    // --- Record velocity event ---
-    await recordVelocityEvent(worker.id, "WITHDRAWAL", data.amount, ipAddress);
-
     // Step 1: Create withdrawal + deduct BOTH walletBalance and availableBalance atomically
     const withdrawal = await db.$transaction(async (tx: Parameters<Parameters<typeof db.$transaction>[0]>[0]) => {
       const w = await tx.withdrawal.create({
@@ -254,6 +251,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (payoutResult.success) {
+      // --- Record velocity event only after successful payout ---
+      await recordVelocityEvent(worker.id, "WITHDRAWAL", data.amount, ipAddress);
+
       // Payout succeeded → mark COMPLETED, store voucher/reference
       await db.$transaction(async (tx: Parameters<Parameters<typeof db.$transaction>[0]>[0]) => {
         await tx.withdrawal.update({

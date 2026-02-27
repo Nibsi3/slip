@@ -100,8 +100,18 @@ export async function runAmlChecks(
     });
   }
 
-  // Persist alerts to database
+  // Persist alerts to database — deduplicated per alertType per hour to prevent flooding
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   for (const alert of alerts) {
+    const existing = await db.amlAlert.findFirst({
+      where: {
+        workerId,
+        alertType: alert.alertType,
+        createdAt: { gte: oneHourAgo },
+      },
+    });
+    if (existing) continue;
+
     await db.amlAlert.create({
       data: {
         workerId,
@@ -204,7 +214,7 @@ async function detectRoundAmounts(workerId: string): Promise<{
   });
 
   const amounts = recentTips.map((t) => Number(t.amount));
-  const roundAmounts = amounts.filter((a) => a % 50 === 0 && a >= 50);
+  const roundAmounts = amounts.filter((a) => a % 100 === 0 && a >= 200);
 
   return {
     detected: roundAmounts.length >= AML_ROUND_AMOUNT_THRESHOLD,

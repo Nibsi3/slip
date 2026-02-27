@@ -15,16 +15,17 @@ export function generatePaymentId(): string {
 }
 
 export function calculateFees(amount: number) {
-  // Platform fee: 10% of tip amount
-  const platformFeeRate = 0.10;
-  // Paystack ZA fee: 2.9% + R1.00, capped at R1000 per transaction
+  const totalFeeCapRate = 0.10;
+  // Paystack ZA fee: 2.9% + R1.00 (approx; Paystack may apply caps/variations)
   const gatewayFeeRate = 0.029;
   const gatewayFeeFixed = 1.0;
 
-  const feePlatform = Math.round(amount * platformFeeRate * 100) / 100;
-  const feeGateway =
-    Math.round((amount * gatewayFeeRate + gatewayFeeFixed) * 100) / 100;
-  const netAmount = Math.round((amount - feePlatform - feeGateway) * 100) / 100;
+  const feeGateway = Math.round((amount * gatewayFeeRate + gatewayFeeFixed) * 100) / 100;
+  const totalFeeCap = Math.round(amount * totalFeeCapRate * 100) / 100;
+
+  // Platform earns the remainder up to the 10% total cap (Paystack fee is deducted first)
+  const feePlatform = Math.max(0, Math.round((totalFeeCap - feeGateway) * 100) / 100);
+  const netAmount = Math.round((amount - feeGateway - feePlatform) * 100) / 100;
 
   return { feePlatform, feeGateway, netAmount: Math.max(netAmount, 0) };
 }
@@ -52,7 +53,7 @@ export function getInitials(firstName: string, lastName: string): string {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 }
 
-export const TIP_AMOUNTS = [10, 20, 50, 100, 200];
-export const MIN_TIP = 5;
+export const TIP_AMOUNTS = [15, 20, 50, 100, 200];
+export const MIN_TIP = 15;
 export const MAX_TIP = 5000;
 export const MIN_WITHDRAWAL = 100;

@@ -3,10 +3,10 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useParams } from "next/navigation";
 
-const TIP_AMOUNTS = [10, 20, 50, 100, 200];
-const MIN_TIP = 5;
+const TIP_AMOUNTS = [15, 20, 50, 100, 200];
+const MIN_TIP = 15;
 const MAX_TIP = 5000;
-const PLATFORM_FEE_RATE = 0.10;
+const TOTAL_FEE_RATE = 0.10;
 
 interface WorkerInfo {
   firstName: string;
@@ -24,11 +24,9 @@ export default function TipPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedAmount, setSelectedAmount] = useState<number | null>(50);
-  const [customAmount, setCustomAmount] = useState("");
-  const [isCustom, setIsCustom] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const tipAmount = isCustom ? parseFloat(customAmount) || 0 : selectedAmount || 0;
+  const tipAmount = selectedAmount || 0;
 
   useEffect(() => {
     async function loadWorker() {
@@ -154,17 +152,13 @@ export default function TipPage() {
                     <button
                       key={amt}
                       type="button"
-                      onClick={() => {
-                        setSelectedAmount(amt);
-                        setIsCustom(false);
-                        setCustomAmount("");
-                      }}
+                      onClick={() => setSelectedAmount(amt)}
                       className={`py-3.5 text-center font-bold text-base rounded-xl transition-all duration-150 ${
-                        !isCustom && selectedAmount === amt
+                        selectedAmount === amt
                           ? "text-white scale-[1.03] ring-1 ring-accent/40"
                           : "text-white/55 ring-1 ring-white/[0.07] hover:ring-white/[0.14] hover:text-white/80"
                       }`}
-                      style={!isCustom && selectedAmount === amt
+                      style={selectedAmount === amt
                         ? { background: "rgba(20,167,249,0.18)" }
                         : { background: "rgba(255,255,255,0.03)" }
                       }
@@ -172,47 +166,8 @@ export default function TipPage() {
                       R{amt}
                     </button>
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsCustom(true);
-                      setSelectedAmount(null);
-                    }}
-                    className={`py-3.5 text-center font-bold text-sm rounded-xl transition-all duration-150 ${
-                      isCustom
-                        ? "text-white scale-[1.03] ring-1 ring-accent/40"
-                        : "text-white/55 ring-1 ring-white/[0.07] hover:ring-white/[0.14] hover:text-white/80"
-                    }`}
-                    style={isCustom
-                      ? { background: "rgba(20,167,249,0.18)" }
-                      : { background: "rgba(255,255,255,0.03)" }
-                    }
-                  >
-                    Custom
-                  </button>
                 </div>
               </div>
-
-              {/* Custom amount input */}
-              {isCustom && (
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 mb-2">Enter amount (R{MIN_TIP}–R{MAX_TIP})</p>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-bold text-xl">R</span>
-                    <input
-                      type="number"
-                      min={MIN_TIP}
-                      max={MAX_TIP}
-                      step="0.01"
-                      value={customAmount}
-                      onChange={(e) => setCustomAmount(e.target.value)}
-                      placeholder="0.00"
-                      className="input-field pl-10 text-2xl font-bold !rounded-xl"
-                      autoFocus
-                    />
-                  </div>
-                </div>
-              )}
 
               {/* Fee transparency */}
               {tipAmount >= MIN_TIP && (
@@ -223,15 +178,15 @@ export default function TipPage() {
                     <span className="text-white/70">R{tipAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-white/40">Platform fee (10%)</span>
-                    <span className="text-white/70">−R{(tipAmount * PLATFORM_FEE_RATE).toFixed(2)}</span>
+                    <span className="text-white/40">Total fee (10%)</span>
+                    <span className="text-white/70">−R{(tipAmount * TOTAL_FEE_RATE).toFixed(2)}</span>
                   </div>
                   <div className="h-px my-1" style={{ background: "rgba(255,255,255,0.06)" }} />
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-white/50">{worker?.firstName} receives</span>
-                    <span className="text-green-400">~R{(tipAmount * (1 - PLATFORM_FEE_RATE)).toFixed(2)}</span>
+                    <span className="text-green-400">R{(tipAmount * (1 - TOTAL_FEE_RATE)).toFixed(2)}</span>
                   </div>
-                  <p className="text-[10px] text-white/20 mt-1">Gateway processing fees are deducted separately by Paystack.</p>
+                  <p className="text-[10px] text-white/20 mt-1">Includes Paystack processing + Slip a Tip platform fee.</p>
                 </div>
               )}
 

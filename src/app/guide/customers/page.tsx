@@ -87,8 +87,7 @@ function AmountScreen() {
         </div>
         <p className="text-[7px] text-white/30 uppercase tracking-wider mb-1.5">Select amount</p>
         <div className="grid grid-cols-3 gap-1">
-          {[10,20,50,100,200].map((a,i)=>{const sel=i===2;return(<div key={a} className="py-2 text-center text-[10px] font-bold rounded-md" style={{ background: sel?"rgba(20,167,249,0.15)":"rgba(255,255,255,0.04)", color: sel?"#14a7f9":"rgba(255,255,255,0.35)", border: sel?"1px solid rgba(20,167,249,0.3)":"1px solid rgba(255,255,255,0.06)", transform: sel?"scale(1.04)":"scale(1)" }}>R{a}</div>);})}
-          <div className="py-2 text-center text-[10px] rounded-md" style={{ background:"rgba(255,255,255,0.04)", color:"rgba(255,255,255,0.2)", border:"1px solid rgba(255,255,255,0.06)" }}>Custom</div>
+          {[15,20,50,100,200].map((a,i)=>{const sel=i===2;return(<div key={a} className="py-2 text-center text-[10px] font-bold rounded-md" style={{ background: sel?"rgba(20,167,249,0.15)":"rgba(255,255,255,0.04)", color: sel?"#14a7f9":"rgba(255,255,255,0.35)", border: sel?"1px solid rgba(20,167,249,0.3)":"1px solid rgba(255,255,255,0.06)", transform: sel?"scale(1.04)":"scale(1)" }}>R{a}</div>);})}
         </div>
         <div className="mt-2.5 flex items-center justify-between">
           <span className="text-[8px] text-white/30">Total</span>
@@ -171,7 +170,7 @@ const visuals = [<CameraScreen key="c1" />, <QrScanScreen key="c2" />, <AmountSc
 const stepData = [
   { num: "01", title: "Open Your Camera", desc: "Use your phone's built-in camera app. No need to download anything — works on iPhone and Android." },
   { num: "02", title: "Scan the QR Code", desc: "Point your camera at the worker's QR code. A link will pop up — tap it. It opens their personal tip page in your browser." },
-  { num: "03", title: "Choose an Amount", desc: "Tap a quick amount — R10, R20, R50, R100, R200 — or enter a custom tip. You'll see the worker's name and employer so you know it's the right person." },
+  { num: "03", title: "Choose an Amount", desc: "Tap a quick amount — R15, R20, R50, R100, or R200. You'll see the worker's name and employer so you know it's the right person." },
   { num: "04", title: "Enter Card Details", desc: "Enter your bank card number, expiry date, and CVV. All card data is handled by Paystack — Slip a Tip never sees or stores your card. Payment is secured with 3D Secure authentication via your banking app." },
   { num: "05", title: "Done! Tip Sent", desc: "That's it. The worker receives your tip instantly in their digital wallet. You'll see a confirmation screen. The whole process takes about 30 seconds." },
 ];
@@ -181,10 +180,10 @@ const faqs = [
   { q: "Is my card information safe?", a: "Yes. All payment processing is handled by Paystack (PCI-DSS Level 1 certified). Slip a Tip never sees or stores your card details. Payments are authenticated with 3D Secure through your bank." },
   { q: "Can I tip using EFT or e-wallet?", a: "Currently we support bank card payments only (Visa, Mastercard). This ensures instant delivery to the worker." },
   { q: "Do I need to create an account?", a: "No. Customers don't need an account. You just scan, tap, pay, and go." },
-  { q: "What payment amounts can I choose?", a: "Quick amounts of R10, R20, R50, R100, and R200 are available. You can also enter any custom amount." },
+  { q: "What payment amounts can I choose?", a: "Quick amounts of R15, R20, R50, R100, and R200 are available." },
   { q: "Can I get a receipt?", a: "You'll see a confirmation page after payment. Your bank statement will also show the transaction." },
   { q: "What if I tipped the wrong person?", a: "Tips are non-refundable once completed. If there was an error, please contact your bank directly for a chargeback." },
-  { q: "Does the full tip go to the worker?", a: "90% of your tip goes directly to the worker. A 10% platform fee is deducted when they withdraw to cover payment processing and platform costs." },
+  { q: "Does the full tip go to the worker?", a: "90% of your tip goes directly to the worker. A total 10% fee (Paystack processing + Slip a Tip) is deducted from the tip at the time of payment. There are no withdrawal fees." },
 ];
 
 export default function CustomerGuidePage() {

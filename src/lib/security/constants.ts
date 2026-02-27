@@ -9,7 +9,7 @@
 export const BALANCE_CAP_ZAR = 2000;
 export const MIN_WITHDRAWAL_ZAR = 100;
 export const MAX_WITHDRAWAL_PER_TX_ZAR = 2000;
-export const WITHDRAWAL_FEE_PERCENT = 0.10;
+export const WITHDRAWAL_FEE_PERCENT = 0;
 export const MAX_DAILY_WITHDRAWAL_ZAR = 2000;
 
 // ---------------------------------------------------------------------------
@@ -77,11 +77,13 @@ export const AML_ROUND_AMOUNT_THRESHOLD = 3;
 // High-Risk BIN Prefixes (known prepaid/virtual card ranges)
 // These are example ranges — update with actual risk data from EFTCorp
 // ---------------------------------------------------------------------------
-export const HIGH_RISK_BIN_PREFIXES = [
-  "4000", // Test/virtual cards
-  "5100", // Certain prepaid ranges
-  "6011", // Discover (uncommon in ZA, suspicious)
-];
+export const HIGH_RISK_BIN_PREFIXES =
+  process.env.NODE_ENV === "production"
+    ? [
+        "5100", // Certain prepaid ranges
+        "6011", // Discover (uncommon in ZA, suspicious)
+      ]
+    : []; // No BIN blocking in development/test — Paystack test cards use 4000 prefixes
 
 // ---------------------------------------------------------------------------
 // Account Age Thresholds (hours)

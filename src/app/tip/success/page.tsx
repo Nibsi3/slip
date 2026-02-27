@@ -3,11 +3,27 @@
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
+
+interface TipDetails {
+  amount: number;
+  workerName: string;
+  employerName: string | null;
+  status: string;
+}
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const reference = searchParams.get("reference") || searchParams.get("trxref");
+  const [tip, setTip] = useState<TipDetails | null>(null);
+
+  useEffect(() => {
+    if (!reference) return;
+    fetch(`/api/tips/lookup?reference=${encodeURIComponent(reference)}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setTip(data); })
+      .catch(() => {});
+  }, [reference]);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#030306" }}>
@@ -20,10 +36,22 @@ function SuccessContent() {
             </svg>
           </div>
 
-          <h1 className="text-2xl font-bold text-white mb-2">Tip Sent Successfully!</h1>
-          <p className="text-sm text-white/50 mb-6">
-            Thank you for your generosity. The worker will receive your tip shortly.
-          </p>
+          <h1 className="text-2xl font-bold text-white mb-2">Tip Sent!</h1>
+
+          {tip ? (
+            <div className="mb-6 space-y-3">
+              <div className="text-4xl font-bold text-white">R{tip.amount.toFixed(2)}</div>
+              <p className="text-sm text-white/50">
+                sent to <span className="text-white/80 font-medium">{tip.workerName}</span>
+                {tip.employerName && <span className="text-white/40"> · {tip.employerName}</span>}
+              </p>
+              <p className="text-xs text-white/30">They&apos;ll receive your tip shortly. Thank you for your generosity.</p>
+            </div>
+          ) : (
+            <p className="text-sm text-white/50 mb-6">
+              Thank you for your generosity. The worker will receive your tip shortly.
+            </p>
+          )}
 
           {reference && (
             <div className="mb-6 p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.03)" }}>

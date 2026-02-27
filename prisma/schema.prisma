@@ -8,6 +8,294 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model User {
+  id                   String     @id @default(cuid())
+  email                String?    @unique
+  phone                String?    @unique
+  passwordHash         String
+  role                 Role       @default(WORKER)
+  firstName            String
+  lastName             String
+  idNumber             String?
+  isVerified           Boolean    @default(false)
+  emailVerified        Boolean    @default(false)
+  emailVerifyToken     String?
+  emailVerifyExpiresAt DateTime?
+  loginAttempts        Int        @default(0)
+  lockedUntil          DateTime?
+  resetToken           String?
+  resetTokenExpiresAt  DateTime?
+  termsAcceptedAt      DateTime?
+  termsVersion         String?
+  termsIpAddress       String?
+  totpSecret           String?
+  totpEnabled          Boolean    @default(false)
+  backupCodes          String[]
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  auditLogs            AuditLog[]
+  sessions             Session[]
+  worker               Worker?
+}
+
+model Worker {
+  id                 String              @id @default(cuid())
+  userId             String              @unique
+  employerName       String?
+  jobTitle           String?
+  qrCode             String              @unique @default(cuid())
+  walletBalance      Decimal             @default(0) @db.Decimal(12, 2)
+  bankName           String?
+  bankAccountNo      String?
+  bankBranchCode     String?
+  phoneForIM         String?
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  availableBalance   Decimal             @default(0) @db.Decimal(12, 2)
+  balanceCap         Decimal             @default(2000) @db.Decimal(12, 2)
+  chargebackDebt     Decimal             @default(0) @db.Decimal(12, 2)
+  docIdUrl           String?
+  docAddressUrl      String?
+  docSelfieUrl       String?
+  docStatus          DocStatus           @default(NOT_SUBMITTED)
+  docRejectReason    String?
+  docSubmittedAt     DateTime?
+  docReviewedAt      DateTime?
+  docReviewedBy      String?
+  physicalQrCount    Int                 @default(0)
+  amlAlerts          AmlAlert[]
+  fraudEvents        FraudEvent[]
+  ledgerEntries      LedgerEntry[]
+  physicalQrRequests PhysicalQRRequest[]
+  qrCodes            QRCode[]
+  settlementHolds    SettlementHold[]
+  tips               Tip[]
+  velocityRecords    VelocityRecord[]
+  withdrawals        Withdrawal[]
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PhysicalQRRequest {
+  id           String           @id @default(cuid())
+  workerId     String
+  status       PhysicalQRStatus @default(PENDING)
+  isFree       Boolean          @default(false)
+  feeCharged   Decimal          @default(0) @db.Decimal(12, 2)
+  address      String?
+  notes        String?
+  adminNotes   String?
+  dispatchedAt DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  worker       Worker           @relation(fields: [workerId], references: [id])
+
+  @@index([workerId])
+}
+
+model Tip {
+  id              String          @id @default(cuid())
+  workerId        String
+  amount          Decimal         @db.Decimal(12, 2)
+  feePlatform     Decimal         @default(0) @db.Decimal(12, 2)
+  feeGateway      Decimal         @default(0) @db.Decimal(12, 2)
+  netAmount       Decimal         @db.Decimal(12, 2)
+  currency        String          @default("ZAR")
+  status          TipStatus       @default(PENDING)
+  paymentMethod   String          @default("paystack")
+  paymentId       String          @unique
+  paystackRef     String?
+  customerName    String?
+  customerEmail   String?
+  customerMessage String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  ledgerEntry     LedgerEntry?
+  settlementHold  SettlementHold?
+  worker          Worker          @relation(fields: [workerId], references: [id])
+}
+
+model LedgerEntry {
+  id              String          @id @default(cuid())
+  workerId        String
+  transactionType TransactionType
+  amount          Decimal         @db.Decimal(12, 2)
+  feePlatform     Decimal         @default(0) @db.Decimal(12, 2)
+  feeGateway      Decimal         @default(0) @db.Decimal(12, 2)
+  netAmount       Decimal         @db.Decimal(12, 2)
+  status          LedgerStatus    @default(PENDING)
+  reference       String?
+  tipId           String?         @unique
+  withdrawalId    String?         @unique
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  tip             Tip?            @relation(fields: [tipId], references: [id])
+  withdrawal      Withdrawal?     @relation(fields: [withdrawalId], references: [id])
+  worker          Worker          @relation(fields: [workerId], references: [id])
+}
+
+model Withdrawal {
+  id             String           @id @default(cuid())
+  workerId       String
+  amount         Decimal          @db.Decimal(12, 2)
+  fee            Decimal          @default(0) @db.Decimal(12, 2)
+  netAmount      Decimal          @db.Decimal(12, 2)
+  method         WithdrawalMethod
+  status         WithdrawalStatus @default(PENDING)
+  bankName       String?
+  bankAccountNo  String?
+  bankBranchCode String?
+  phoneNumber    String?
+  reference      String?
+  processedAt    DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  ledgerEntry    LedgerEntry?
+  worker         Worker           @relation(fields: [workerId], references: [id])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model QRCode {
+  id           String       @id @default(cuid())
+  token        String       @unique
+  workerId     String?
+  batchId      String?
+  status       QRCodeStatus @default(INACTIVE)
+  createdAt    DateTime     @default(now())
+  activatedAt  DateTime?
+  cancelReason String?
+  cancelledAt  DateTime?
+  worker       Worker?      @relation(fields: [workerId], references: [id])
+}
+
+model FraudEvent {
+  id           String           @id @default(cuid())
+  type         FraudEventType
+  status       FraudEventStatus @default(OPEN)
+  action       FraudAction      @default(FLAG)
+  riskScore    Int              @default(0)
+  workerId     String?
+  tipId        String?
+  withdrawalId String?
+  ipAddress    String?
+  deviceId     String?
+  details      Json?
+  resolvedBy   String?
+  resolvedAt   DateTime?
+  resolution   String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  worker       Worker?          @relation(fields: [workerId], references: [id])
+
+  @@index([workerId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model DeviceFingerprint {
+  id              String   @id @default(cuid())
+  fingerprintHash String
+  userAgent       String?
+  platform        String?
+  screenRes       String?
+  timezone        String?
+  language        String?
+  ipAddress       String?
+  workerId        String?
+  tipperSessionId String?
+  isKnownProxy    Boolean  @default(false)
+  isKnownVPN      Boolean  @default(false)
+  geoCountry      String?
+  geoCity         String?
+  geoLat          Float?
+  geoLon          Float?
+  createdAt       DateTime @default(now())
+
+  @@index([fingerprintHash])
+  @@index([ipAddress])
+  @@index([workerId])
+  @@index([tipperSessionId])
+}
+
+model VelocityRecord {
+  id        String   @id @default(cuid())
+  workerId  String
+  action    String
+  amount    Decimal  @db.Decimal(12, 2)
+  ipAddress String?
+  deviceId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  worker    Worker   @relation(fields: [workerId], references: [id])
+
+  @@index([workerId, action, createdAt])
+  @@index([ipAddress, createdAt])
+}
+
+model ChargebackReserve {
+  id             String   @id @default(cuid())
+  totalBalance   Decimal  @default(0) @db.Decimal(12, 2)
+  reservePercent Decimal  @default(0.075) @db.Decimal(5, 4)
+  reserveAmount  Decimal  @default(0) @db.Decimal(12, 2)
+  lastCalculated DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SettlementHold {
+  id          String    @id @default(cuid())
+  tipId       String    @unique
+  workerId    String
+  amount      Decimal   @db.Decimal(12, 2)
+  clearsAt    DateTime
+  clearedAt   DateTime?
+  isFraudHeld Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  tip         Tip       @relation(fields: [tipId], references: [id])
+  worker      Worker    @relation(fields: [workerId], references: [id])
+
+  @@index([workerId, clearsAt])
+  @@index([clearsAt])
+}
+
+model AmlAlert {
+  id         String    @id @default(cuid())
+  workerId   String
+  alertType  String
+  riskLevel  String
+  details    Json?
+  isReviewed Boolean   @default(false)
+  reviewedBy String?
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+  worker     Worker    @relation(fields: [workerId], references: [id])
+
+  @@index([workerId])
+  @@index([isReviewed])
+  @@index([createdAt])
+}
+
 enum Role {
   WORKER
   ADMIN
@@ -54,187 +342,11 @@ enum DocStatus {
   REJECTED
 }
 
-model User {
-  id           String   @id @default(cuid())
-  email        String?  @unique
-  phone        String?  @unique
-  passwordHash String
-  role         Role     @default(WORKER)
-  firstName    String
-  lastName     String
-  idNumber     String?
-  isVerified            Boolean   @default(false)
-  emailVerified         Boolean   @default(false)
-  emailVerifyToken      String?
-  emailVerifyExpiresAt  DateTime?
-  loginAttempts         Int       @default(0)
-  lockedUntil           DateTime?
-  resetToken            String?
-  resetTokenExpiresAt   DateTime?
-  termsAcceptedAt       DateTime?
-  termsVersion          String?
-  termsIpAddress        String?
-  totpSecret            String?
-  totpEnabled           Boolean   @default(false)
-  backupCodes           String[]
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  worker    Worker?
-  sessions  Session[]
-  auditLogs AuditLog[]
-}
-
-model Worker {
-  id            String  @id @default(cuid())
-  userId        String  @unique
-  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  employerName  String?
-  jobTitle      String?
-  qrCode        String  @unique @default(cuid())
-  walletBalance Decimal @default(0) @db.Decimal(12, 2)
-  bankName      String?
-  bankAccountNo String?
-  bankBranchCode String?
-  phoneForIM    String?
-  isActive      Boolean @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  availableBalance Decimal  @default(0) @db.Decimal(12, 2)
-  balanceCap       Decimal  @default(2000) @db.Decimal(12, 2)
-  chargebackDebt   Decimal  @default(0) @db.Decimal(12, 2)
-
-  // Document verification (FICA)
-  docIdUrl         String?
-  docAddressUrl    String?
-  docSelfieUrl     String?
-  docStatus        DocStatus @default(NOT_SUBMITTED)
-  docRejectReason  String?
-  docSubmittedAt   DateTime?
-  docReviewedAt    DateTime?
-  docReviewedBy    String?
-
-  physicalQrCount  Int      @default(0)
-
-  ledgerEntries       LedgerEntry[]
-  withdrawals         Withdrawal[]
-  tips                Tip[]
-  qrCodes             QRCode[]
-  fraudEvents         FraudEvent[]
-  velocityRecords     VelocityRecord[]
-  settlementHolds     SettlementHold[]
-  amlAlerts           AmlAlert[]
-  physicalQrRequests  PhysicalQRRequest[]
-}
-
 enum PhysicalQRStatus {
   PENDING
   APPROVED
   DISPATCHED
   REJECTED
-}
-
-model PhysicalQRRequest {
-  id          String           @id @default(cuid())
-  workerId    String
-  worker      Worker           @relation(fields: [workerId], references: [id])
-  status      PhysicalQRStatus @default(PENDING)
-  isFree      Boolean          @default(false)
-  feeCharged  Decimal          @default(0) @db.Decimal(12, 2)
-  address     String?
-  notes       String?
-  adminNotes  String?
-  dispatchedAt DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  @@index([workerId])
-}
-
-model Tip {
-  id              String    @id @default(cuid())
-  workerId        String
-  worker          Worker    @relation(fields: [workerId], references: [id])
-  amount          Decimal   @db.Decimal(12, 2)
-  feePlatform     Decimal   @default(0) @db.Decimal(12, 2)
-  feeGateway      Decimal   @default(0) @db.Decimal(12, 2)
-  netAmount       Decimal   @db.Decimal(12, 2)
-  currency        String    @default("ZAR")
-  status          TipStatus @default(PENDING)
-  paymentMethod   String    @default("paystack")
-  paymentId       String    @unique
-  pfPaymentId     String?
-  paystackRef     String?
-  customerName    String?
-  customerEmail   String?
-  customerMessage String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  ledgerEntry    LedgerEntry?
-  settlementHold SettlementHold?
-}
-
-model LedgerEntry {
-  id              String          @id @default(cuid())
-  workerId        String
-  worker          Worker          @relation(fields: [workerId], references: [id])
-  transactionType TransactionType
-  amount          Decimal         @db.Decimal(12, 2)
-  feePlatform     Decimal         @default(0) @db.Decimal(12, 2)
-  feeGateway      Decimal         @default(0) @db.Decimal(12, 2)
-  netAmount       Decimal         @db.Decimal(12, 2)
-  status          LedgerStatus    @default(PENDING)
-  reference       String?
-  tipId           String?         @unique
-  tip             Tip?            @relation(fields: [tipId], references: [id])
-  withdrawalId    String?         @unique
-  withdrawal      Withdrawal?     @relation(fields: [withdrawalId], references: [id])
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-}
-
-model Withdrawal {
-  id            String           @id @default(cuid())
-  workerId      String
-  worker        Worker           @relation(fields: [workerId], references: [id])
-  amount        Decimal          @db.Decimal(12, 2)
-  fee           Decimal          @default(0) @db.Decimal(12, 2)
-  netAmount     Decimal          @db.Decimal(12, 2)
-  method        WithdrawalMethod
-  status        WithdrawalStatus @default(PENDING)
-  bankName      String?
-  bankAccountNo String?
-  bankBranchCode String?
-  phoneNumber   String?
-  reference     String?
-  processedAt   DateTime?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-
-  ledgerEntry LedgerEntry?
-}
-
-model Session {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-}
-
-model AuditLog {
-  id        String   @id @default(cuid())
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  action    String
-  entity    String
-  entityId  String?
-  details   Json?
-  ipAddress String?
-  createdAt DateTime @default(now())
 }
 
 enum QRCodeStatus {
@@ -243,23 +355,6 @@ enum QRCodeStatus {
   DISABLED
   CANCELLED
 }
-
-model QRCode {
-  id          String       @id @default(cuid())
-  token       String       @unique
-  workerId    String?
-  worker      Worker?      @relation(fields: [workerId], references: [id])
-  batchId     String?
-  status       QRCodeStatus @default(INACTIVE)
-  createdAt    DateTime     @default(now())
-  activatedAt  DateTime?
-  cancelReason String?
-  cancelledAt  DateTime?
-}
-
-// ---------------------------------------------------------------------------
-// Security & Fraud Prevention Models
-// ---------------------------------------------------------------------------
 
 enum FraudEventType {
   TIP_FLAGGED
@@ -289,112 +384,4 @@ enum FraudAction {
   FLAG
   HOLD
   BLOCK
-}
-
-model FraudEvent {
-  id            String           @id @default(cuid())
-  type          FraudEventType
-  status        FraudEventStatus @default(OPEN)
-  action        FraudAction      @default(FLAG)
-  riskScore     Int              @default(0)
-  workerId      String?
-  worker        Worker?          @relation(fields: [workerId], references: [id])
-  tipId         String?
-  withdrawalId  String?
-  ipAddress     String?
-  deviceId      String?
-  details       Json?
-  resolvedBy    String?
-  resolvedAt    DateTime?
-  resolution    String?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-
-  @@index([workerId])
-  @@index([type])
-  @@index([status])
-  @@index([createdAt])
-}
-
-model DeviceFingerprint {
-  id              String   @id @default(cuid())
-  fingerprintHash String
-  userAgent       String?
-  platform        String?
-  screenRes       String?
-  timezone        String?
-  language        String?
-  ipAddress       String?
-  workerId        String?
-  tipperSessionId String?
-  isKnownProxy    Boolean  @default(false)
-  isKnownVPN      Boolean  @default(false)
-  geoCountry      String?
-  geoCity         String?
-  geoLat          Float?
-  geoLon          Float?
-  createdAt       DateTime @default(now())
-
-  @@index([fingerprintHash])
-  @@index([ipAddress])
-  @@index([workerId])
-  @@index([tipperSessionId])
-}
-
-model VelocityRecord {
-  id         String   @id @default(cuid())
-  workerId   String
-  worker     Worker   @relation(fields: [workerId], references: [id])
-  action     String   // TIP_RECEIVED, WITHDRAWAL, TIP_SENT
-  amount     Decimal  @db.Decimal(12, 2)
-  ipAddress  String?
-  deviceId   String?
-  metadata   Json?
-  createdAt  DateTime @default(now())
-
-  @@index([workerId, action, createdAt])
-  @@index([ipAddress, createdAt])
-}
-
-model ChargebackReserve {
-  id              String   @id @default(cuid())
-  totalBalance    Decimal  @default(0) @db.Decimal(12, 2)
-  reservePercent  Decimal  @default(0.075) @db.Decimal(5, 4)
-  reserveAmount   Decimal  @default(0) @db.Decimal(12, 2)
-  lastCalculated  DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-
-model SettlementHold {
-  id           String    @id @default(cuid())
-  tipId        String    @unique
-  tip          Tip       @relation(fields: [tipId], references: [id])
-  workerId     String
-  worker       Worker    @relation(fields: [workerId], references: [id])
-  amount       Decimal   @db.Decimal(12, 2)
-  clearsAt     DateTime
-  clearedAt    DateTime?
-  isFraudHeld  Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-
-  @@index([workerId, clearsAt])
-  @@index([clearsAt])
-}
-
-model AmlAlert {
-  id          String   @id @default(cuid())
-  workerId    String
-  worker      Worker   @relation(fields: [workerId], references: [id])
-  alertType   String   // LARGE_TRANSACTION, RAPID_ACCUMULATION, STRUCTURING, ROUND_AMOUNTS
-  riskLevel   String   // LOW, MEDIUM, HIGH, CRITICAL
-  details     Json?
-  isReviewed  Boolean  @default(false)
-  reviewedBy  String?
-  reviewedAt  DateTime?
-  createdAt   DateTime @default(now())
-
-  @@index([workerId])
-  @@index([isReviewed])
-  @@index([createdAt])
 }

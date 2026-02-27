@@ -16,7 +16,7 @@ import {
 
 const tipSchema = z.object({
   qrCode: z.string().min(1),
-  amount: z.number().min(5).max(5000),
+  amount: z.number().min(15).max(5000),
   customerName: z.string().max(100).optional(),
   customerEmail: z.string().email().optional(),
   customerMessage: z.string().max(200).optional(),
@@ -130,10 +130,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // --- Record velocity event ---
-    await recordVelocityEvent(worker.id, "TIP_RECEIVED", data.amount, ipAddress, fingerprintHash);
-    await recordVelocityEvent(worker.id, "TIP_SENT", data.amount, ipAddress, fingerprintHash);
-
     const paymentId = generatePaymentId();
     const appUrl = getAppUrl();
 
@@ -153,11 +149,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // --- Record velocity events after tip is persisted ---
+    await recordVelocityEvent(worker.id, "TIP_RECEIVED", data.amount, ipAddress, fingerprintHash);
+    await recordVelocityEvent(ipAddress, "TIP_SENT", data.amount, ipAddress, fingerprintHash);
+
     const workerName = `${worker.user.firstName} ${worker.user.lastName}`;
 
     const returnUrl = new URL(`/tip/success`, appUrl);
+    returnUrl.searchParams.set("reference", tip.paymentId);
 
     const cancelUrl = new URL(`/tip/failed`, appUrl);
+    cancelUrl.searchParams.set("reference", tip.paymentId);
 
     const paystack = await initializeTransaction({
       paymentId: tip.paymentId,
@@ -166,7 +168,7 @@ export async function POST(request: NextRequest) {
       workerName,
       returnUrl: returnUrl.toString(),
       cancelUrl: cancelUrl.toString(),
-      customerEmail: data.customerEmail,
+      customerEmail: data.customerEmail || `tip+${tip.paymentId}@slipatip.co.za`,
       customerName: data.customerName,
     });
 

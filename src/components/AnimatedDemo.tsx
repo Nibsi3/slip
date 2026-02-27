@@ -5,9 +5,9 @@ import Image from "next/image";
 
 const STEPS = [
   { id: 1, title: "Scan the QR Code", sub: "Customer opens their camera", desc: "No app needed — just point and scan. The QR links directly to the worker's personal tip page." },
-  { id: 2, title: "Choose a Tip", sub: "Quick amounts or custom value", desc: "Pick R10, R20, R50, R100, R200 — or enter a custom amount. Fast and frictionless." },
+  { id: 2, title: "Choose a Tip", sub: "Quick preset amounts", desc: "Pick R15, R20, R50, R100, or R200. Quick, simple, no fuss." },
   { id: 3, title: "Pay Securely", sub: "3D Secure via Paystack", desc: "Card details handled by Paystack (PCI-DSS Level 1). Slip a Tip never sees your card." },
-  { id: 4, title: "Worker Gets Paid", sub: "Tip lands in their wallet", desc: "90% goes to the worker instantly. They withdraw via Instant Money or EFT anytime." },
+  { id: 4, title: "Worker Gets Paid", sub: "Tip lands in their wallet", desc: "90% goes to the worker. Total fees capped at 10%. They withdraw via Instant Money or EFT anytime." },
 ];
 
 function DemoPhone({ step, progress }: { step: number; progress: number }) {
@@ -117,7 +117,7 @@ function DemoPhone({ step, progress }: { step: number; progress: number }) {
           </div>
           <p className="text-[9px] text-white/30 uppercase tracking-wider mb-2">Select amount</p>
           <div className="grid grid-cols-3 gap-1.5">
-            {[10, 20, 50, 100, 200].map((a, i) => {
+            {[15, 20, 50, 100, 200].map((a, i) => {
               const sel = i === 2;
               return (
                 <div
@@ -134,16 +134,6 @@ function DemoPhone({ step, progress }: { step: number; progress: number }) {
                 </div>
               );
             })}
-            <div
-              className="py-2.5 text-center text-xs rounded-lg"
-              style={{
-                background: "rgba(255,255,255,0.04)",
-                color: "rgba(255,255,255,0.2)",
-                border: "1px solid rgba(255,255,255,0.06)",
-              }}
-            >
-              Custom
-            </div>
           </div>
           <div className="mt-4 flex items-center justify-between">
             <span className="text-[10px] text-white/30">Total</span>

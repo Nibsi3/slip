@@ -89,7 +89,7 @@ export default function HomePage() {
                   <div className="mt-12 flex items-center gap-8 justify-center lg:justify-start">
                     {[
                       { value: "R0", label: "Setup cost" },
-                      { value: "10%", label: "Withdrawal fee" },
+                      { value: "10%", label: "Total fee" },
                       { value: "Instant", label: "Payments" },
                     ].map((s, i) => (
                       <div key={s.label} className="text-center lg:text-left">
@@ -138,7 +138,7 @@ export default function HomePage() {
                   <div className="px-6 py-4 border-b border-white/[0.06]">
                     <div className="text-[10px] font-medium text-white/30 uppercase tracking-widest mb-3">Choose amount</div>
                     <div className="grid grid-cols-3 gap-2">
-                      {["R10", "R20", "R50", "R100", "R200", "Custom"].map((a, i) => (
+                      {["R15", "R20", "R50", "R100", "R200"].map((a, i) => (
                         <div
                           key={a}
                           className={`px-3 py-2.5 text-center text-sm font-semibold rounded-lg transition-all ${
@@ -248,8 +248,8 @@ export default function HomePage() {
                 <div className="mt-10 space-y-6">
                   {[
                     { step: "01", title: "Scan QR code", desc: "Customer opens their phone camera and scans the worker's unique QR code. No app installs needed." },
-                    { step: "02", title: "Pick an amount", desc: "Choose from quick amounts (R10, R20, R50, R100, R200) or enter a custom tip amount." },
-                    { step: "03", title: "Pay securely", desc: "Secure 3D Secure checkout via Paystack. The tip is automatically split — 90% to the worker, 10% platform fee." },
+                    { step: "02", title: "Pick an amount", desc: "Choose from quick amounts — R15, R20, R50, R100, or R200. Quick, simple, no fuss." },
+                    { step: "03", title: "Pay securely", desc: "Secure 3D Secure checkout via Paystack. A small total fee (up to 10%) is deducted from the tip — Paystack takes their processing fee, Slip a Tip takes the remainder." },
                   ].map((item, i) => (
                     <ScrollReveal key={item.step} delay={i * 0.12}>
                       <div className="flex gap-5">
@@ -280,110 +280,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ===== FEATURES ===== */}
-        <section className="relative py-24 sm:py-32 overflow-hidden">
-          <div className="relative mx-auto max-w-7xl px-6">
-            <ScrollReveal>
-              <div className="mb-16 text-center max-w-2xl mx-auto">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-3">Features</p>
-                <h2 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight">Everything a worker needs</h2>
-                <p className="mt-4 text-white/40">Personal dashboard, transparent wallet, and simple withdrawals. Built for the entire service industry.</p>
-              </div>
-            </ScrollReveal>
-
-            {/* Bento grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Large feature — with image */}
-              <ScrollReveal className="lg:col-span-2 lg:row-span-2">
-                <div className="relative rounded-2xl overflow-hidden h-80 lg:h-full min-h-[320px] ring-1 ring-white/[0.07]">
-                  <Image
-                    src="/photos/ec628e67-bca5-465e-8434-f4b09e9dd1f8_3840w.webp"
-                    alt="Digital payment card"
-                    fill
-                    quality={95}
-                    className="object-cover object-center"
-                  />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(3,3,6,0.9) 0%, rgba(3,3,6,0.4) 60%, rgba(3,3,6,0.1) 100%)" }} />
-                  <div className="absolute bottom-0 left-0 right-0 p-8">
-                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-2">Digital Wallet</div>
-                    <h3 className="text-2xl font-extrabold text-white">Secure, instant payments</h3>
-                    <p className="mt-2 text-sm text-white/50 max-w-sm">Every tip tracked with full transparency. Withdraw to any SA bank account or collect cash at any ATM via Instant Money.</p>
-                  </div>
-                </div>
-              </ScrollReveal>
-
-              {/* Feature card 1 */}
-              <ScrollReveal delay={0.1}>
-                <div className="rounded-2xl p-6 h-full ring-1 ring-white/[0.07] flex flex-col justify-between min-h-[160px]" style={{ background: "rgba(255,255,255,0.03)" }}>
-                  <div className="h-10 w-10 rounded-xl bg-accent/10 flex items-center justify-center ring-1 ring-accent/20">
-                    <svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-white">Personal QR Code</h3>
-                    <p className="mt-1.5 text-sm text-white/40">Unique link for each worker. Print it, frame it, or display it on your phone.</p>
-                  </div>
-                </div>
-              </ScrollReveal>
-
-              {/* Feature card 2 */}
-              <ScrollReveal delay={0.15}>
-                <div className="rounded-2xl p-6 h-full ring-1 ring-white/[0.07] flex flex-col justify-between min-h-[160px]" style={{ background: "rgba(255,255,255,0.03)" }}>
-                  <div className="h-10 w-10 rounded-xl bg-accent/10 flex items-center justify-center ring-1 ring-accent/20">
-                    <svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-white">Wallet & Ledger</h3>
-                    <p className="mt-1.5 text-sm text-white/40">Every tip tracked. Full transparency and a clear audit trail for all earnings.</p>
-                  </div>
-                </div>
-              </ScrollReveal>
-
-              {/* Industries — full width bottom row */}
-              <ScrollReveal delay={0.2} className="sm:col-span-2 lg:col-span-3">
-                <div className="rounded-2xl p-6 ring-1 ring-white/[0.07]" style={{ background: "rgba(255,255,255,0.02)" }}>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/30 mb-4">Who uses Slip a Tip</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {[
-                      {
-                        title: "Restaurants & Cafés",
-                        desc: "Waiters, baristas, runners",
-                        icon: (<svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.871c1.355 0 2.697.056 4.024.166C17.155 8.51 18 9.473 18 10.608v2.513M15 8.25v-1.5m-6 1.5v-1.5m12 9.75-1.5.75a3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-3 0 3.354 3.354 0 0 0-3 0 3.354 3.354 0 0 1-1.5-.75m0-9.75a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v9.75" /></svg>)
-                      },
-                      {
-                        title: "Hotels & Lodges",
-                        desc: "Porters, housekeeping, concierge",
-                        icon: (<svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" /></svg>)
-                      },
-                      {
-                        title: "Car Guards",
-                        desc: "Quick scan at any parking",
-                        icon: (<svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>)
-                      },
-                      {
-                        title: "Delivery Riders",
-                        desc: "Drivers and couriers",
-                        icon: (<svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>)
-                      },
-                    ].map((u) => (
-                      <div key={u.title} className="flex items-start gap-3">
-                        <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(20,167,249,0.08)" }}>{u.icon}</div>
-                        <div>
-                          <div className="text-sm font-semibold text-white">{u.title}</div>
-                          <div className="text-xs text-white/40 mt-0.5">{u.desc}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </ScrollReveal>
-            </div>
-          </div>
-        </section>
-
         {/* ===== PRICING ===== */}
         <section id="pricing" className="relative py-24 sm:py-32 overflow-hidden">
           {/* Background image strip */}
@@ -408,13 +304,13 @@ export default function HomePage() {
                   <h2 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight">Completely free<br />to get started</h2>
                   <p className="mt-5 text-white/40 max-w-md leading-relaxed">
                     No monthly fees. No hidden costs. Sign up, get your QR code, and start receiving tips immediately.
-                    A small 10% fee is only deducted when you withdraw.
+                    A small total fee (up to 10%) is deducted from tips to cover Paystack processing and the Slip a Tip platform.
                   </p>
 
                   <div className="mt-10 grid grid-cols-3 gap-6 max-w-xs">
                     {[
                       { value: "R0", sub: "to sign up" },
-                      { value: "10%", sub: "on withdrawals" },
+                      { value: "Up to 10%", sub: "total fee on tips" },
                       { value: "0%", sub: "monthly fees" },
                     ].map((s, i) => (
                       <div key={s.sub} className="relative">
@@ -444,8 +340,9 @@ export default function HomePage() {
                       "Worker dashboard & wallet",
                       "Full tip history & audit trail",
                       "Withdraw via Instant Money or EFT",
-                      "10% fee on withdrawals only",
+                      "Total fees capped at 10%",
                       "No monthly fees, ever",
+                      "No platform withdrawal fees",
                     ].map((x) => (
                       <div key={x} className="flex items-center gap-3">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full shrink-0" style={{ background: "rgba(20,167,249,0.12)" }}>
@@ -498,8 +395,8 @@ export default function HomePage() {
                 {[
                   { q: "Do customers need an app?", a: "No. They scan the QR code with their phone camera and tip directly in the browser. Zero friction." },
                   { q: "Is it secure?", a: "All payments are handled by Paystack (PCI-DSS Level 1) with 3D Secure authentication. Slip a Tip never sees or stores card details. Liability shifts to the card issuer." },
-                  { q: "How do withdrawals work?", a: "Request a withdrawal from your dashboard. Choose Instant Money (collect at any ATM) or EFT to your bank." },
-                  { q: "What does it cost?", a: "Signing up is completely free. A 10% platform fee is deducted only when you withdraw your tips." },
+                  { q: "How do withdrawals work?", a: "Request a withdrawal from your dashboard. Choose Instant Money (collect at any ATM) or EFT to your bank. No platform withdrawal fees." },
+                  { q: "What does it cost?", a: "Signing up is completely free. A small total fee (up to 10%) is deducted from tips to cover Paystack processing and the Slip a Tip platform." },
                   { q: "Who can use Slip a Tip?", a: "Any worker in the service industry — waiters, baristas, porters, car guards, delivery riders, and more." },
                   { q: "How fast do tips arrive?", a: "Tips appear in your wallet instantly. Funds become available for withdrawal after a 72-hour settlement cooldown period for fraud protection." },
                 ].map((item, i) => (

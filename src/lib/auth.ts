@@ -18,6 +18,14 @@ const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 const sessionCache = new Map<string, { data: any; expiresAt: number }>();
 const CACHE_TTL = 30_000; // 30 seconds
 
+// Sweep expired entries every 5 minutes to prevent unbounded growth
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of sessionCache.entries()) {
+    if (entry.expiresAt <= now) sessionCache.delete(key);
+  }
+}, 5 * 60 * 1000);
+
 export async function createToken(userId: string, role: string) {
   return new SignJWT({ userId, role })
     .setProtectedHeader({ alg: "HS256" })

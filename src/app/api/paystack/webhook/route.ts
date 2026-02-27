@@ -70,7 +70,20 @@ async function handleChargeSuccess(event: PaystackWebhookEvent) {
     return;
   }
 
-  if (tip.status === "COMPLETED") {
+  if (tip.status !== "PENDING") {
+    console.log(`Paystack charge.success: tip ${tip.id} already in status ${tip.status} — idempotent skip`);
+    return;
+  }
+
+  // Idempotency guard: atomically claim the tip by moving it out of PENDING.
+  // If another concurrent webhook delivery already claimed it, this update
+  // will match 0 rows and we bail out without double-crediting.
+  const claimed = await db.tip.updateMany({
+    where: { id: tip.id, status: "PENDING" },
+    data: { status: "COMPLETED" },
+  });
+  if (claimed.count === 0) {
+    console.log(`Paystack charge.success: tip ${tip.id} already claimed by concurrent event — skip`);
     return;
   }
 
@@ -481,60 +494,14 @@ async function handleDisputeCreate(event: PaystackWebhookEvent) {
   const worker = await db.worker.findUnique({ where: { id: tip.workerId } });
   if (!worker) return;
 
-  const currentBalance = Number(worker.walletBalance);
-  const chargebackDebt = Number(worker.chargebackDebt ?? 0);
-
-  if (currentBalance >= disputeAmount) {
-    // Deduct from balance immediately
-    await db.$transaction(async (tx) => {
-      await tx.worker.update({
-        where: { id: tip.workerId },
-        data: {
-          walletBalance: { decrement: disputeAmount },
-          availableBalance: { decrement: Math.min(disputeAmount, Number(worker.availableBalance)) },
-        },
-      });
-
-      await tx.ledgerEntry.create({
-        data: {
-          workerId: tip.workerId,
-          transactionType: "CHARGEBACK",
-          amount: disputeAmount,
-          feePlatform: 0,
-          feeGateway: 0,
-          netAmount: -disputeAmount,
-          status: "COMPLETED",
-          reference: `Dispute: ${reference}`,
-          tipId: tip.id,
-        },
-      });
-    });
-  } else {
-    // Insufficient balance — set chargeback debt
-    const shortfall = disputeAmount - currentBalance;
-    await db.$transaction(async (tx) => {
-      await tx.worker.update({
-        where: { id: tip.workerId },
-        data: {
-          walletBalance: 0,
-          availableBalance: 0,
-          chargebackDebt: chargebackDebt + shortfall,
-        },
-      });
-
-      await tx.ledgerEntry.create({
-        data: {
-          workerId: tip.workerId,
-          transactionType: "CHARGEBACK",
-          amount: disputeAmount,
-          feePlatform: 0,
-          feeGateway: 0,
-          netAmount: -disputeAmount,
-          status: "COMPLETED",
-          reference: `Dispute (partial): ${reference}`,
-          tipId: tip.id,
-        },
-      });
+  // On dispute.create we FREEZE available balance only — the dispute may resolve in our favour.
+  // Actual deduction happens in handleDisputeResolve if we lose.
+  // Freeze up to disputeAmount from availableBalance so worker can't withdraw disputed funds.
+  const freezeAmount = Math.min(disputeAmount, Number(worker.availableBalance));
+  if (freezeAmount > 0) {
+    await db.worker.update({
+      where: { id: tip.workerId },
+      data: { availableBalance: { decrement: freezeAmount } },
     });
   }
 
@@ -552,7 +519,7 @@ async function handleDisputeCreate(event: PaystackWebhookEvent) {
       action: "CHARGEBACK_RECEIVED",
       entity: "Tip",
       entityId: tip.id,
-      details: { reference, disputeAmount, workerBalance: currentBalance },
+      details: { reference, disputeAmount, workerBalance: Number(worker.walletBalance), freezeAmount },
     },
   });
 
@@ -576,15 +543,15 @@ async function handleDisputeResolve(event: PaystackWebhookEvent) {
 
   const resolvedInOurFavour = (event.data as unknown as Record<string, unknown>).resolution === "merchant-accepted";
   const disputeAmount = (event.data.amount || 0) / 100;
+  const worker = await db.worker.findUnique({ where: { id: tip.workerId } });
+  if (!worker) return;
 
   if (resolvedInOurFavour) {
-    // Refund the worker
+    // Won: restore the frozen available balance and log the reversal
     await db.$transaction(async (tx) => {
       await tx.worker.update({
         where: { id: tip.workerId },
-        data: {
-          walletBalance: { increment: disputeAmount },
-        },
+        data: { availableBalance: { increment: Math.min(disputeAmount, Number(worker.walletBalance)) } },
       });
 
       await tx.ledgerEntry.create({
@@ -601,6 +568,52 @@ async function handleDisputeResolve(event: PaystackWebhookEvent) {
         },
       });
     });
+  } else {
+    // Lost: now permanently deduct from walletBalance and handle any shortfall as debt
+    const currentBalance = Number(worker.walletBalance);
+    const chargebackDebt = Number(worker.chargebackDebt ?? 0);
+    if (currentBalance >= disputeAmount) {
+      await db.$transaction(async (tx) => {
+        await tx.worker.update({
+          where: { id: tip.workerId },
+          data: { walletBalance: { decrement: disputeAmount } },
+        });
+        await tx.ledgerEntry.create({
+          data: {
+            workerId: tip.workerId,
+            transactionType: "CHARGEBACK",
+            amount: disputeAmount,
+            feePlatform: 0,
+            feeGateway: 0,
+            netAmount: -disputeAmount,
+            status: "COMPLETED",
+            reference: `Dispute lost: ${reference}`,
+            tipId: tip.id,
+          },
+        });
+      });
+    } else {
+      const shortfall = disputeAmount - currentBalance;
+      await db.$transaction(async (tx) => {
+        await tx.worker.update({
+          where: { id: tip.workerId },
+          data: { walletBalance: 0, chargebackDebt: chargebackDebt + shortfall },
+        });
+        await tx.ledgerEntry.create({
+          data: {
+            workerId: tip.workerId,
+            transactionType: "CHARGEBACK",
+            amount: disputeAmount,
+            feePlatform: 0,
+            feeGateway: 0,
+            netAmount: -disputeAmount,
+            status: "COMPLETED",
+            reference: `Dispute lost (partial debt R${shortfall.toFixed(2)}): ${reference}`,
+            tipId: tip.id,
+          },
+        });
+      });
+    }
   }
 
   await db.auditLog.create({
