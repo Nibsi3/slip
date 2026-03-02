@@ -49,9 +49,9 @@ export default function ForgotPasswordPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h1 className="text-xl font-bold text-white mb-2">Check your email</h1>
+              <h1 className="text-xl font-bold text-white mb-2">Reset link sent</h1>
               <p className="text-sm text-muted mb-6">
-                If an account exists for <span className="text-white">{identifier}</span>, we&apos;ve sent a password reset link. It expires in 1 hour.
+                If an account exists for <span className="text-white">{identifier}</span>, we&apos;ve sent a password reset link via <strong className="text-white">SMS</strong> (phone users) or <strong className="text-white">email</strong> (admin users). It expires in 1 hour.
               </p>
               <Link href="/auth/login" className="text-sm text-accent hover:text-accent-300 transition-colors">
                 ← Back to login
@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <>
               <h1 className="text-2xl font-bold text-white">Reset your password</h1>
-              <p className="mt-1 text-sm text-muted">Enter your phone number or email and we&apos;ll send a reset link.</p>
+              <p className="mt-1 text-sm text-muted">Enter your phone number or email. Workers receive a reset link via SMS.</p>
 
               <form onSubmit={handleSubmit} className="mt-8 space-y-5">
                 <div>
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     className="input-field"
-                    placeholder="e.g. 066 299 5533 or admin@example.com"
+                    placeholder="e.g. 071 000 0001 or admin@example.com"
                   />
                 </div>
 

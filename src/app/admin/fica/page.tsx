@@ -38,16 +38,16 @@ interface WorkerDoc {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  PENDING_REVIEW: "bg-yellow-900/30 text-yellow-400",
-  APPROVED: "bg-green-900/30 text-green-400",
-  REJECTED: "bg-red-900/30 text-red-400",
-  NOT_SUBMITTED: "bg-white/10 text-muted",
+  PENDING_REVIEW: "bg-amber-100 text-amber-700",
+  APPROVED: "bg-emerald-100 text-emerald-700",
+  REJECTED: "bg-red-100 text-red-700",
+  NOT_SUBMITTED: "bg-slate-100 text-slate-500",
 };
 
 const DECISION_COLORS: Record<string, string> = {
-  AUTO_APPROVE: "bg-green-900/30 text-green-400 border-green-700/40",
-  ADMIN_REVIEW: "bg-yellow-900/30 text-yellow-400 border-yellow-700/40",
-  AUTO_DENY: "bg-red-900/30 text-red-400 border-red-700/40",
+  AUTO_APPROVE: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  ADMIN_REVIEW: "bg-amber-100 text-amber-700 border-amber-200",
+  AUTO_DENY: "bg-red-100 text-red-700 border-red-200",
 };
 
 export default function AdminFicaPage() {

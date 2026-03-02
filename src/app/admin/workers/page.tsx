@@ -158,8 +158,8 @@ export default function AdminWorkersPage() {
     <div className="space-y-6">
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl text-sm font-medium shadow-lg ${
-          toast.type === "success" ? "bg-green-900/80 text-green-300 border border-green-700/50" : "bg-red-900/80 text-red-300 border border-red-700/50"
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl text-sm font-semibold shadow-lg border ${
+          toast.type === "success" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-red-50 text-red-700 border-red-200"
         }`}>
           {toast.msg}
         </div>
@@ -167,9 +167,9 @@ export default function AdminWorkersPage() {
 
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Workers <span className="text-muted-300 font-normal text-lg">({workers.length})</span></h1>
+          <h1 className="text-xl font-bold text-slate-800">Workers <span className="text-slate-400 font-normal text-base">({workers.length})</span></h1>
           {pending > 0 && (
-            <p className="text-sm text-yellow-400 mt-0.5">{pending} pending approval</p>
+            <p className="text-sm text-amber-600 mt-0.5 font-medium">{pending} pending approval</p>
           )}
         </div>
       </div>
@@ -181,90 +181,90 @@ export default function AdminWorkersPage() {
           placeholder="Search name, email, job..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="input-field !py-2 !text-sm max-w-xs"
+          className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white w-64"
         />
         <div className="flex gap-1">
           {(["all", "active", "inactive"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${
-                filter === f ? "bg-accent text-white" : "bg-white/5 text-muted hover:bg-white/10"
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all border ${
+                filter === f ? "bg-blue-600 text-white border-blue-600" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
               }`}
             >
               {f}
             </button>
           ))}
         </div>
+        <span className="text-xs text-slate-400 self-center ml-auto">{filtered.length} results</span>
       </div>
 
       {loading ? (
-        <div className="animate-pulse text-muted-300">Loading workers...</div>
+        <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+          <div className="inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        </div>
       ) : (
-        <div className="card overflow-hidden !p-0">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b border-white/[0.06]" style={{ background: "rgba(255,255,255,0.02)" }}>
+              <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-5 py-3 text-left font-medium text-muted text-xs uppercase tracking-wider">Name</th>
-                  <th className="px-5 py-3 text-left font-medium text-muted text-xs uppercase tracking-wider">Contact</th>
-                  <th className="px-5 py-3 text-left font-medium text-muted text-xs uppercase tracking-wider">Job</th>
-                  <th className="px-5 py-3 text-right font-medium text-muted text-xs uppercase tracking-wider">Balance</th>
-                  <th className="px-5 py-3 text-right font-medium text-muted text-xs uppercase tracking-wider">Tips</th>
-                  <th className="px-5 py-3 text-left font-medium text-muted text-xs uppercase tracking-wider">Status</th>
-                  <th className="px-5 py-3 text-left font-medium text-muted text-xs uppercase tracking-wider">Joined</th>
-                  <th className="px-5 py-3 text-right font-medium text-muted text-xs uppercase tracking-wider">Actions</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Contact</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Job</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Balance</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Tips</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Joined</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
+              <tbody className="divide-y divide-slate-100">
                 {filtered.length === 0 && (
-                  <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-300">No workers found</td></tr>
+                  <tr><td colSpan={8} className="px-5 py-10 text-center text-slate-400 text-sm">No workers found</td></tr>
                 )}
                 {filtered.map((w) => (
-                  <tr key={w.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-5 py-4">
-                      <button onClick={() => openModal(w, "detail")} className="font-medium text-white hover:text-accent transition-colors text-left">
+                  <tr key={w.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-5 py-3.5">
+                      <button onClick={() => openModal(w, "detail")} className="font-semibold text-slate-800 hover:text-blue-600 transition-colors text-left">
                         {w.user.firstName} {w.user.lastName}
                       </button>
                     </td>
-                    <td className="px-5 py-4">
-                      <div className="text-muted text-xs">{w.user.email || "—"}</div>
-                      <div className="text-muted-300 text-xs">{w.user.phone || "—"}</div>
+                    <td className="px-5 py-3.5">
+                      <div className="text-slate-600 text-xs">{w.user.email || "—"}</div>
+                      <div className="text-slate-400 text-xs">{w.user.phone || "—"}</div>
                     </td>
-                    <td className="px-5 py-4 text-muted text-xs">
+                    <td className="px-5 py-3.5 text-slate-500 text-xs">
                       {w.jobTitle || "—"}{w.employerName ? ` @ ${w.employerName}` : ""}
                     </td>
-                    <td className="px-5 py-4 text-right font-medium text-accent text-xs">
+                    <td className="px-5 py-3.5 text-right font-semibold text-blue-600 text-xs">
                       R{Number(w.walletBalance).toFixed(2)}
                     </td>
-                    <td className="px-5 py-4 text-right text-muted text-xs">{w._count.tips}</td>
-                    <td className="px-5 py-4">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                        w.isActive ? "bg-green-900/30 text-green-400" : "bg-red-900/30 text-red-400"
+                    <td className="px-5 py-3.5 text-right text-slate-500 text-xs">{w._count.tips}</td>
+                    <td className="px-5 py-3.5">
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                        w.isActive ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"
                       }`}>
                         {w.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-muted-300 text-xs">
+                    <td className="px-5 py-3.5 text-slate-400 text-xs">
                       {new Date(w.createdAt).toLocaleDateString("en-ZA")}
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-5 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-1">
                         {!w.isActive && (
-                          <button
-                            onClick={() => openModal(w, "detail")}
-                            className="px-2 py-1 rounded-md text-xs font-medium bg-green-900/30 text-green-400 hover:bg-green-900/50 transition-colors"
-                          >
+                          <button onClick={() => openModal(w, "detail")} className="px-2 py-1 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors">
                             Review
                           </button>
                         )}
-                        <button onClick={() => openModal(w, "edit")} className="px-2 py-1 rounded-md text-xs text-muted hover:text-white hover:bg-white/5 transition-colors">Edit</button>
+                        <button onClick={() => openModal(w, "edit")} className="px-2 py-1 rounded-md text-xs text-slate-600 hover:bg-slate-100 transition-colors font-medium">Edit</button>
                         {w.isActive ? (
-                          <button onClick={() => openModal(w, "deactivate")} className="px-2 py-1 rounded-md text-xs text-yellow-400 hover:bg-yellow-900/20 transition-colors">Deactivate</button>
+                          <button onClick={() => openModal(w, "deactivate")} className="px-2 py-1 rounded-md text-xs text-amber-600 hover:bg-amber-50 transition-colors font-medium">Deactivate</button>
                         ) : (
-                          <button onClick={() => openModal(w, "detail")} className="px-2 py-1 rounded-md text-xs text-blue-400 hover:bg-blue-900/20 transition-colors">Activate</button>
+                          <button onClick={() => openModal(w, "detail")} className="px-2 py-1 rounded-md text-xs text-blue-600 hover:bg-blue-50 transition-colors font-medium">Activate</button>
                         )}
-                        <button onClick={() => openModal(w, "delete")} className="px-2 py-1 rounded-md text-xs text-red-400 hover:bg-red-900/20 transition-colors">Delete</button>
+                        <button onClick={() => openModal(w, "delete")} className="px-2 py-1 rounded-md text-xs text-red-600 hover:bg-red-50 transition-colors font-medium">Delete</button>
                       </div>
                     </td>
                   </tr>
@@ -285,9 +285,9 @@ export default function AdminWorkersPage() {
               <InfoRow label="ID Number" value={selected.user.idNumber || "—"} />
               <InfoRow label="Job Title" value={selected.jobTitle || "—"} />
               <InfoRow label="Employer" value={selected.employerName || "—"} />
-              <InfoRow label="Status" value={selected.isActive ? "Active" : "Inactive"} color={selected.isActive ? "text-green-400" : "text-red-400"} />
-              <InfoRow label="Wallet Balance" value={`R${Number(selected.walletBalance).toFixed(2)}`} color="text-accent" />
-              <InfoRow label="Available Balance" value={`R${Number(selected.availableBalance).toFixed(2)}`} color="text-accent" />
+              <InfoRow label="Status" value={selected.isActive ? "Active" : "Inactive"} color={selected.isActive ? "text-emerald-600" : "text-red-600"} />
+              <InfoRow label="Wallet Balance" value={`R${Number(selected.walletBalance).toFixed(2)}`} color="text-blue-600" />
+              <InfoRow label="Available Balance" value={`R${Number(selected.availableBalance).toFixed(2)}`} color="text-blue-600" />
               <InfoRow label="Total Tips" value={String(selected._count.tips)} />
               <InfoRow label="Withdrawals" value={String(selected._count.withdrawals)} />
               <InfoRow label="Bank" value={selected.bankName || "—"} />
@@ -298,20 +298,20 @@ export default function AdminWorkersPage() {
               <InfoRow label="Joined" value={new Date(selected.user.createdAt).toLocaleDateString("en-ZA")} />
             </div>
             {selected.docStatus === "PENDING_REVIEW" && (
-              <div className="rounded-xl p-3 bg-yellow-500/10 border border-yellow-500/20 mb-2">
-                <p className="text-xs font-semibold text-yellow-400 mb-2">FICA Documents Pending Review</p>
+              <div className="rounded-xl p-3 bg-amber-50 border border-amber-200 mb-2">
+                <p className="text-xs font-semibold text-amber-700 mb-2">FICA Documents Pending Review</p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => doAction("approveDoc")}
                     disabled={saving}
-                    className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-green-900/40 text-green-400 hover:bg-green-900/60 transition-colors"
+                    className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors border border-emerald-200"
                   >
                     ✓ Approve Documents
                   </button>
                   <button
                     onClick={() => { setModal("rejectDoc" as ModalType); }}
                     disabled={saving}
-                    className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-900/40 text-red-400 hover:bg-red-900/60 transition-colors"
+                    className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-100 text-red-700 hover:bg-red-200 transition-colors border border-red-200"
                   >
                     ✗ Reject Documents
                   </button>
@@ -348,8 +348,8 @@ export default function AdminWorkersPage() {
             <Field label="Phone" value={editForm.phone || ""} onChange={(v) => setEditForm((p) => ({ ...p, phone: v }))} />
             <Field label="Job Title" value={editForm.jobTitle || ""} onChange={(v) => setEditForm((p) => ({ ...p, jobTitle: v }))} />
             <Field label="Employer Name" value={editForm.employerName || ""} onChange={(v) => setEditForm((p) => ({ ...p, employerName: v }))} />
-            <div className="border-t border-white/[0.06] pt-3">
-              <p className="text-xs text-muted-300 mb-2">Bank Details</p>
+            <div className="border-t border-slate-200 pt-3">
+              <p className="text-xs font-semibold text-slate-500 mb-2">Bank Details</p>
               <div className="grid grid-cols-3 gap-2">
                 <Field label="Bank" value={editForm.bankName || ""} onChange={(v) => setEditForm((p) => ({ ...p, bankName: v }))} />
                 <Field label="Account No" value={editForm.bankAccountNo || ""} onChange={(v) => setEditForm((p) => ({ ...p, bankAccountNo: v }))} />
@@ -357,8 +357,8 @@ export default function AdminWorkersPage() {
               </div>
             </div>
             <div className="flex gap-2 pt-1">
-              <button onClick={doEdit} disabled={saving} className="btn-primary !py-2 !px-4 !text-sm flex-1">{saving ? "Saving…" : "Save Changes"}</button>
-              <button onClick={closeModal} className="btn-secondary !py-2 !px-4 !text-sm">Cancel</button>
+              <button onClick={doEdit} disabled={saving} className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors">{saving ? "Saving…" : "Save Changes"}</button>
+              <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">Cancel</button>
             </div>
           </div>
         </ModalWrapper>
@@ -367,17 +367,17 @@ export default function AdminWorkersPage() {
       {/* ── Deactivate Modal ── */}
       {modal === "deactivate" && selected && (
         <ModalWrapper onClose={closeModal} title="Deactivate Worker">
-          <p className="text-muted text-sm mb-4">Deactivate <strong className="text-white">{selected.user.firstName} {selected.user.lastName}</strong>? Their QR code will stop accepting tips.</p>
+          <p className="text-slate-600 text-sm mb-4">Deactivate <strong className="text-slate-800">{selected.user.firstName} {selected.user.lastName}</strong>? Their QR code will stop accepting tips.</p>
           <textarea
-            placeholder="Reason (optional, will be emailed to worker)"
+            placeholder="Reason (optional, will be sent to worker via SMS)"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={3}
-            className="input-field !text-sm w-full mb-4 resize-none"
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 resize-none"
           />
           <div className="flex gap-2">
-            <button onClick={() => doAction("deactivate")} disabled={saving} className="flex-1 px-4 py-2 rounded-xl text-sm font-medium bg-yellow-900/30 text-yellow-400 hover:bg-yellow-900/50 transition-colors">{saving ? "Saving…" : "Deactivate"}</button>
-            <button onClick={closeModal} className="btn-secondary !py-2 !px-4 !text-sm">Cancel</button>
+            <button onClick={() => doAction("deactivate")} disabled={saving} className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-200 transition-colors">{saving ? "Saving…" : "Deactivate"}</button>
+            <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">Cancel</button>
           </div>
         </ModalWrapper>
       )}
@@ -385,17 +385,17 @@ export default function AdminWorkersPage() {
       {/* ── Reject Modal ── */}
       {modal === "reject" && selected && (
         <ModalWrapper onClose={closeModal} title="Reject Application">
-          <p className="text-muted text-sm mb-4">Reject <strong className="text-white">{selected.user.firstName} {selected.user.lastName}</strong>?</p>
+          <p className="text-slate-600 text-sm mb-4">Reject <strong className="text-slate-800">{selected.user.firstName} {selected.user.lastName}</strong>?</p>
           <textarea
-            placeholder="Reason (optional, will be emailed to worker)"
+            placeholder="Reason (optional, will be sent to worker via SMS)"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={3}
-            className="input-field !text-sm w-full mb-4 resize-none"
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 resize-none"
           />
           <div className="flex gap-2">
-            <button onClick={() => doAction("reject")} disabled={saving} className="flex-1 px-4 py-2 rounded-xl text-sm font-medium bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors">{saving ? "Saving…" : "Reject"}</button>
-            <button onClick={closeModal} className="btn-secondary !py-2 !px-4 !text-sm">Cancel</button>
+            <button onClick={() => doAction("reject")} disabled={saving} className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold bg-red-100 text-red-700 hover:bg-red-200 border border-red-200 transition-colors">{saving ? "Saving…" : "Reject"}</button>
+            <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">Cancel</button>
           </div>
         </ModalWrapper>
       )}
@@ -403,17 +403,17 @@ export default function AdminWorkersPage() {
       {/* ── Reject Documents Modal ── */}
       {modal === "rejectDoc" && selected && (
         <ModalWrapper onClose={closeModal} title="Reject FICA Documents">
-          <p className="text-muted text-sm mb-4">Reject documents for <strong className="text-white">{selected.user.firstName} {selected.user.lastName}</strong>? They will be asked to re-upload.</p>
+          <p className="text-slate-600 text-sm mb-4">Reject documents for <strong className="text-slate-800">{selected.user.firstName} {selected.user.lastName}</strong>? They will be asked to re-upload.</p>
           <textarea
             placeholder="Reason (will be sent to worker via SMS)"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={3}
-            className="input-field !text-sm w-full mb-4 resize-none"
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 resize-none"
           />
           <div className="flex gap-2">
-            <button onClick={() => doAction("rejectDoc")} disabled={saving} className="flex-1 px-4 py-2 rounded-xl text-sm font-medium bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors">{saving ? "Saving…" : "Reject Documents"}</button>
-            <button onClick={closeModal} className="btn-secondary !py-2 !px-4 !text-sm">Cancel</button>
+            <button onClick={() => doAction("rejectDoc")} disabled={saving} className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold bg-red-100 text-red-700 hover:bg-red-200 border border-red-200 transition-colors">{saving ? "Saving…" : "Reject Documents"}</button>
+            <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">Cancel</button>
           </div>
         </ModalWrapper>
       )}
@@ -421,11 +421,11 @@ export default function AdminWorkersPage() {
       {/* ── Delete Modal ── */}
       {modal === "delete" && selected && (
         <ModalWrapper onClose={closeModal} title="Delete Worker">
-          <p className="text-muted text-sm mb-2">Permanently delete <strong className="text-white">{selected.user.firstName} {selected.user.lastName}</strong>?</p>
-          <p className="text-red-400/70 text-xs mb-4">This will delete all their data including tips, withdrawals and QR codes. This cannot be undone.</p>
+          <p className="text-slate-600 text-sm mb-2">Permanently delete <strong className="text-slate-800">{selected.user.firstName} {selected.user.lastName}</strong>?</p>
+          <p className="text-red-600 text-xs mb-4">This will delete all their data including tips, withdrawals and QR codes. This cannot be undone.</p>
           <div className="flex gap-2">
-            <button onClick={doDelete} disabled={saving} className="flex-1 px-4 py-2 rounded-xl text-sm font-medium bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors">{saving ? "Deleting…" : "Delete Permanently"}</button>
-            <button onClick={closeModal} className="btn-secondary !py-2 !px-4 !text-sm">Cancel</button>
+            <button onClick={doDelete} disabled={saving} className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors">{saving ? "Deleting…" : "Delete Permanently"}</button>
+            <button onClick={closeModal} className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">Cancel</button>
           </div>
         </ModalWrapper>
       )}
@@ -436,11 +436,11 @@ export default function AdminWorkersPage() {
 function ModalWrapper({ children, onClose, title }: { children: React.ReactNode; onClose: () => void; title: string }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="relative w-full max-w-lg rounded-2xl border border-white/[0.08] shadow-2xl p-6" style={{ background: "#0d0d14" }}>
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-lg rounded-2xl border border-slate-200 shadow-2xl p-6 bg-white">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-base font-bold text-white">{title}</h3>
-          <button onClick={onClose} className="text-muted-300 hover:text-white transition-colors">
+          <h3 className="text-base font-bold text-slate-800">{title}</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -452,9 +452,9 @@ function ModalWrapper({ children, onClose, title }: { children: React.ReactNode;
 
 function InfoRow({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div>
-      <p className="text-xs text-muted-300">{label}</p>
-      <p className={`text-sm font-medium ${color || "text-white"} truncate`}>{value}</p>
+    <div className="bg-slate-50 rounded-lg p-2.5">
+      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{label}</p>
+      <p className={`text-sm font-semibold mt-0.5 ${color || "text-slate-800"} truncate`}>{value}</p>
     </div>
   );
 }
@@ -462,20 +462,20 @@ function InfoRow({ label, value, color }: { label: string; value: string; color?
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <label className="block text-xs text-muted-300 mb-1">{label}</label>
-      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="input-field !py-2 !text-sm" />
+      <label className="block text-xs font-semibold text-slate-500 mb-1">{label}</label>
+      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
     </div>
   );
 }
 
 function ActionBtn({ color, label, onClick }: { color: string; label: string; onClick: () => void }) {
   const colors: Record<string, string> = {
-    green: "bg-green-900/30 text-green-400 hover:bg-green-900/50",
-    blue: "bg-blue-900/30 text-blue-400 hover:bg-blue-900/50",
-    yellow: "bg-yellow-900/30 text-yellow-400 hover:bg-yellow-900/50",
-    red: "bg-red-900/30 text-red-400 hover:bg-red-900/50",
+    green: "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-emerald-200",
+    blue: "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200",
+    yellow: "bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200",
+    red: "bg-red-100 text-red-700 hover:bg-red-200 border-red-200",
   };
   return (
-    <button onClick={onClick} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${colors[color]}`}>{label}</button>
+    <button onClick={onClick} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border ${colors[color]}`}>{label}</button>
   );
 }

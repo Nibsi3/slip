@@ -49,21 +49,21 @@ async function main() {
   const workerHash = await hash(workerPassword, 12);
 
   const worker = await prisma.user.upsert({
-    where: { phone: "0662995533" },
+    where: { phone: "0710000001" },
     update: {},
     create: {
-      firstName: "Thabo",
-      lastName: "Molefe",
-      phone: "0662995533",
+      firstName: "Demo",
+      lastName: "Worker",
+      phone: "0710000001",
       passwordHash: workerHash,
       role: "WORKER",
       isVerified: true,
       worker: {
         create: {
-          employerName: "The Grand Hotel",
+          employerName: "Demo Employer",
           jobTitle: "Waiter",
           qrCode: "DEMO0001",
-          phoneForIM: "0662995533",
+          phoneForIM: "0710000001",
         },
       },
     },
@@ -71,29 +71,29 @@ async function main() {
   console.log(`Demo worker: ${worker.phone}`);
 
   const worker2 = await prisma.user.upsert({
-    where: { phone: "0829876543" },
+    where: { phone: "0720000002" },
     update: {},
     create: {
-      firstName: "Naledi",
-      lastName: "Dlamini",
-      phone: "0829876543",
+      firstName: "Demo",
+      lastName: "Worker2",
+      phone: "0720000002",
       passwordHash: workerHash,
       role: "WORKER",
       isVerified: true,
       worker: {
         create: {
-          employerName: "Ocean Basket Waterfront",
+          employerName: "Demo Venue",
           jobTitle: "Barista",
           qrCode: "DEMO0002",
-          phoneForIM: "0829876543",
+          phoneForIM: "0720000002",
         },
       },
     },
   });
   console.log(`Demo worker: ${worker2.phone}`);
 
-  const thaboWorker = await prisma.worker.findFirst({ where: { user: { phone: "0662995533" } } });
-  const nalediWorker = await prisma.worker.findFirst({ where: { user: { phone: "0829876543" } } });
+  const thaboWorker = await prisma.worker.findFirst({ where: { user: { phone: "0710000001" } } });
+  const nalediWorker = await prisma.worker.findFirst({ where: { user: { phone: "0720000002" } } });
 
   if (thaboWorker) {
     await prisma.qRCode.upsert({

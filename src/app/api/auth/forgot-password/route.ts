@@ -5,6 +5,7 @@ import { createHash } from "crypto";
 import { db } from "@/lib/db";
 import { checkPasswordResetLimit } from "@/lib/rate-limit";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { sendSms } from "@/lib/sms";
 
 const schema = z.object({
   identifier: z.string().min(1, "Phone number or email is required"),
@@ -75,6 +76,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://slipatip.co.za"}/auth/reset-password?token=${rawToken}`;
+
     // Send reset email if user has an email address
     if (user.email) {
       await sendPasswordResetEmail({
@@ -82,6 +85,14 @@ export async function POST(request: NextRequest) {
         email: user.email,
         resetToken: rawToken,
       });
+    }
+
+    // Send reset link via SMS if user has a phone number
+    if (user.phone) {
+      await sendSms(
+        user.phone,
+        `Hi ${user.firstName}, reset your Slip a Tip password here: ${resetUrl} — Link expires in 1 hour. Ignore this if you didn't request it.`
+      );
     }
 
     return NextResponse.json({ success: true });
