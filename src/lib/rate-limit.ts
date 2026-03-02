@@ -1,6 +1,8 @@
 /**
  * Redis-backed sliding window rate limiter.
  * Uses INCR + EXPIRE for atomic, distributed rate limiting.
+ * Fails open (allows) when Redis is unavailable so a Redis outage
+ * never causes a 500 on auth or payment routes.
  */
 
 import { redis } from "@/lib/redis";
@@ -9,6 +11,11 @@ export interface RateLimitResult {
   allowed: boolean;
   remaining: number;
   resetAt: Date;
+}
+
+/** Sentinel result returned when Redis is unavailable — always allows. */
+function failOpen(): RateLimitResult {
+  return { allowed: true, remaining: 999, resetAt: new Date(Date.now() + 60_000) };
 }
 
 /**
@@ -22,30 +29,45 @@ export async function checkRateLimit(
   max: number,
   windowMs: number
 ): Promise<RateLimitResult> {
-  const redisKey = `rl:${key}`;
-  const windowSec = Math.ceil(windowMs / 1000);
-
-  const count = await redis.incr(redisKey);
-
-  if (count === 1) {
-    await redis.expire(redisKey, windowSec);
+  if (!redis) {
+    console.warn(`[RateLimit] Redis unavailable — skipping check for key: ${key}`);
+    return failOpen();
   }
 
-  const ttl = await redis.ttl(redisKey);
-  const resetAt = new Date(Date.now() + ttl * 1000);
+  try {
+    const redisKey = `rl:${key}`;
+    const windowSec = Math.ceil(windowMs / 1000);
 
-  if (count > max) {
-    return { allowed: false, remaining: 0, resetAt };
+    const count = await redis.incr(redisKey);
+
+    if (count === 1) {
+      await redis.expire(redisKey, windowSec);
+    }
+
+    const ttl = await redis.ttl(redisKey);
+    const resetAt = new Date(Date.now() + ttl * 1000);
+
+    if (count > max) {
+      return { allowed: false, remaining: 0, resetAt };
+    }
+
+    return { allowed: true, remaining: max - count, resetAt };
+  } catch (err) {
+    console.error(`[RateLimit] Redis error for key ${key} — failing open:`, err);
+    return failOpen();
   }
-
-  return { allowed: true, remaining: max - count, resetAt };
 }
 
 /**
  * Reset the rate limit window for a key (e.g. on successful login).
  */
 export async function resetRateLimit(key: string): Promise<void> {
-  await redis.del(`rl:${key}`);
+  if (!redis) return;
+  try {
+    await redis.del(`rl:${key}`);
+  } catch (err) {
+    console.error(`[RateLimit] Failed to reset key ${key}:`, err);
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -26,7 +26,8 @@ interface OtpEntry {
 export async function generateOtp(
   phone: string
 ): Promise<{ sessionKey: string; code: string; cooldownActive: boolean }> {
-  // Check for an existing unexpired OTP within cooldown window
+  if (!redis) throw new Error("OTP service is temporarily unavailable. Please try again shortly.");
+
   const cooldownKey = `otp:cooldown:${phone}`;
   const existingSession = await redis.get(cooldownKey);
   if (existingSession) {
@@ -55,6 +56,8 @@ export async function verifyOtp(
   sessionKey: string,
   code: string
 ): Promise<{ valid: boolean; reason?: string }> {
+  if (!redis) return { valid: false, reason: "OTP service is temporarily unavailable." };
+
   const key = `otp:session:${sessionKey}`;
   const raw = await redis.get(key);
 
@@ -81,7 +84,6 @@ export async function verifyOtp(
     };
   }
 
-  // Success — consume the OTP
   await redis.del(key);
   return { valid: true };
 }
@@ -90,6 +92,7 @@ export async function verifyOtp(
  * Get the phone number associated with an OTP session.
  */
 export async function getOtpPhone(sessionKey: string): Promise<string | null> {
+  if (!redis) return null;
   const raw = await redis.get(`otp:session:${sessionKey}`);
   if (!raw) return null;
   const entry: OtpEntry = JSON.parse(raw);

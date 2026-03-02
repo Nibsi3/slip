@@ -1,23 +1,22 @@
 import Redis from "ioredis";
 
-const getRedisUrl = (): string => {
-  const url = process.env.REDIS_URL;
-  if (!url) {
-    throw new Error("FATAL: REDIS_URL environment variable is not set.");
-  }
-  return url;
-};
-
 declare global {
   // eslint-disable-next-line no-var
-  var __redis: Redis | undefined;
+  var __redis: Redis | null | undefined;
 }
 
-function createRedisClient(): Redis {
-  const client = new Redis(getRedisUrl(), {
-    maxRetriesPerRequest: 3,
+function createRedisClient(): Redis | null {
+  const url = process.env.REDIS_URL;
+  if (!url) {
+    console.warn("[Redis] REDIS_URL is not set — rate limiting and velocity checks will be skipped.");
+    return null;
+  }
+
+  const client = new Redis(url, {
+    maxRetriesPerRequest: 1,
     lazyConnect: false,
-    tls: process.env.REDIS_URL?.startsWith("rediss://") ? {} : undefined,
+    connectTimeout: 5000,
+    tls: url.startsWith("rediss://") ? {} : undefined,
   });
 
   client.on("error", (err) => {
@@ -27,7 +26,9 @@ function createRedisClient(): Redis {
   return client;
 }
 
-export const redis: Redis =
+export const redis: Redis | null =
   process.env.NODE_ENV === "production"
     ? createRedisClient()
-    : (globalThis.__redis ?? (globalThis.__redis = createRedisClient()));
+    : (globalThis.__redis !== undefined
+        ? globalThis.__redis
+        : (globalThis.__redis = createRedisClient()));
