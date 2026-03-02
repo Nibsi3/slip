@@ -6,6 +6,7 @@
 import { db } from "@/lib/db";
 import { Decimal } from "@prisma/client/runtime/library";
 import { getSettlementDelayHours } from "./constants";
+import { sendSettlementClearedSms } from "@/lib/sms";
 
 /**
  * Create a settlement hold for a completed tip.
@@ -71,6 +72,23 @@ export async function processSettlementClears(): Promise<number> {
       });
 
       cleared++;
+
+      // Notify the worker via SMS that their funds are now available
+      try {
+        const workerData = await db.worker.findUnique({
+          where: { id: hold.workerId },
+          select: { user: { select: { firstName: true, phone: true } } },
+        });
+        if (workerData?.user?.phone) {
+          await sendSettlementClearedSms(
+            workerData.user.phone,
+            workerData.user.firstName,
+            Number(hold.amount)
+          );
+        }
+      } catch (smsErr) {
+        console.error(`[Settlement] SMS failed for worker ${hold.workerId}:`, smsErr);
+      }
     } catch (err) {
       console.error(`Failed to clear settlement hold ${hold.id}:`, err);
     }

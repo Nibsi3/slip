@@ -3,7 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useParams } from "next/navigation";
 
-const TIP_AMOUNTS = [15, 20, 50, 100, 200];
+const TIP_AMOUNTS = [15, 30, 50, 75, 100, 200];
 const MIN_TIP = 15;
 const MAX_TIP = 5000;
 const TOTAL_FEE_RATE = 0.10;
@@ -49,8 +49,9 @@ export default function TipPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (tipAmount < MIN_TIP || tipAmount > MAX_TIP) return;
+    if (tipAmount < MIN_TIP || tipAmount > MAX_TIP || submitting) return;
     setSubmitting(true);
+    setError("");
 
     try {
       const res = await fetch("/api/tips", {
@@ -68,9 +69,9 @@ export default function TipPage() {
       }
 
       const data = await res.json();
-      // Redirect to Paystack payment page
       if (data.paystack?.authorizationUrl) {
         window.location.href = data.paystack.authorizationUrl;
+        return;
       } else {
         throw new Error("Payment gateway unavailable");
       }
@@ -152,8 +153,9 @@ export default function TipPage() {
                     <button
                       key={amt}
                       type="button"
-                      onClick={() => setSelectedAmount(amt)}
-                      className={`py-3.5 text-center font-bold text-base rounded-xl transition-all duration-150 ${
+                      onClick={() => !submitting && setSelectedAmount(amt)}
+                      disabled={submitting}
+                      className={`py-3.5 text-center font-bold text-base rounded-xl transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${
                         selectedAmount === amt
                           ? "text-white scale-[1.03] ring-1 ring-accent/40"
                           : "text-white/55 ring-1 ring-white/[0.07] hover:ring-white/[0.14] hover:text-white/80"

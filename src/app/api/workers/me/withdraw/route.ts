@@ -21,11 +21,11 @@ import {
 
 const withdrawSchema = z.object({
   amount: z.number().min(100),
-  method: z.enum(["INSTANT_MONEY", "EFT"]),
-  bankName: z.string().optional(),
-  bankAccountNo: z.string().optional(),
+  method: z.literal("EFT"),
+  bankName: z.string().min(1, "Bank name is required"),
+  bankAccountNo: z.string().min(1, "Account number is required"),
   bankBranchCode: z.string().optional(),
-  phoneNumber: z.string().optional(),
+  bankCode: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -174,26 +174,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (data.method === "EFT" && (!data.bankName || !data.bankAccountNo)) {
+    if (!data.bankName || !data.bankAccountNo) {
       return NextResponse.json(
         { error: "Bank details required for EFT withdrawal" },
         { status: 400 }
       );
     }
 
-    if (data.method === "INSTANT_MONEY" && !data.phoneNumber) {
-      return NextResponse.json(
-        { error: "Phone number required for Instant Money" },
-        { status: 400 }
-      );
-    }
-
     const fee = Number((data.amount * WITHDRAWAL_FEE_PERCENT).toFixed(2));
     const netAmount = Number((data.amount - fee).toFixed(2));
-    const phone = data.phoneNumber || worker.phoneForIM || "";
     const bank = data.bankName || worker.bankName || "";
     const accountNo = data.bankAccountNo || worker.bankAccountNo || "";
     const branchCode = data.bankBranchCode || worker.bankBranchCode || "";
+    const bankCode = data.bankCode || "";
 
     // Step 1: Create withdrawal + deduct BOTH walletBalance and availableBalance atomically
     const withdrawal = await db.$transaction(async (tx: Parameters<Parameters<typeof db.$transaction>[0]>[0]) => {
@@ -208,7 +201,6 @@ export async function POST(request: NextRequest) {
           bankName: bank,
           bankAccountNo: accountNo,
           bankBranchCode: branchCode,
-          phoneNumber: phone,
         },
       });
 
@@ -243,10 +235,10 @@ export async function POST(request: NextRequest) {
       withdrawalId: withdrawal.id,
       method: data.method,
       amount: netAmount,
-      phoneNumber: phone,
       bankName: bank,
       bankAccountNo: accountNo,
       bankBranchCode: branchCode,
+      bankCode: bankCode || undefined,
       recipientName,
     });
 

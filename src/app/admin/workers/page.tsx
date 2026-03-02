@@ -35,7 +35,7 @@ interface WorkerItem {
   qrCodes: QRCodeItem[];
 }
 
-type ModalType = "detail" | "edit" | "reject" | "deactivate" | "delete" | null;
+type ModalType = "detail" | "edit" | "reject" | "rejectDoc" | "deactivate" | "delete" | null;
 
 export default function AdminWorkersPage() {
   const [workers, setWorkers] = useState<WorkerItem[]>([]);
@@ -297,12 +297,33 @@ export default function AdminWorkersPage() {
               <InfoRow label="QR Codes" value={String(selected.qrCodes?.length || 0)} />
               <InfoRow label="Joined" value={new Date(selected.user.createdAt).toLocaleDateString("en-ZA")} />
             </div>
+            {selected.docStatus === "PENDING_REVIEW" && (
+              <div className="rounded-xl p-3 bg-yellow-500/10 border border-yellow-500/20 mb-2">
+                <p className="text-xs font-semibold text-yellow-400 mb-2">FICA Documents Pending Review</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => doAction("approveDoc")}
+                    disabled={saving}
+                    className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-green-900/40 text-green-400 hover:bg-green-900/60 transition-colors"
+                  >
+                    ✓ Approve Documents
+                  </button>
+                  <button
+                    onClick={() => { setModal("rejectDoc" as ModalType); }}
+                    disabled={saving}
+                    className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-900/40 text-red-400 hover:bg-red-900/60 transition-colors"
+                  >
+                    ✗ Reject Documents
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="flex gap-2 pt-2 flex-wrap">
               {!selected.isActive && (
-                <ActionBtn color="green" label="✓ Approve" onClick={() => doAction("approve")} />
+                <ActionBtn color="green" label="✓ Approve Account" onClick={() => doAction("approve")} />
               )}
               {!selected.isActive && (
-                <ActionBtn color="red" label="✗ Reject" onClick={() => { setModal("reject"); }} />
+                <ActionBtn color="red" label="✗ Reject Account" onClick={() => { setModal("reject"); }} />
               )}
               <ActionBtn color="blue" label="Edit" onClick={() => openModal(selected, "edit")} />
               {selected.isActive
@@ -374,6 +395,24 @@ export default function AdminWorkersPage() {
           />
           <div className="flex gap-2">
             <button onClick={() => doAction("reject")} disabled={saving} className="flex-1 px-4 py-2 rounded-xl text-sm font-medium bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors">{saving ? "Saving…" : "Reject"}</button>
+            <button onClick={closeModal} className="btn-secondary !py-2 !px-4 !text-sm">Cancel</button>
+          </div>
+        </ModalWrapper>
+      )}
+
+      {/* ── Reject Documents Modal ── */}
+      {modal === "rejectDoc" && selected && (
+        <ModalWrapper onClose={closeModal} title="Reject FICA Documents">
+          <p className="text-muted text-sm mb-4">Reject documents for <strong className="text-white">{selected.user.firstName} {selected.user.lastName}</strong>? They will be asked to re-upload.</p>
+          <textarea
+            placeholder="Reason (will be sent to worker via SMS)"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={3}
+            className="input-field !text-sm w-full mb-4 resize-none"
+          />
+          <div className="flex gap-2">
+            <button onClick={() => doAction("rejectDoc")} disabled={saving} className="flex-1 px-4 py-2 rounded-xl text-sm font-medium bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors">{saving ? "Saving…" : "Reject Documents"}</button>
             <button onClick={closeModal} className="btn-secondary !py-2 !px-4 !text-sm">Cancel</button>
           </div>
         </ModalWrapper>

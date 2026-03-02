@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { sendApprovalEmail, sendRejectionEmail, sendDeactivationEmail } from "@/lib/email";
+import { sendFicaApprovedSms, sendFicaRejectedSms } from "@/lib/sms";
 
 export async function GET() {
   try {
@@ -44,7 +45,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { workerId, action, reason, ...editFields } = body as {
       workerId: string;
-      action: "approve" | "reject" | "activate" | "deactivate" | "edit";
+      action: "approve" | "reject" | "approveDoc" | "rejectDoc" | "activate" | "deactivate" | "edit";
       reason?: string;
       firstName?: string;
       lastName?: string;
@@ -95,6 +96,45 @@ export async function PATCH(request: NextRequest) {
       });
       await sendRejectionEmail({ firstName: worker.user.firstName, email: worker.user.email, reason });
       return NextResponse.json({ success: true, message: "Worker rejected" });
+    }
+
+    if (action === "approveDoc") {
+      await db.worker.update({
+        where: { id: workerId },
+        data: { docStatus: "APPROVED", docReviewedAt: new Date(), docRejectReason: null },
+      });
+      await db.auditLog.create({
+        data: {
+          userId: session.user.id,
+          action: "FICA_DOCS_APPROVED",
+          entity: "Worker",
+          entityId: workerId,
+        },
+      });
+      if (worker.user.phone) {
+        await sendFicaApprovedSms(worker.user.phone, worker.user.firstName);
+      }
+      return NextResponse.json({ success: true, message: "Documents approved. Worker notified via SMS." });
+    }
+
+    if (action === "rejectDoc") {
+      await db.worker.update({
+        where: { id: workerId },
+        data: { docStatus: "REJECTED", docReviewedAt: new Date(), docRejectReason: reason || "Documents could not be verified." },
+      });
+      await db.auditLog.create({
+        data: {
+          userId: session.user.id,
+          action: "FICA_DOCS_REJECTED",
+          entity: "Worker",
+          entityId: workerId,
+          details: { reason: reason || null },
+        },
+      });
+      if (worker.user.phone) {
+        await sendFicaRejectedSms(worker.user.phone, worker.user.firstName, reason);
+      }
+      return NextResponse.json({ success: true, message: "Documents rejected. Worker notified via SMS." });
     }
 
     if (action === "activate") {

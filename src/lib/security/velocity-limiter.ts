@@ -90,6 +90,35 @@ export async function checkTipReceivedVelocity(workerId: string): Promise<Veloci
 }
 
 /**
+ * Check if a single IP has tipped the same worker more than 2 times in 24 hours.
+ * This blocks card abuse against a single recipient while allowing normal multi-worker tipping.
+ */
+export async function checkTipperToWorkerVelocity(
+  ipAddress: string,
+  workerId: string
+): Promise<{ allowed: boolean; reason?: string }> {
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+  const count = await db.velocityRecord.count({
+    where: {
+      ipAddress,
+      workerId,
+      action: "TIP_RECEIVED",
+      createdAt: { gte: oneDayAgo },
+    },
+  });
+
+  if (count >= 2) {
+    return {
+      allowed: false,
+      reason: "You have already tipped this person twice today. Please try again tomorrow.",
+    };
+  }
+
+  return { allowed: true };
+}
+
+/**
  * Check velocity limits for tips sent from an IP/device.
  */
 export async function checkTipSentVelocity(ipAddress: string): Promise<VelocityCheckResult> {

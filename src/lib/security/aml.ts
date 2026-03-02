@@ -21,6 +21,7 @@ export interface AmlCheckResult {
   }>;
   hasAlerts: boolean;
   highestRiskLevel: string;
+  blocked: boolean;
 }
 
 /**
@@ -129,10 +130,13 @@ export async function runAmlChecks(
       : highest;
   }, "LOW");
 
+  const blocked = highestRiskLevel === "HIGH" || highestRiskLevel === "CRITICAL";
+
   return {
     alerts,
     hasAlerts: alerts.length > 0,
     highestRiskLevel,
+    blocked,
   };
 }
 

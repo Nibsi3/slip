@@ -12,6 +12,8 @@ import {
   checkBalanceCap,
   checkTipSentVelocity,
   checkTipReceivedVelocity,
+  checkTipperToWorkerVelocity,
+  runAmlChecks,
 } from "@/lib/security";
 
 const tipSchema = z.object({
@@ -60,6 +62,15 @@ export async function POST(request: NextRequest) {
     if (!receivedVelocity.allowed) {
       return NextResponse.json(
         { error: "This worker is temporarily unable to receive tips. Please try again later." },
+        { status: 429 }
+      );
+    }
+
+    // --- Security: Per-tipper to per-worker velocity (max 2 tips/day to same worker) ---
+    const tipperWorkerVelocity = await checkTipperToWorkerVelocity(ipAddress, worker.id);
+    if (!tipperWorkerVelocity.allowed) {
+      return NextResponse.json(
+        { error: tipperWorkerVelocity.reason || "You have reached the tip limit for this recipient today." },
         { status: 429 }
       );
     }
@@ -128,6 +139,24 @@ export async function POST(request: NextRequest) {
         action: fraudResult.action,
         details: { factors: fraudResult.factors, amount: data.amount },
       });
+    }
+
+    // --- Security: AML pre-check — auto-block on HIGH/CRITICAL ---
+    const amlResult = await runAmlChecks(worker.id, data.amount, "TIP");
+    if (amlResult.blocked) {
+      await recordFraudEvent({
+        type: "AML_ALERT",
+        workerId: worker.id,
+        ipAddress,
+        deviceId: fingerprintHash,
+        riskScore: 85,
+        action: "BLOCK",
+        details: { alerts: amlResult.alerts, amount: data.amount, autoBlocked: true },
+      });
+      return NextResponse.json(
+        { error: "This account has been flagged for suspicious activity. Please contact support to resolve this." },
+        { status: 403 }
+      );
     }
 
     const paymentId = generatePaymentId();
