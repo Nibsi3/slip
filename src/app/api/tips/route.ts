@@ -178,10 +178,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // --- Record velocity events after tip is persisted ---
-    await recordVelocityEvent(worker.id, "TIP_RECEIVED", data.amount, ipAddress, fingerprintHash);
-    await recordVelocityEvent(ipAddress, "TIP_SENT", data.amount, ipAddress, fingerprintHash);
-
     const workerName = `${worker.user.firstName} ${worker.user.lastName}`;
 
     const returnUrl = new URL(`/tip/success`, appUrl);
@@ -190,16 +186,30 @@ export async function POST(request: NextRequest) {
     const cancelUrl = new URL(`/tip/failed`, appUrl);
     cancelUrl.searchParams.set("reference", tip.paymentId);
 
-    const paystack = await initializeTransaction({
-      paymentId: tip.paymentId,
-      amount: data.amount,
-      itemName: `Tip for ${workerName}`,
-      workerName,
-      returnUrl: returnUrl.toString(),
-      cancelUrl: cancelUrl.toString(),
-      customerEmail: data.customerEmail || `tip+${tip.paymentId}@slipatip.co.za`,
-      customerName: data.customerName,
-    });
+    let paystack;
+    try {
+      paystack = await initializeTransaction({
+        paymentId: tip.paymentId,
+        amount: data.amount,
+        itemName: `Tip for ${workerName}`,
+        workerName,
+        returnUrl: returnUrl.toString(),
+        cancelUrl: cancelUrl.toString(),
+        customerEmail: data.customerEmail || `tip+${tip.paymentId}@slipatip.co.za`,
+        customerName: data.customerName,
+      });
+    } catch (paystackErr) {
+      // Clean up the orphaned tip so the user can retry cleanly
+      await db.tip.delete({ where: { id: tip.id } }).catch(() => {});
+      throw paystackErr;
+    }
+
+    // --- Record velocity events only after payment gateway confirms ---
+    // This ensures failed/errored attempts do NOT consume the user's daily quota.
+    // Both records use worker.id as the FK-required workerId field;
+    // TIP_SENT is queried by ipAddress only, TIP_RECEIVED by workerId+ipAddress.
+    await recordVelocityEvent(worker.id, "TIP_RECEIVED", data.amount, ipAddress, fingerprintHash);
+    await recordVelocityEvent(worker.id, "TIP_SENT", data.amount, ipAddress, fingerprintHash);
 
     return NextResponse.json({
       tip: { id: tip.id, paymentId: tip.paymentId },

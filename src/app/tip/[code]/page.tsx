@@ -223,25 +223,41 @@ export default function TipPage() {
 
               {/* Scan to Pay strip */}
               <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 mb-2.5 text-center">Pay directly from your banking app</p>
-                <div className="flex items-center justify-center gap-2 flex-wrap">
-                  {[
-                    { name: "FNB", color: "#00a650" },
-                    { name: "Capitec", color: "#0066cc" },
-                    { name: "ABSA", color: "#dc0032" },
-                    { name: "Nedbank", color: "#007a4d" },
-                    { name: "Std Bank", color: "#1a73e8" },
-                  ].map((bank) => (
-                    <span
-                      key={bank.name}
-                      className="px-2 py-1 rounded-md text-[10px] font-bold tracking-tight"
-                      style={{ background: `${bank.color}18`, color: bank.color, border: `1px solid ${bank.color}30` }}
-                    >
-                      {bank.name}
-                    </span>
-                  ))}
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 mb-3 text-center">Pay directly from your banking app</p>
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  {/* FNB */}
+                  <div className="flex items-center justify-center w-12 h-8 rounded-lg" style={{ background: "rgba(0,166,80,0.12)", border: "1px solid rgba(0,166,80,0.25)" }}>
+                    <svg viewBox="0 0 48 20" className="w-9 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <text x="0" y="15" fontFamily="Arial Black, Arial" fontWeight="900" fontSize="13" fill="#00a650" letterSpacing="-0.5">FNB</text>
+                    </svg>
+                  </div>
+                  {/* Capitec */}
+                  <div className="flex items-center justify-center w-14 h-8 rounded-lg" style={{ background: "rgba(0,102,204,0.12)", border: "1px solid rgba(0,102,204,0.25)" }}>
+                    <svg viewBox="0 0 64 20" className="w-12 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <text x="0" y="15" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="11" fill="#0066cc" letterSpacing="0.2">CAPITEC</text>
+                    </svg>
+                  </div>
+                  {/* ABSA */}
+                  <div className="flex items-center justify-center w-12 h-8 rounded-lg" style={{ background: "rgba(220,0,50,0.12)", border: "1px solid rgba(220,0,50,0.25)" }}>
+                    <svg viewBox="0 0 44 20" className="w-9 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <text x="0" y="15" fontFamily="Arial Black, Arial" fontWeight="900" fontSize="13" fill="#dc0032" letterSpacing="-0.3">ABSA</text>
+                    </svg>
+                  </div>
+                  {/* Nedbank */}
+                  <div className="flex items-center justify-center w-16 h-8 rounded-lg" style={{ background: "rgba(0,122,77,0.12)", border: "1px solid rgba(0,122,77,0.25)" }}>
+                    <svg viewBox="0 0 72 20" className="w-14 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <text x="0" y="15" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="11" fill="#007a4d" letterSpacing="0.1">NEDBANK</text>
+                    </svg>
+                  </div>
+                  {/* Standard Bank */}
+                  <div className="flex items-center justify-center w-8 h-8 rounded-lg" style={{ background: "rgba(0,85,165,0.12)", border: "1px solid rgba(0,85,165,0.25)" }}>
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="10" fill="#0055a5" opacity="0.15"/>
+                      <text x="12" y="16" fontFamily="Arial Black, Arial" fontWeight="900" fontSize="9" fill="#0055a5" textAnchor="middle" letterSpacing="-0.3">SB</text>
+                    </svg>
+                  </div>
                 </div>
-                <p className="text-center text-[10px] text-white/25 mt-2">Select &ldquo;Scan to Pay&rdquo; at checkout &middot; No card number needed</p>
+                <p className="text-center text-[10px] text-white/25 mt-2.5">Select &ldquo;Scan to Pay&rdquo; at checkout &middot; No card details needed</p>
               </div>
 
               <div className="flex items-center justify-center gap-2 pt-1">
