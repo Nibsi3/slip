@@ -15,7 +15,7 @@ const protectedRoutes = ["/dashboard", "/admin"];
 const authRoutes = ["/auth/login", "/auth/register"];
 const CSRF_MUTATION_METHODS = ["POST", "PATCH", "PUT", "DELETE"];
 // API paths that are exempt from CSRF (webhooks, public endpoints, cron)
-const CSRF_EXEMPT = ["/api/paystack/webhook", "/api/cron/", "/api/tips", "/api/contact", "/api/apply", "/api/qrcodes/activate", "/api/auth/login", "/api/auth/register", "/api/auth/forgot-password", "/api/auth/reset-password", "/api/auth/otp/", "/api/auth/2fa/verify", "/api/auth/csrf", "/api/health"];
+const CSRF_EXEMPT = ["/api/paystack/webhook", "/api/cron/", "/api/tips", "/api/contact", "/api/apply", "/api/qrcodes/activate", "/api/auth/login", "/api/auth/register", "/api/auth/forgot-password", "/api/auth/reset-password", "/api/auth/otp/", "/api/auth/2fa/verify", "/api/auth/csrf", "/api/auth/logout", "/api/health"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
