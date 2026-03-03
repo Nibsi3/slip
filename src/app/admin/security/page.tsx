@@ -9,6 +9,8 @@ export default function AdminSecurityPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [csrfToken, setCsrfToken] = useState<string>("");
+
   // Setup state
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [secret, setSecret] = useState("");
@@ -18,6 +20,18 @@ export default function AdminSecurityPage() {
 
   // Check current 2FA status
   const [totpEnabled, setTotpEnabled] = useState(false);
+
+  async function ensureCsrfToken(): Promise<string> {
+    if (csrfToken) return csrfToken;
+    const res = await fetch("/api/auth/csrf");
+    const data = await res.json();
+    const token = data.csrfToken as string | undefined;
+    if (res.ok && token) {
+      setCsrfToken(token);
+      return token;
+    }
+    throw new Error(data.error || "Failed to get CSRF token");
+  }
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -31,6 +45,13 @@ export default function AdminSecurityPage() {
         }
       })
       .catch(() => setStep("setup"));
+
+    fetch("/api/auth/csrf")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.csrfToken) setCsrfToken(d.csrfToken);
+      })
+      .catch(() => {});
   }, []);
 
   async function startSetup() {
@@ -55,11 +76,25 @@ export default function AdminSecurityPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/2fa/setup", {
+      const token = await ensureCsrfToken();
+
+      let res = await fetch("/api/auth/2fa/setup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-csrf-token": token },
         body: JSON.stringify({ secret, token: verifyCode }),
       });
+
+      // If the CSRF cookie expired/rotated, refresh token once and retry.
+      if (res.status === 403) {
+        setCsrfToken("");
+        const refreshed = await ensureCsrfToken();
+        res = await fetch("/api/auth/2fa/setup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-csrf-token": refreshed },
+          body: JSON.stringify({ secret, token: verifyCode }),
+        });
+      }
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Verification failed");
       setBackupCodes(data.backupCodes || []);
