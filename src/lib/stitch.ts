@@ -95,7 +95,7 @@ export async function createStitchPaymentLink(
     merchantReference: params.merchantReference.slice(0, 50),
   };
 
-  if (params.payerName) body.payerName = params.payerName.slice(0, 40);
+  body.payerName = (params.payerName || "Guest").slice(0, 40);
   if (params.payerEmail) body.payerEmailAddress = params.payerEmail;
   if (params.payerPhone) body.payerPhoneNumber = params.payerPhone;
   if (params.expiresAt) body.expiresAt = params.expiresAt;
