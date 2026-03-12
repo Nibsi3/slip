@@ -6,7 +6,7 @@ declare global {
 }
 
 function createRedisClient(): Redis | null {
-  const url = process.env.REDIS_URL;
+  const url = process.env.REDIS_URL?.trim();
   if (!url) {
     console.warn("[Redis] REDIS_URL is not set — rate limiting and velocity checks will be skipped.");
     return null;
