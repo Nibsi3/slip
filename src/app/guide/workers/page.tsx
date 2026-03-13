@@ -295,15 +295,15 @@ const faqs = [
 
 export default function WorkerGuidePage() {
   return (
-    <div className="min-h-screen bg-white">
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-lg">
+    <div className="min-h-screen" style={{ background: "#030306" }}>
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.05]" style={{ background: "rgba(3,3,6,0.75)", backdropFilter: "blur(24px)" }}>
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2.5">
             <Image src="/logo.png" alt="Slip a Tip" width={56} height={56} quality={95} priority className="h-11 w-11 object-contain" />
           </Link>
           <div className="flex items-center gap-3 sm:gap-5">
-            <Link href="/guide/customers" className="hidden sm:inline-flex text-xs text-gray-500 hover:text-gray-900 transition-colors">Customer Guide</Link>
-            <Link href="/" className="text-xs text-gray-500 hover:text-gray-900 transition-colors">&larr; Home</Link>
+            <Link href="/guide/customers" className="hidden sm:inline-flex text-xs text-white/40 hover:text-white transition-colors">Customer Guide</Link>
+            <Link href="/" className="text-xs text-white/40 hover:text-white transition-colors">&larr; Home</Link>
             <Link href="/auth/register" className="btn-primary !py-2 !px-4 !text-xs">Get Started</Link>
           </div>
         </nav>
@@ -313,12 +313,12 @@ export default function WorkerGuidePage() {
         <div className="mx-auto max-w-5xl">
           {/* Title */}
           <div className="mb-16 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium text-sky-700 bg-sky-50 ring-1 ring-sky-200 mb-6">
-              <svg className="h-3.5 w-3.5 text-sky-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+            <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium text-white/70 ring-1 ring-white/[0.12] mb-6" style={{ background: "rgba(20,167,249,0.07)" }}>
+              <svg className="h-3.5 w-3.5 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
               Worker Guide
             </div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-tight">Getting Started as a Worker</h1>
-            <p className="mt-4 text-gray-500 max-w-lg mx-auto leading-relaxed">
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight">Getting Started as a Worker</h1>
+            <p className="mt-4 text-white/40 max-w-lg mx-auto leading-relaxed">
               Everything you need to know — from signing up to withdrawing your first tips. Follow these steps and you&rsquo;ll be accepting digital tips in minutes.
             </p>
           </div>
@@ -332,14 +332,14 @@ export default function WorkerGuidePage() {
                 {/* Text */}
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="h-9 w-9 rounded-full bg-sky-100 flex items-center justify-center text-xs font-bold text-sky-600 shrink-0">{s.num}</div>
-                    <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900">{s.title}</h2>
+                    <div className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-bold text-accent ring-1 ring-accent/20 shrink-0" style={{ background: "rgba(20,167,249,0.08)" }}>{s.num}</div>
+                    <h2 className="text-xl sm:text-2xl font-extrabold text-white">{s.title}</h2>
                   </div>
                   <ul className="space-y-2">
                     {s.items.map((item, j) => (
                       <li key={j} className="flex items-start gap-2.5">
-                        <svg className="h-4 w-4 text-sky-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                        <span className="text-sm text-gray-500 leading-relaxed">{item}</span>
+                        <svg className="h-4 w-4 text-accent/60 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                        <span className="text-sm text-white/50 leading-relaxed">{item}</span>
                       </li>
                     ))}
                   </ul>
@@ -351,14 +351,14 @@ export default function WorkerGuidePage() {
           {/* FAQ */}
           <div className="mt-24">
             <div className="mb-10 text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-500 mb-3">FAQ</p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight">Frequently Asked Questions</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-3">FAQ</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">Frequently Asked Questions</h2>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {faqs.map((f) => (
-                <div key={f.q} className="rounded-2xl p-5 bg-gray-50 ring-1 ring-gray-100">
-                  <div className="text-sm font-semibold text-gray-900">{f.q}</div>
-                  <div className="mt-2 text-xs text-gray-500 leading-relaxed">{f.a}</div>
+                <div key={f.q} className="rounded-2xl p-5 ring-1 ring-white/[0.07]" style={{ background: "rgba(255,255,255,0.025)" }}>
+                  <div className="text-sm font-semibold text-white">{f.q}</div>
+                  <div className="mt-2 text-xs text-white/40 leading-relaxed">{f.a}</div>
                 </div>
               ))}
             </div>
@@ -366,9 +366,9 @@ export default function WorkerGuidePage() {
 
           {/* CTA */}
           <div className="mt-20 text-center">
-            <div className="rounded-2xl p-10 bg-gray-50 ring-1 ring-gray-100">
-              <h3 className="text-2xl font-extrabold text-gray-900">Ready to start earning tips?</h3>
-              <p className="mt-3 text-sm text-gray-500">Create your free account and get your personal QR code in minutes.</p>
+            <div className="rounded-2xl p-10 ring-1 ring-white/[0.09]" style={{ background: "rgba(8,8,14,0.8)", backdropFilter: "blur(24px)" }}>
+              <h3 className="text-2xl font-extrabold text-white">Ready to start earning tips?</h3>
+              <p className="mt-3 text-sm text-white/40">Create your free account and get your personal QR code in minutes.</p>
               <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                 <Link href="/auth/register" className="btn-primary !py-3.5 !px-8 text-sm">Create your account</Link>
                 <Link href="/apply" className="btn-secondary !py-3.5 !px-8 text-sm">Apply as a worker</Link>

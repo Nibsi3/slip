@@ -129,7 +129,7 @@ export default function WithdrawPage() {
     }
   }
 
-  if (loading) return <div className="animate-pulse text-gray-400">Loading...</div>;
+  if (loading) return <div className="animate-pulse text-muted-300">Loading...</div>;
   if (!worker) return <div className="text-red-500">Failed to load data.</div>;
 
   const balance = Number(worker.walletBalance);
@@ -139,15 +139,15 @@ export default function WithdrawPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Withdraw Funds</h1>
-        <p className="text-gray-500 mt-1">
-          Available balance: <span className="font-bold text-sky-600">R{balance.toFixed(2)}</span>
+        <h1 className="text-2xl font-bold text-white">Withdraw Funds</h1>
+        <p className="text-muted mt-1">
+          Available balance: <span className="font-bold text-accent">R{balance.toFixed(2)}</span>
         </p>
       </div>
 
       {!canWithdraw && (
-        <div className="rounded-xl p-4 bg-yellow-50 border border-yellow-200">
-          <p className="text-sm text-yellow-700 font-medium">
+        <div className="rounded-xl p-4 bg-yellow-500/10 border border-yellow-500/20">
+          <p className="text-sm text-yellow-400 font-medium">
             You need a minimum balance of <strong>R100</strong> to withdraw. Keep tipping to build your balance!
           </p>
         </div>
@@ -156,15 +156,15 @@ export default function WithdrawPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Left — Withdrawal form */}
         <div className="card">
-          <h2 className="text-lg font-bold text-gray-900 mb-5">New EFT Withdrawal</h2>
+          <h2 className="text-lg font-bold text-white mb-5">New EFT Withdrawal</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Amount <span className="text-gray-400">(min R100)</span>
+              <label className="block text-sm font-medium text-muted mb-1">
+                Amount <span className="text-white/30">(min R100)</span>
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">R</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-300 font-semibold">R</span>
                 <input
                   type="number"
                   min={100}
@@ -179,25 +179,25 @@ export default function WithdrawPage() {
                 />
               </div>
               {amountNum >= 100 && (
-                <div className="mt-2 p-3 rounded-lg bg-gray-50 ring-1 ring-gray-100 text-xs space-y-1.5">
+                <div className="mt-2 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] text-xs space-y-1.5">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Withdrawal amount</span>
-                    <span className="text-gray-900">R{amountNum.toFixed(2)}</span>
+                    <span className="text-white/40">Withdrawal amount</span>
+                    <span className="text-white">R{amountNum.toFixed(2)}</span>
                   </div>
-                  <div className="h-px bg-gray-200" />
+                  <div className="h-px bg-white/[0.06]" />
                   <div className="flex justify-between font-semibold">
-                    <span className="text-gray-500">You receive</span>
-                    <span className="text-green-600">R{amountNum.toFixed(2)}</span>
+                    <span className="text-white/50">You receive</span>
+                    <span className="text-green-400">R{amountNum.toFixed(2)}</span>
                   </div>
-                  <p className="text-[10px] text-gray-400 mt-1">No Slip a Tip fee. Bank EFT charges may apply.</p>
+                  <p className="text-[10px] text-white/20 mt-1">No Slip a Tip fee. Bank EFT charges may apply.</p>
                 </div>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bank</label>
+              <label className="block text-sm font-medium text-muted mb-1">Bank</label>
               {banksLoading ? (
-                <div className="input-field text-gray-300 animate-pulse">Loading banks...</div>
+                <div className="input-field text-white/30 animate-pulse">Loading banks...</div>
               ) : (
                 <select
                   value={selectedBankCode}
@@ -215,7 +215,7 @@ export default function WithdrawPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
+              <label className="block text-sm font-medium text-muted mb-1">Account Number</label>
               <input
                 type="text"
                 value={bankAccountNo}
@@ -228,10 +228,10 @@ export default function WithdrawPage() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">{error}</div>
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-sm text-red-400">{error}</div>
             )}
             {success && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700">{success}</div>
+              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 text-sm text-green-400">{success}</div>
             )}
 
             <button
@@ -254,33 +254,33 @@ export default function WithdrawPage() {
 
         {/* Right — Withdrawal history */}
         <div className="card">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Withdrawal History</h2>
+          <h2 className="text-lg font-bold text-white mb-4">Withdrawal History</h2>
           {withdrawals.length === 0 ? (
-            <p className="text-sm text-gray-400 py-8 text-center">No withdrawals yet</p>
+            <p className="text-sm text-muted-300 py-8 text-center">No withdrawals yet</p>
           ) : (
-            <div className="divide-y divide-gray-50 max-h-[600px] overflow-y-auto">
+            <div className="divide-y divide-white/[0.05] max-h-[600px] overflow-y-auto">
               {withdrawals.map((w) => (
                 <div key={w.id} className="py-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900 text-sm">R{Number(w.amount).toFixed(2)}</p>
-                      <p className="text-xs text-gray-500">EFT Transfer</p>
+                      <p className="font-medium text-white text-sm">R{Number(w.amount).toFixed(2)}</p>
+                      <p className="text-xs text-muted">EFT Transfer</p>
                     </div>
                     <div className="text-right">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
                           w.status === "COMPLETED"
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-green-900/30 text-green-400"
                             : w.status === "PENDING"
-                            ? "bg-yellow-100 text-yellow-700"
+                            ? "bg-yellow-900/30 text-yellow-400"
                             : w.status === "PROCESSING"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-red-100 text-red-700"
+                            ? "bg-blue-900/30 text-blue-400"
+                            : "bg-red-900/30 text-red-400"
                         }`}
                       >
                         {w.status === "PROCESSING" ? "IN PROGRESS" : w.status}
                       </span>
-                      <p className="text-[10px] text-gray-400 mt-0.5">
+                      <p className="text-[10px] text-muted-300 mt-0.5">
                         {new Date(w.createdAt).toLocaleDateString("en-ZA")}
                       </p>
                     </div>
@@ -289,22 +289,22 @@ export default function WithdrawPage() {
                   {w.reference && (w.status === "PROCESSING" || w.status === "COMPLETED") && (
                     <div className={`mt-2 p-3 rounded-lg ${
                       w.status === "PROCESSING"
-                        ? "bg-blue-50 border border-blue-100"
-                        : "bg-green-50 border border-green-100"
+                        ? "bg-blue-900/20 border border-blue-800/40"
+                        : "bg-green-900/20 border border-green-800/40"
                     }`}>
-                      <p className="text-[10px] font-medium text-gray-400 mb-1">EFT Reference</p>
-                      <p className="text-sm font-mono font-bold tracking-widest text-gray-900 break-all">
+                      <p className="text-[10px] font-medium text-muted mb-1">EFT Reference</p>
+                      <p className="text-sm font-mono font-bold tracking-widest text-white break-all">
                         {w.reference}
                       </p>
                     </div>
                   )}
 
                   {w.status === "PENDING" && (
-                    <p className="mt-1 text-xs text-yellow-600">Under review — payment will be processed shortly.</p>
+                    <p className="mt-1 text-xs text-yellow-400">Under review — payment will be processed shortly.</p>
                   )}
 
                   {w.status === "FAILED" && (
-                    <p className="mt-1 text-xs text-red-600">
+                    <p className="mt-1 text-xs text-red-400">
                       Failed. {w.reference ? `Reason: ${w.reference}.` : ""} Funds have been returned to your wallet.
                     </p>
                   )}

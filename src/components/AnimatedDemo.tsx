@@ -270,18 +270,18 @@ export default function AnimatedDemo() {
               }}
               className="flex-1 group"
             >
-              <div className="h-1 rounded-full overflow-hidden mb-2 bg-gray-200">
+              <div className="h-1 rounded-full overflow-hidden mb-2" style={{ background: "rgba(255,255,255,0.06)" }}>
                 <div
                   className="h-full rounded-full transition-all duration-200"
                   style={{
-                    background: step >= s.id ? "#0ea5e9" : "transparent",
+                    background: step >= s.id ? "#14a7f9" : "transparent",
                     width: step > s.id ? "100%" : step === s.id ? `${progress}%` : "0%",
                   }}
                 />
               </div>
               <span
                 className={`text-[10px] sm:text-xs font-medium transition-colors ${
-                  step === s.id ? "text-sky-600" : "text-gray-400 group-hover:text-gray-600"
+                  step === s.id ? "text-accent" : "text-white/25 group-hover:text-white/40"
                 }`}
               >
                 Step {s.id}
@@ -306,15 +306,18 @@ export default function AnimatedDemo() {
               {step === s.id && (
                 <>
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="h-9 w-9 rounded-xl bg-sky-100 flex items-center justify-center text-xs font-bold text-sky-600">
+                    <div
+                      className="h-9 w-9 rounded-xl flex items-center justify-center text-xs font-bold text-accent"
+                      style={{ background: "rgba(20,167,249,0.1)" }}
+                    >
                       {s.id}
                     </div>
                     <div>
-                      <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900">{s.title}</h3>
-                      <p className="text-xs text-sky-500">{s.sub}</p>
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-white">{s.title}</h3>
+                      <p className="text-xs text-accent/60">{s.sub}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500 leading-relaxed max-w-md">{s.desc}</p>
+                  <p className="text-sm text-white/45 leading-relaxed max-w-md">{s.desc}</p>
                 </>
               )}
             </div>
@@ -325,14 +328,15 @@ export default function AnimatedDemo() {
         <div className="mt-6 flex items-center gap-3">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className="h-9 w-9 rounded-full ring-1 ring-gray-200 bg-white flex items-center justify-center hover:ring-sky-300 transition-all"
+            className="h-9 w-9 rounded-full ring-1 ring-white/10 flex items-center justify-center hover:ring-accent/30 transition-all"
+            style={{ background: "rgba(255,255,255,0.04)" }}
           >
             {isPlaying ? (
-              <svg className="h-3.5 w-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <svg className="h-3.5 w-3.5 text-white/60" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
               </svg>
             ) : (
-              <svg className="h-3.5 w-3.5 text-gray-500 ml-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <svg className="h-3.5 w-3.5 text-white/60 ml-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
               </svg>
             )}
@@ -342,11 +346,11 @@ export default function AnimatedDemo() {
               setStep(1);
               setProgress(0);
             }}
-            className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-[10px] text-white/30 hover:text-white/60 transition-colors"
           >
             Restart
           </button>
-          <span className="ml-auto text-[10px] text-gray-300">{step}/4</span>
+          <span className="ml-auto text-[10px] text-white/20">{step}/4</span>
         </div>
       </div>
 

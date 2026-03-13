@@ -84,7 +84,7 @@ export default function QRCodePage() {
   }
 
   if (loading) {
-    return <div className="animate-pulse text-gray-400">Loading QR code...</div>;
+    return <div className="animate-pulse text-muted-300">Loading QR code...</div>;
   }
 
   if (!worker) {
@@ -96,21 +96,21 @@ export default function QRCodePage() {
   return (
     <div className="space-y-6 max-w-lg">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Your QR Code</h1>
-        <p className="text-gray-500 mt-1">Customer scans → WhatsApp opens → tip in seconds</p>
+        <h1 className="text-2xl font-bold text-white">Your QR Code</h1>
+        <p className="text-muted mt-1">Customer scans → WhatsApp opens → tip in seconds</p>
       </div>
 
       {/* QR Card */}
       <div className="card-glow text-center">
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-white">
             {worker.user.firstName} {worker.user.lastName}
           </h2>
           {worker.jobTitle && (
-            <p className="text-sm text-gray-500 mt-0.5">{worker.jobTitle}</p>
+            <p className="text-sm text-muted mt-0.5">{worker.jobTitle}</p>
           )}
           {worker.employerName && (
-            <p className="text-xs text-gray-400 mt-0.5">{worker.employerName}</p>
+            <p className="text-xs text-muted-300 mt-0.5">{worker.employerName}</p>
           )}
         </div>
 
@@ -126,13 +126,13 @@ export default function QRCodePage() {
           </div>
         ) : (
           <div className="flex justify-center mb-6">
-            <div className="w-52 h-52 sm:w-64 sm:h-64 rounded-2xl bg-gray-50 ring-1 ring-gray-100 flex items-center justify-center">
-              <div className="animate-pulse text-gray-300 text-sm">Generating...</div>
+            <div className="w-52 h-52 sm:w-64 sm:h-64 rounded-2xl bg-white/5 ring-1 ring-white/10 flex items-center justify-center">
+              <div className="animate-pulse text-white/20 text-sm">Generating...</div>
             </div>
           </div>
         )}
 
-        <p className="text-[11px] text-gray-400 break-all mb-6 px-2 font-mono">{waUrl}</p>
+        <p className="text-[11px] text-muted-300 break-all mb-6 px-2 font-mono">{waUrl}</p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button onClick={downloadQR} className="btn-primary">
@@ -146,7 +146,7 @@ export default function QRCodePage() {
 
       {/* How to use */}
       <div className="card">
-        <h3 className="font-bold text-gray-900 mb-4">How it works</h3>
+        <h3 className="font-bold text-white mb-4">How it works</h3>
         <div className="space-y-3">
           {[
             { n: "1", t: "Print or display", d: "Print this QR code and place it where customers can see it — on your badge, car, or workspace." },
@@ -156,10 +156,10 @@ export default function QRCodePage() {
             { n: "5", t: "You get paid", d: "Funds land in your Slip a Tip wallet instantly. You'll get a WhatsApp notification too." },
           ].map((s) => (
             <div key={s.n} className="flex gap-4">
-              <div className="h-7 w-7 rounded-full bg-sky-100 flex items-center justify-center text-xs font-bold text-sky-600 shrink-0 mt-0.5">{s.n}</div>
+              <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold text-accent shrink-0 mt-0.5" style={{ background: "rgba(20,167,249,0.1)" }}>{s.n}</div>
               <div>
-                <div className="text-sm font-semibold text-gray-900">{s.t}</div>
-                <div className="text-xs text-gray-500 mt-0.5">{s.d}</div>
+                <div className="text-sm font-semibold text-white">{s.t}</div>
+                <div className="text-xs text-muted mt-0.5">{s.d}</div>
               </div>
             </div>
           ))}
@@ -218,57 +218,57 @@ function PhysicalQRRequest() {
   const pendingRequest = info.requests.find(r => r.status === "PENDING");
 
   const statusColor: Record<string, string> = {
-    PENDING: "text-yellow-600",
-    APPROVED: "text-blue-600",
-    DISPATCHED: "text-green-600",
-    REJECTED: "text-red-600",
+    PENDING: "text-yellow-400",
+    APPROVED: "text-blue-400",
+    DISPATCHED: "text-green-400",
+    REJECTED: "text-red-400",
   };
 
   return (
     <div className="card">
       <div className="flex items-start gap-3 mb-4">
-        <div className="h-8 w-8 rounded-lg bg-sky-100 flex items-center justify-center shrink-0">
-          <svg className="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" /></svg>
+        <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(20,167,249,0.1)" }}>
+          <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" /></svg>
         </div>
         <div className="flex-1">
-          <h3 className="text-sm font-bold text-gray-900">Request a Physical QR Card</h3>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <h3 className="text-sm font-bold text-white">Request a Physical QR Card</h3>
+          <p className="text-xs text-muted mt-0.5">
             {info.isFreeEligible
               ? "Your first physical QR card is free! We'll print and dispatch it to you."
               : `Additional physical QR cards cost R${info.fee}. The fee is deducted from your wallet.`}
           </p>
         </div>
         {info.isFreeEligible && (
-          <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wide shrink-0">Free</span>
+          <span className="px-2 py-0.5 rounded-full bg-green-900/30 text-green-400 text-[10px] font-bold uppercase tracking-wide shrink-0">Free</span>
         )}
       </div>
 
       {success && (
-        <div className="mb-4 px-3 py-2.5 rounded-xl bg-green-50 border border-green-200 text-xs text-green-700">{success}</div>
+        <div className="mb-4 px-3 py-2.5 rounded-xl bg-green-900/20 border border-green-700/30 text-xs text-green-400">{success}</div>
       )}
 
       {/* Previous requests */}
       {info.requests.length > 0 && (
         <div className="mb-4 space-y-2">
           {info.requests.slice(0, 3).map(req => (
-            <div key={req.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 ring-1 ring-gray-100">
+            <div key={req.id} className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.03)" }}>
               <div>
-                <span className={`text-xs font-medium ${statusColor[req.status] || "text-gray-500"}`}>{req.status}</span>
-                <span className="text-[11px] text-gray-400 ml-2">{req.isFree ? "Free" : `R${Number(req.feeCharged).toFixed(2)}`}</span>
-                {req.adminNotes && <p className="text-[11px] text-gray-500 mt-0.5">{req.adminNotes}</p>}
+                <span className={`text-xs font-medium ${statusColor[req.status] || "text-muted"}`}>{req.status}</span>
+                <span className="text-[11px] text-muted-300 ml-2">{req.isFree ? "Free" : `R${Number(req.feeCharged).toFixed(2)}`}</span>
+                {req.adminNotes && <p className="text-[11px] text-muted mt-0.5">{req.adminNotes}</p>}
               </div>
-              <span className="text-[11px] text-gray-400">{new Date(req.createdAt).toLocaleDateString("en-ZA")}</span>
+              <span className="text-[11px] text-muted-300">{new Date(req.createdAt).toLocaleDateString("en-ZA")}</span>
             </div>
           ))}
         </div>
       )}
 
       {pendingRequest ? (
-        <p className="text-xs text-yellow-600">You have a pending request. We&apos;ll process it shortly.</p>
+        <p className="text-xs text-yellow-400/80">You have a pending request. We&apos;ll process it shortly.</p>
       ) : open ? (
         <div className="space-y-3 mt-2">
           <div>
-            <label className="block text-xs text-gray-600 mb-1">Delivery Address <span className="text-gray-400">(optional)</span></label>
+            <label className="block text-xs text-muted mb-1">Delivery Address <span className="text-muted-300">(optional)</span></label>
             <input
               type="text"
               value={address}
@@ -278,7 +278,7 @@ function PhysicalQRRequest() {
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-600 mb-1">Notes <span className="text-gray-400">(optional)</span></label>
+            <label className="block text-xs text-muted mb-1">Notes <span className="text-muted-300">(optional)</span></label>
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
@@ -287,9 +287,9 @@ function PhysicalQRRequest() {
               placeholder="Any special instructions..."
             />
           </div>
-          {error && <div className="px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600">{error}</div>}
+          {error && <div className="px-3 py-2 rounded-xl bg-red-900/20 border border-red-700/30 text-xs text-red-400">{error}</div>}
           {!info.isFreeEligible && (
-            <div className="px-3 py-2 rounded-xl bg-yellow-50 border border-yellow-200 text-xs text-yellow-700">
+            <div className="px-3 py-2 rounded-xl bg-yellow-900/20 border border-yellow-700/30 text-xs text-yellow-400/80">
               R{info.fee} will be deducted from your wallet balance.
             </div>
           )}
@@ -347,13 +347,13 @@ function CancelQR({ onCancelled }: { onCancelled: () => void }) {
 
   if (!open) {
     return (
-      <div className="card border border-red-100">
+      <div className="card border-red-500/10">
         <div className="flex items-start gap-3">
-          <svg className="h-5 w-5 text-red-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+          <svg className="h-5 w-5 text-red-400/60 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
           <div className="flex-1">
-            <h3 className="text-sm font-semibold text-gray-900">Cancel QR Code</h3>
-            <p className="text-xs text-gray-500 mt-1">If your QR code card is lost, stolen, or damaged, cancel it here. A new digital QR code will be generated immediately.</p>
-            <button onClick={() => setOpen(true)} className="mt-3 text-xs font-medium text-red-600 hover:text-red-700 transition-colors">
+            <h3 className="text-sm font-semibold text-white">Cancel QR Code</h3>
+            <p className="text-xs text-muted mt-1">If your QR code card is lost, stolen, or damaged, cancel it here. A new digital QR code will be generated immediately.</p>
+            <button onClick={() => setOpen(true)} className="mt-3 text-xs font-medium text-red-400 hover:text-red-300 transition-colors">
               Cancel my QR code &rarr;
             </button>
           </div>
@@ -363,19 +363,17 @@ function CancelQR({ onCancelled }: { onCancelled: () => void }) {
   }
 
   return (
-    <div className="card ring-1 ring-red-200">
-      <h3 className="text-sm font-bold text-gray-900 mb-3">Cancel QR Code</h3>
-      <p className="text-xs text-gray-500 mb-4">This will deactivate your current QR code and generate a new one. Anyone with your old QR code will no longer be able to use it.</p>
+    <div className="card ring-red-500/20">
+      <h3 className="text-sm font-bold text-white mb-3">Cancel QR Code</h3>
+      <p className="text-xs text-muted mb-4">This will deactivate your current QR code and generate a new one. Anyone with your old QR code will no longer be able to use it.</p>
 
       <div className="space-y-2 mb-4">
         {reasons.map(r => (
-          <label key={r.value} className={`flex items-start gap-3 rounded-xl p-3 ring-1 cursor-pointer transition-all ${
-            reason === r.value ? "ring-red-300 bg-red-50" : "ring-gray-100 bg-gray-50 hover:ring-gray-200"
-          }`}>
+          <label key={r.value} className={`flex items-start gap-3 rounded-xl p-3 ring-1 cursor-pointer transition-all ${reason === r.value ? "ring-red-500/30" : "ring-white/[0.06] hover:ring-white/[0.1]"}`} style={{ background: reason === r.value ? "rgba(239,68,68,0.05)" : "rgba(255,255,255,0.02)" }}>
             <input type="radio" name="cancelReason" value={r.value} checked={reason === r.value} onChange={() => setReason(r.value)} className="mt-0.5 h-3.5 w-3.5 text-red-500 focus:ring-red-500 shrink-0" />
             <div>
-              <div className="text-xs font-medium text-gray-900">{r.label}</div>
-              <div className="text-[11px] text-gray-500">{r.desc}</div>
+              <div className="text-xs font-medium text-white">{r.label}</div>
+              <div className="text-[11px] text-muted">{r.desc}</div>
             </div>
           </label>
         ))}
@@ -383,12 +381,12 @@ function CancelQR({ onCancelled }: { onCancelled: () => void }) {
 
       {(reason === "OTHER" || reason === "STOLEN") && (
         <div className="mb-4">
-          <label className="block text-xs font-medium text-gray-600 mb-1">{reason === "STOLEN" ? "Details (optional — e.g. where/when)" : "Please describe"}</label>
+          <label className="block text-xs font-medium text-muted mb-1">{reason === "STOLEN" ? "Details (optional — e.g. where/when)" : "Please describe"}</label>
           <textarea value={details} onChange={e => setDetails(e.target.value)} className="input-field" rows={2} placeholder="Add any details..." />
         </div>
       )}
 
-      {error && <div className="mb-3 bg-red-50 border border-red-200 rounded-xl p-2 text-xs text-red-600">{error}</div>}
+      {error && <div className="mb-3 bg-red-500/10 border border-red-500/20 rounded-xl p-2 text-xs text-red-400">{error}</div>}
 
       <div className="flex gap-3">
         <button onClick={() => { setOpen(false); setReason(""); setDetails(""); setError(""); }} className="btn-secondary flex-1 !py-2.5 !text-xs">

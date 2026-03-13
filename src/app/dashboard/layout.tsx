@@ -109,35 +109,34 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="sticky top-0 z-30 border-b border-gray-100 bg-white shadow-sm">
+    <div className="min-h-screen" style={{ background: "#030306" }}>
+      <header className="sticky top-0 z-30 border-b border-white/[0.06]" style={{ background: "rgba(3,3,6,0.8)", backdropFilter: "blur(20px)" }}>
         <div className="flex items-center justify-between px-6 h-14">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="lg:hidden p-2 hover:bg-white/5 transition-colors"
             >
-              <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <Link href="/dashboard" className="flex items-center gap-2">
+            <Link href="/dashboard" className="flex items-center">
               <Image src="/logo.png" alt="Slip a Tip" width={36} height={36} quality={95} priority className="h-8 w-8 object-contain" />
-              <span className="font-bold text-gray-900 text-sm hidden sm:block">Slip a Tip</span>
             </Link>
           </div>
           <div className="flex items-center gap-4">
             {user && (
               <div className="hidden sm:flex items-center gap-2">
-                <div className="h-7 w-7 rounded-full bg-sky-100 flex items-center justify-center text-[11px] font-bold text-sky-600">
+                <div className="h-6 w-6 rounded-full bg-accent/15 flex items-center justify-center text-[10px] font-bold text-accent">
                   {user.firstName?.charAt(0)}
                 </div>
-                <span className="text-xs text-gray-600">
+                <span className="text-xs text-white/50">
                   {user.firstName} {user.lastName}
                 </span>
               </div>
             )}
-            <button onClick={handleLogout} className="text-xs text-gray-400 hover:text-gray-700 transition-colors">
+            <button onClick={handleLogout} className="text-xs text-white/30 hover:text-white transition-colors">
               Log out
             </button>
           </div>
@@ -145,33 +144,33 @@ export default function DashboardLayout({
       </header>
 
       <div className="flex">
-        <aside className="hidden lg:flex lg:flex-col w-56 shrink-0 border-r border-gray-100 bg-white min-h-[calc(100vh-3.5rem)]">
+        <aside className="hidden lg:flex lg:flex-col w-56 shrink-0 border-r border-white/[0.06] min-h-[calc(100vh-3.5rem)]" style={{ background: "rgba(6,6,10,0.95)" }}>
           <nav className="flex-1 p-3 space-y-0.5 mt-2">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 prefetch={true}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all ${
                   pathname === item.href
-                    ? "bg-sky-50 text-sky-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "bg-white/[0.08] text-white"
+                    : "text-white/60 hover:bg-white/[0.05] hover:text-white"
                 }`}
               >
-                <span className={pathname === item.href ? "text-sky-500" : "text-gray-400"}>{item.icon}</span>
+                <span className={pathname === item.href ? "text-accent" : "text-white/40"}>{item.icon}</span>
                 {item.label}
               </Link>
             ))}
           </nav>
-          <div className="p-3 border-t border-gray-100">
-            <div className="px-3 py-2 text-[10px] text-gray-400 uppercase tracking-wider">Slip a Tip &middot; Digital Tipping</div>
+          <div className="p-3 border-t border-white/[0.06]">
+            <div className="px-3 py-2 text-[10px] text-white/30 uppercase tracking-wider">Slip a Tip &middot; Digital Tipping</div>
           </div>
         </aside>
 
         {mobileMenuOpen && (
           <div className="fixed inset-0 z-40 lg:hidden">
-            <div className="fixed inset-0 bg-black/30" onClick={() => setMobileMenuOpen(false)} />
-            <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white shadow-xl z-50 pt-16 border-r border-gray-100">
+            <div className="fixed inset-0 bg-black/60" onClick={() => setMobileMenuOpen(false)} />
+            <aside className="fixed left-0 top-0 bottom-0 w-64 shadow-xl z-50 pt-16 border-r border-white/[0.06]" style={{ background: "#060608" }}>
               <nav className="p-3 space-y-0.5">
                 {navItems.map((item) => (
                   <Link
@@ -179,13 +178,13 @@ export default function DashboardLayout({
                     href={item.href}
                     prefetch={true}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all ${
                       pathname === item.href
-                        ? "bg-sky-50 text-sky-700"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        ? "bg-white/[0.08] text-white"
+                        : "text-white/60 hover:bg-white/[0.05] hover:text-white"
                     }`}
                   >
-                    <span className={pathname === item.href ? "text-sky-500" : "text-gray-400"}>{item.icon}</span>
+                    <span className={pathname === item.href ? "text-accent" : "text-white/40"}>{item.icon}</span>
                     {item.label}
                   </Link>
                 ))}

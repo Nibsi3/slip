@@ -188,15 +188,15 @@ const faqs = [
 
 export default function CustomerGuidePage() {
   return (
-    <div className="min-h-screen bg-white">
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-lg">
+    <div className="min-h-screen" style={{ background: "#030306" }}>
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.05]" style={{ background: "rgba(3,3,6,0.75)", backdropFilter: "blur(24px)" }}>
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2.5">
             <Image src="/logo.png" alt="Slip a Tip" width={56} height={56} quality={95} priority className="h-11 w-11 object-contain" />
           </Link>
           <div className="flex items-center gap-3 sm:gap-5">
-            <Link href="/guide/workers" className="hidden sm:inline-flex text-xs text-gray-500 hover:text-gray-900 transition-colors">Worker Guide</Link>
-            <Link href="/" className="text-xs text-gray-500 hover:text-gray-900 transition-colors">&larr; Home</Link>
+            <Link href="/guide/workers" className="hidden sm:inline-flex text-xs text-white/40 hover:text-white transition-colors">Worker Guide</Link>
+            <Link href="/" className="text-xs text-white/40 hover:text-white transition-colors">&larr; Home</Link>
           </div>
         </nav>
       </header>
@@ -205,12 +205,12 @@ export default function CustomerGuidePage() {
         <div className="mx-auto max-w-5xl">
           {/* Title */}
           <div className="mb-16 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium text-green-700 bg-green-50 ring-1 ring-green-200 mb-6">
-              <svg className="h-3.5 w-3.5 text-green-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" /></svg>
+            <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium text-white/70 ring-1 ring-white/[0.12] mb-6" style={{ background: "rgba(34,197,94,0.07)" }}>
+              <svg className="h-3.5 w-3.5 text-green-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" /></svg>
               Customer Guide
             </div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-tight">How to Tip a Worker</h1>
-            <p className="mt-4 text-gray-500 max-w-lg mx-auto leading-relaxed">
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight">How to Tip a Worker</h1>
+            <p className="mt-4 text-white/40 max-w-lg mx-auto leading-relaxed">
               Tipping takes about 30 seconds. No app download, no account, no sign-up. Just scan, tap, and pay.
             </p>
           </div>
@@ -224,26 +224,26 @@ export default function CustomerGuidePage() {
                 {/* Text */}
                 <div className="flex-1 text-center md:text-left">
                   <div className="inline-flex items-center gap-2 mb-3">
-                    <div className="h-8 w-8 rounded-full bg-sky-100 flex items-center justify-center text-[10px] font-bold text-sky-600">{s.num}</div>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Step {s.num}</span>
+                    <div className="h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold text-accent ring-1 ring-accent/20" style={{ background: "rgba(20,167,249,0.08)" }}>{s.num}</div>
+                    <span className="text-[10px] font-bold text-accent/40 uppercase tracking-wider">Step {s.num}</span>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">{s.title}</h2>
-                  <p className="mt-3 text-sm text-gray-500 leading-relaxed max-w-md">{s.desc}</p>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white">{s.title}</h2>
+                  <p className="mt-3 text-sm text-white/45 leading-relaxed max-w-md">{s.desc}</p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Security callout */}
-          <div className="mt-20 rounded-2xl p-6 sm:p-8 bg-green-50 ring-1 ring-green-200">
+          <div className="mt-20 rounded-2xl p-6 sm:p-8 ring-1 ring-green-500/20" style={{ background: "rgba(34,197,94,0.04)" }}>
             <div className="flex items-start gap-4">
-              <div className="h-10 w-10 rounded-xl bg-green-100 flex items-center justify-center shrink-0">
-                <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+              <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
+                <svg className="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
               </div>
               <div>
-                <h3 className="text-base font-bold text-gray-900">Your payment is secure</h3>
-                <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                  All payments are processed by <strong className="text-gray-800">Paystack</strong>, Africa&rsquo;s leading payment processor (PCI-DSS Level 1). Your card details are never shared with Slip a Tip. Every transaction is authenticated with <strong className="text-gray-800">3D Secure</strong> through your bank.
+                <h3 className="text-base font-bold text-white">Your payment is secure</h3>
+                <p className="mt-2 text-sm text-white/40 leading-relaxed">
+                  All payments are processed by <strong className="text-white/60">Paystack</strong>, Africa&rsquo;s leading payment processor (PCI-DSS Level 1). Your card details are never shared with Slip a Tip. Every transaction is authenticated with <strong className="text-white/60">3D Secure</strong> through your bank.
                 </p>
               </div>
             </div>
@@ -252,14 +252,14 @@ export default function CustomerGuidePage() {
           {/* FAQ */}
           <div className="mt-20 max-w-4xl mx-auto">
             <div className="mb-10 text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-500 mb-3">FAQ</p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight">Frequently Asked Questions</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-3">FAQ</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">Frequently Asked Questions</h2>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {faqs.map((f) => (
-                <div key={f.q} className="rounded-2xl p-5 bg-gray-50 ring-1 ring-gray-100">
-                  <div className="text-sm font-semibold text-gray-900">{f.q}</div>
-                  <div className="mt-2 text-xs text-gray-500 leading-relaxed">{f.a}</div>
+                <div key={f.q} className="rounded-2xl p-5 ring-1 ring-white/[0.07]" style={{ background: "rgba(255,255,255,0.025)" }}>
+                  <div className="text-sm font-semibold text-white">{f.q}</div>
+                  <div className="mt-2 text-xs text-white/40 leading-relaxed">{f.a}</div>
                 </div>
               ))}
             </div>

@@ -44,8 +44,8 @@ function ResetPasswordForm() {
   if (!token) {
     return (
       <div className="text-center py-4">
-        <h1 className="text-xl font-bold text-gray-900 mb-2">Invalid reset link</h1>
-        <p className="text-sm text-gray-500 mb-6">This link is missing the reset token. Please request a new one.</p>
+        <h1 className="text-xl font-bold text-white mb-2">Invalid reset link</h1>
+        <p className="text-sm text-muted mb-6">This link is missing the reset token. Please request a new one.</p>
         <Link href="/auth/forgot-password" className="btn-primary inline-block">Request new link</Link>
       </div>
     );
@@ -53,23 +53,23 @@ function ResetPasswordForm() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-gray-900">Set new password</h1>
-      <p className="mt-1 text-sm text-gray-500">Choose a strong password for your account.</p>
+      <h1 className="text-2xl font-bold text-white">Set new password</h1>
+      <p className="mt-1 text-sm text-muted">Choose a strong password for your account.</p>
 
       {success ? (
         <div className="mt-8 text-center">
-          <div className="w-14 h-14 rounded-full bg-green-100 border border-green-200 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-7 h-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-14 h-14 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <p className="text-gray-900 font-semibold mb-1">Password updated!</p>
-          <p className="text-sm text-gray-500">Redirecting to login…</p>
+          <p className="text-white font-semibold mb-1">Password updated!</p>
+          <p className="text-sm text-muted">Redirecting to login…</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-muted mb-2">
               New Password
             </label>
             <input
@@ -84,7 +84,7 @@ function ResetPasswordForm() {
             />
           </div>
           <div>
-            <label htmlFor="confirm" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="confirm" className="block text-sm font-medium text-muted mb-2">
               Confirm Password
             </label>
             <input
@@ -100,7 +100,7 @@ function ResetPasswordForm() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">
+            <div className="bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
               {error}
             </div>
           )}
@@ -116,16 +116,17 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#030306" }}>
+      <div className="fixed inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(20,167,249,0.06) 0%, transparent 70%)" }} />
       <div className="relative w-full max-w-md">
-        <div className="rounded-2xl p-8 bg-white ring-1 ring-gray-100 shadow-lg">
+        <div className="rounded-2xl p-8 ring-1 ring-white/[0.08]" style={{ background: "rgba(8,8,14,0.9)", backdropFilter: "blur(24px)" }}>
           <div className="mb-8 flex items-center gap-3">
             <Link href="/" className="inline-flex items-center gap-3">
               <Image src="/logo.png" alt="Slip a Tip" width={44} height={44} quality={95} priority className="h-11 w-11 object-contain" />
-              <span className="text-base font-semibold text-gray-700 tracking-wide">Slip a Tip</span>
+              <span className="text-base font-semibold text-white/70 tracking-wide">slip a tip</span>
             </Link>
           </div>
-          <Suspense fallback={<div className="text-gray-400 text-sm">Loading…</div>}>
+          <Suspense fallback={<div className="text-muted text-sm">Loading…</div>}>
             <ResetPasswordForm />
           </Suspense>
         </div>

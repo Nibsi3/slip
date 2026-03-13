@@ -40,21 +40,21 @@ export default function ContactPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Contact Us</h1>
-        <p className="text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-white">Contact Us</h1>
+        <p className="text-muted mt-1">
           Have a question, issue, or feedback? We&apos;d love to hear from you.
         </p>
       </div>
 
       {status === "sent" ? (
         <div className="card text-center py-12">
-          <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <div className="mx-auto w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Message Sent</h2>
-          <p className="text-sm text-gray-500 mb-6">
+          <h2 className="text-xl font-bold text-white mb-2">Message Sent</h2>
+          <p className="text-sm text-muted mb-6">
             Thank you for reaching out. We&apos;ll get back to you as soon as possible.
           </p>
           <button
@@ -68,15 +68,15 @@ export default function ContactPage() {
         <div className="grid gap-6 lg:grid-cols-[1fr_auto]">
           {/* Left — Contact form */}
           <div className="card">
-            <h2 className="text-lg font-bold text-gray-900 mb-1">Send a message</h2>
-            <p className="text-xs text-gray-500 mb-5">
+            <h2 className="text-lg font-bold text-white mb-1">Send a message</h2>
+            <p className="text-xs text-muted mb-5">
               Fill out the form and we&apos;ll respond to your inquiry.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="name" className="block text-sm font-medium text-muted mb-1">
                     Your Name
                   </label>
                   <input
@@ -90,7 +90,7 @@ export default function ContactPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-muted mb-1">
                     Your Email
                   </label>
                   <input
@@ -106,7 +106,7 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="subject" className="block text-sm font-medium text-muted mb-1">
                   Subject
                 </label>
                 <input
@@ -121,7 +121,7 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="message" className="block text-sm font-medium text-muted mb-1">
                   Message
                 </label>
                 <textarea
@@ -136,7 +136,7 @@ export default function ContactPage() {
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">
+                <div className="bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
                   {error}
                 </div>
               )}
@@ -155,40 +155,40 @@ export default function ContactPage() {
           <div className="space-y-4 lg:w-64">
             <div className="card">
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-sky-100 shrink-0">
-                  <svg className="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <div className="h-8 w-8 flex items-center justify-center bg-accent/10 shrink-0">
+                  <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Email</p>
-                  <p className="text-xs text-gray-500 break-all">cameronfalck03@gmail.com</p>
+                  <p className="text-sm font-medium text-white">Email</p>
+                  <p className="text-xs text-muted break-all">cameronfalck03@gmail.com</p>
                 </div>
               </div>
             </div>
             <div className="card">
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-sky-100 shrink-0">
-                  <svg className="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <div className="h-8 w-8 flex items-center justify-center bg-accent/10 shrink-0">
+                  <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Response Time</p>
-                  <p className="text-xs text-gray-500">Within 24 hours</p>
+                  <p className="text-sm font-medium text-white">Response Time</p>
+                  <p className="text-xs text-muted">Within 24 hours</p>
                 </div>
               </div>
             </div>
             <div className="card">
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-sky-100 shrink-0">
-                  <svg className="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <div className="h-8 w-8 flex items-center justify-center bg-accent/10 shrink-0">
+                  <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Secure</p>
-                  <p className="text-xs text-gray-500">Your data is safe with us</p>
+                  <p className="text-sm font-medium text-white">Secure</p>
+                  <p className="text-xs text-muted">Your data is safe with us</p>
                 </div>
               </div>
             </div>

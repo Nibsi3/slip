@@ -52,22 +52,22 @@ export default function SettingsPage() {
     }
   }
 
-  if (loading) return <div className="animate-pulse text-gray-400">Loading...</div>;
+  if (loading) return <div className="animate-pulse text-muted-300">Loading...</div>;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-500 mt-1">Update your profile and banking details</p>
+        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <p className="text-muted mt-1">Update your profile and banking details</p>
       </div>
 
       <form onSubmit={handleSubmit}>
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Left — Work details */}
           <div className="card space-y-4">
-            <h2 className="text-lg font-bold text-gray-900">Work Details</h2>
+            <h2 className="text-lg font-bold text-white">Work Details</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Employer Name</label>
+              <label className="block text-sm font-medium text-muted mb-1">Employer Name</label>
               <input
                 type="text"
                 value={form.employerName}
@@ -77,7 +77,7 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
+              <label className="block text-sm font-medium text-muted mb-1">Job Title</label>
               <input
                 type="text"
                 value={form.jobTitle}
@@ -87,7 +87,7 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone for Instant Money</label>
+              <label className="block text-sm font-medium text-muted mb-1">Phone for Instant Money</label>
               <input
                 type="tel"
                 value={form.phoneForIM}
@@ -100,10 +100,10 @@ export default function SettingsPage() {
 
           {/* Right — Banking details */}
           <div className="card space-y-4">
-            <h2 className="text-lg font-bold text-gray-900">Banking Details</h2>
-            <p className="text-xs text-gray-400 -mt-2">Required for EFT withdrawals</p>
+            <h2 className="text-lg font-bold text-white">Banking Details</h2>
+            <p className="text-xs text-muted -mt-2">Required for EFT withdrawals</p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+              <label className="block text-sm font-medium text-muted mb-1">Bank Name</label>
               <input
                 type="text"
                 value={form.bankName}
@@ -113,7 +113,7 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
+              <label className="block text-sm font-medium text-muted mb-1">Account Number</label>
               <input
                 type="text"
                 value={form.bankAccountNo}
@@ -123,7 +123,7 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Branch Code</label>
+              <label className="block text-sm font-medium text-muted mb-1">Branch Code</label>
               <input
                 type="text"
                 value={form.bankBranchCode}
@@ -137,10 +137,10 @@ export default function SettingsPage() {
 
         {message && (
           <div
-            className={`mt-4 p-3 rounded-xl text-sm ${
+            className={`mt-4 p-3 text-sm ${
               message.includes("success")
-                ? "bg-green-50 border border-green-200 text-green-700"
-                : "bg-red-50 border border-red-200 text-red-600"
+                ? "bg-green-500/10 border border-green-500/20 text-green-400"
+                : "bg-red-500/10 border border-red-500/20 text-red-400"
             }`}
           >
             {message}

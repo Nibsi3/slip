@@ -85,24 +85,26 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#030306" }}>
+      {/* Background accent */}
+      <div className="fixed inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(20,167,249,0.06) 0%, transparent 70%)" }} />
       <div className="relative w-full max-w-md">
-        <div className="rounded-2xl p-8 bg-white ring-1 ring-gray-100 shadow-lg">
+        <div className="rounded-2xl p-8 ring-1 ring-white/[0.08]" style={{ background: "rgba(8,8,14,0.9)", backdropFilter: "blur(24px)" }}>
           <div className="mb-8 flex items-center gap-3">
             <Link href="/" className="inline-flex items-center gap-3">
               <Image src="/logo.png" alt="Slip a Tip" width={44} height={44} quality={95} priority className="h-11 w-11 object-contain" />
-              <span className="text-base font-semibold text-gray-700 tracking-wide">Slip a Tip</span>
+              <span className="text-base font-semibold text-white/70 tracking-wide">slip a tip</span>
             </Link>
           </div>
 
           {!pending2FA ? (
             <>
-              <h1 className="text-2xl font-bold text-gray-900">Welcome to Slip a Tip</h1>
-              <p className="mt-1 text-sm text-gray-500">Digital tipping made simple</p>
+              <h1 className="text-2xl font-bold text-white">Welcome to Slip a Tip</h1>
+              <p className="mt-1 text-sm text-muted">Digital tipping made simple</p>
 
               <form onSubmit={handleSubmit} className="mt-8 space-y-5">
                 <div>
-                  <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="identifier" className="block text-sm font-medium text-muted mb-2">
                     Phone Number
                   </label>
                   <input
@@ -114,15 +116,15 @@ function LoginForm() {
                     className="input-field"
                     placeholder="e.g. 071 000 0001"
                   />
-                  <p className="mt-1 text-xs text-gray-400">Admin? Use your email address instead</p>
+                  <p className="mt-1 text-xs text-muted-300">Admin? Use your email address instead</p>
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="password" className="block text-sm font-medium text-muted">
                       Password
                     </label>
-                    <Link href="/auth/forgot-password" className="text-xs text-sky-600 hover:text-sky-700 transition-colors">
+                    <Link href="/auth/forgot-password" className="text-xs text-accent hover:text-accent-300 transition-colors">
                       Forgot password?
                     </Link>
                   </div>
@@ -139,7 +141,7 @@ function LoginForm() {
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">
+                  <div className="bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
                     {error}
                   </div>
                 )}
@@ -149,10 +151,10 @@ function LoginForm() {
                 </button>
               </form>
 
-              <div className="mt-6 pt-5 border-t border-gray-100">
-                <p className="text-center text-sm text-gray-500">
+              <div className="mt-6 pt-5 border-t border-surface-100">
+                <p className="text-center text-sm text-muted-200">
                   Don&apos;t have an account?{" "}
-                  <Link href="/auth/register" className="font-semibold text-sky-600 hover:text-sky-700 transition-colors">
+                  <Link href="/auth/register" className="font-semibold text-accent hover:text-accent-300 transition-colors">
                     Sign up
                   </Link>
                 </p>
@@ -160,12 +162,12 @@ function LoginForm() {
             </>
           ) : (
             <>
-              <h1 className="text-2xl font-bold text-gray-900">Two-Factor Authentication</h1>
-              <p className="mt-1 text-sm text-gray-500">Enter the 6-digit code from your authenticator app, or a backup code.</p>
+              <h1 className="text-2xl font-bold text-white">Two-Factor Authentication</h1>
+              <p className="mt-1 text-sm text-muted">Enter the 6-digit code from your authenticator app, or a backup code.</p>
 
               <form onSubmit={handle2FAVerify} className="mt-8 space-y-5">
                 <div>
-                  <label htmlFor="totpCode" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="totpCode" className="block text-sm font-medium text-muted mb-2">
                     Verification Code
                   </label>
                   <input
@@ -184,7 +186,7 @@ function LoginForm() {
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">
+                  <div className="bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
                     {error}
                   </div>
                 )}
@@ -196,7 +198,7 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={() => { setPending2FA(false); setTotpCode(""); setError(""); }}
-                  className="w-full text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                  className="w-full text-sm text-white/40 hover:text-white/60 transition-colors"
                 >
                   Back to login
                 </button>
@@ -211,7 +213,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="text-gray-400">Loading...</div></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div>Loading...</div></div>}>
       <LoginForm />
     </Suspense>
   );
