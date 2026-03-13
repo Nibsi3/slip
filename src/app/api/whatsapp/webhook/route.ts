@@ -306,7 +306,7 @@ async function handleIncomingMessage(message: WaIncomingMessage, contactName?: s
 // Step 1: Customer sent "TIP [qrCode]" — look up worker, ask for amount
 // ---------------------------------------------------------------------------
 async function handleTipInitiation(from: string, qrCode: string) {
-  const worker = await db.worker.findUnique({
+  const worker = await db.worker.findFirst({
     where: { qrCode, isActive: true },
     include: { user: { select: { firstName: true, lastName: true } } },
   });
@@ -354,7 +354,7 @@ async function handleAmountSelected(from: string, amount: number) {
 
   const { qrCode, workerFirstName } = session;
 
-  const worker = await db.worker.findUnique({
+  const worker = await db.worker.findFirst({
     where: { qrCode, isActive: true },
     include: { user: { select: { firstName: true, lastName: true } } },
   });
