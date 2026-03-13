@@ -8,6 +8,12 @@ const MIN_TIP = 15;
 const MAX_TIP = 5000;
 const TOTAL_FEE_RATE = 0.10;
 
+const WA_ICON = (
+  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+);
+
 interface WorkerInfo {
   firstName: string;
   lastName: string;
@@ -16,21 +22,20 @@ interface WorkerInfo {
   qrCode: string;
 }
 
-type Step = "select" | "phone" | "sent";
+type Step = "select" | "loading" | "open";
 
 export default function TipPage() {
   const params = useParams();
   const code = params.code as string;
 
   const [worker, setWorker] = useState<WorkerInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedAmount, setSelectedAmount] = useState<number | null>(50);
   const [customAmount, setCustomAmount] = useState("");
   const [step, setStep] = useState<Step>("select");
-  const [phone, setPhone] = useState("");
-  const [customerName, setCustomerName] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [whatsappUrl, setWhatsappUrl] = useState("");
+  const [paymentLinkUrl, setPaymentLinkUrl] = useState("");
 
   const tipAmount = customAmount ? parseFloat(customAmount) || 0 : selectedAmount || 0;
 
@@ -47,14 +52,13 @@ export default function TipPage() {
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Something went wrong");
       } finally {
-        setLoading(false);
+        setPageLoading(false);
       }
     }
     loadWorker();
   }, [code]);
 
   function handleAmountSelect(amt: number) {
-    if (submitting) return;
     setSelectedAmount(amt);
     setCustomAmount("");
   }
@@ -64,46 +68,35 @@ export default function TipPage() {
     setSelectedAmount(null);
   }
 
-  function handleContinue(e: FormEvent) {
+  async function handleTip(e: FormEvent) {
     e.preventDefault();
     if (tipAmount < MIN_TIP || tipAmount > MAX_TIP) return;
-    setStep("phone");
-    setError("");
-  }
-
-  async function handleSendWhatsApp(e: FormEvent) {
-    e.preventDefault();
-    if (!phone || submitting) return;
-    setSubmitting(true);
+    setStep("loading");
     setError("");
 
     try {
-      const res = await fetch("/api/tips/whatsapp", {
+      const res = await fetch("/api/tips/init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          qrCode: code,
-          amount: tipAmount,
-          customerPhone: phone,
-          customerName: customerName || undefined,
-        }),
+        body: JSON.stringify({ qrCode: code, amount: tipAmount }),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create payment link");
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to send payment link");
-      }
+      setWhatsappUrl(data.whatsappUrl);
+      setPaymentLinkUrl(data.paymentLinkUrl);
+      setStep("open");
 
-      setStep("sent");
+      // Immediately redirect to WhatsApp
+      window.location.href = data.whatsappUrl;
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setSubmitting(false);
+      setStep("select");
     }
   }
 
-  if (loading) {
+  if (pageLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#030306" }}>
         <div className="animate-pulse text-white/40 text-xl font-semibold">Loading...</div>
@@ -117,9 +110,7 @@ export default function TipPage() {
         <div className="card text-center max-w-sm w-full">
           <h1 className="text-xl font-bold text-white">Oops!</h1>
           <p className="mt-2 text-muted">{error}</p>
-          <p className="mt-4 text-sm text-muted-300">
-            This QR code may be invalid or the worker is no longer active.
-          </p>
+          <p className="mt-4 text-sm text-muted-300">This QR code may be invalid or the worker is no longer active.</p>
         </div>
       </div>
     );
@@ -144,7 +135,7 @@ export default function TipPage() {
         <div className="w-full max-w-sm">
           <div className="rounded-3xl overflow-hidden ring-1 ring-white/[0.09]" style={{ background: "rgba(8,8,14,0.95)", backdropFilter: "blur(24px)" }}>
 
-            {/* Worker info */}
+            {/* Worker avatar + name */}
             <div className="relative px-6 pt-8 pb-6 text-center overflow-hidden">
               <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 100% 120% at 50% 0%, rgba(37,211,102,0.08) 0%, transparent 70%)" }} />
               <div className="relative">
@@ -154,20 +145,16 @@ export default function TipPage() {
                 <h1 className="mt-4 text-xl font-extrabold text-white tracking-tight">
                   {worker?.firstName} {worker?.lastName}
                 </h1>
-                {worker?.jobTitle && (
-                  <p className="mt-1 text-sm text-white/50">{worker.jobTitle}</p>
-                )}
-                {worker?.employerName && (
-                  <p className="text-xs text-white/35 mt-0.5">{worker.employerName}</p>
-                )}
+                {worker?.jobTitle && <p className="mt-1 text-sm text-white/50">{worker.jobTitle}</p>}
+                {worker?.employerName && <p className="text-xs text-white/35 mt-0.5">{worker.employerName}</p>}
               </div>
             </div>
 
             <div className="h-px bg-white/[0.06]" />
 
-            {/* ── STEP 1: Select amount ── */}
+            {/* ── SELECT AMOUNT ── */}
             {step === "select" && (
-              <form onSubmit={handleContinue} className="p-5 space-y-5">
+              <form onSubmit={handleTip} className="p-5 space-y-5">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30 mb-3">Select tip amount</p>
                   <div className="grid grid-cols-3 gap-2">
@@ -190,7 +177,6 @@ export default function TipPage() {
                       </button>
                     ))}
                   </div>
-
                   <div className="mt-3">
                     <input
                       type="number"
@@ -226,18 +212,22 @@ export default function TipPage() {
                   </div>
                 )}
 
+                {error && (
+                  <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+                    {error}
+                  </div>
+                )}
+
                 <button
                   type="submit"
                   disabled={tipAmount < MIN_TIP || tipAmount > MAX_TIP}
                   className="w-full py-4 rounded-2xl text-base font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  style={{ background: tipAmount >= MIN_TIP ? "linear-gradient(180deg, #25d366 0%, #1da851 100%)" : "rgba(255,255,255,0.08)", color: tipAmount >= MIN_TIP ? "#fff" : "rgba(255,255,255,0.3)" }}
+                  style={{
+                    background: tipAmount >= MIN_TIP ? "linear-gradient(180deg, #25d366 0%, #1da851 100%)" : "rgba(255,255,255,0.08)",
+                    color: tipAmount >= MIN_TIP ? "#fff" : "rgba(255,255,255,0.3)",
+                  }}
                 >
-                  {tipAmount >= MIN_TIP ? (
-                    <>
-                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                      Continue — get payment link on WhatsApp
-                    </>
-                  ) : "Select an amount to continue"}
+                  {tipAmount >= MIN_TIP ? <>{WA_ICON} Tip via WhatsApp</> : "Select an amount to continue"}
                 </button>
 
                 <div className="flex items-center justify-center gap-2">
@@ -249,104 +239,57 @@ export default function TipPage() {
               </form>
             )}
 
-            {/* ── STEP 2: Enter phone ── */}
-            {step === "phone" && (
-              <form onSubmit={handleSendWhatsApp} className="p-5 space-y-5">
-                <div className="rounded-xl p-3 flex items-center justify-between" style={{ background: "rgba(37,211,102,0.08)", border: "1px solid rgba(37,211,102,0.2)" }}>
-                  <span className="text-sm text-white/60">Tip amount</span>
-                  <span className="text-base font-bold text-[#25d366]">R{tipAmount.toFixed(2)}</span>
-                </div>
-
-                <div className="space-y-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Your WhatsApp number</p>
-                  <p className="text-xs text-white/40">We&apos;ll send you a secure payment link — pay anytime within 24 hours.</p>
-
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    placeholder="e.g. 082 123 4567"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:ring-1 focus:ring-[#25d366]/40"
-                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="Your name (optional)"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:ring-1 focus:ring-[#25d366]/40"
-                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-                  />
-                </div>
-
-                {error && (
-                  <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
-                    {error}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={!phone || submitting}
-                  className="w-full py-4 rounded-2xl text-base font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  style={{ background: "linear-gradient(180deg, #25d366 0%, #1da851 100%)", color: "#fff" }}
-                >
-                  {submitting ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                      Send payment link to WhatsApp
-                    </>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setStep("select"); setError(""); }}
-                  className="w-full py-2.5 text-sm text-white/40 hover:text-white/60 transition-colors"
-                >
-                  ← Change amount
-                </button>
-              </form>
-            )}
-
-            {/* ── STEP 3: Sent confirmation ── */}
-            {step === "sent" && (
-              <div className="p-6 text-center space-y-4">
-                <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center" style={{ background: "rgba(37,211,102,0.15)" }}>
-                  <svg viewBox="0 0 24 24" className="w-8 h-8" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            {/* ── LOADING / GENERATING LINK ── */}
+            {step === "loading" && (
+              <div className="p-8 flex flex-col items-center gap-5 text-center">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: "rgba(37,211,102,0.12)" }}>
+                  <svg className="animate-spin w-8 h-8 text-[#25d366]" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
                 </div>
                 <div>
-                  <h2 className="text-xl font-extrabold text-white">Payment link sent!</h2>
+                  <p className="text-base font-bold text-white">Creating your payment link…</p>
+                  <p className="text-xs text-white/40 mt-1">Opening WhatsApp in a moment</p>
+                </div>
+              </div>
+            )}
+
+            {/* ── WHATSAPP OPENED ── */}
+            {step === "open" && (
+              <div className="p-6 text-center space-y-5">
+                <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center" style={{ background: "rgba(37,211,102,0.15)" }}>
+                  {WA_ICON}
+                </div>
+                <div>
+                  <h2 className="text-xl font-extrabold text-white">WhatsApp opened!</h2>
                   <p className="mt-2 text-sm text-white/50">
-                    Check your WhatsApp — we just sent you a secure payment link for <span className="text-[#25d366] font-semibold">R{tipAmount.toFixed(2)}</span>.
+                    Your payment link for <span className="text-[#25d366] font-semibold">R{tipAmount.toFixed(2)}</span> is ready in WhatsApp.
+                    Just tap <strong className="text-white/70">Send</strong> — you can pay anytime within 24 hours.
                   </p>
                 </div>
-                <div className="rounded-xl p-4 text-left space-y-2.5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <div className="flex items-start gap-2.5">
-                    <span className="text-base mt-0.5">💬</span>
-                    <p className="text-xs text-white/50">Open the WhatsApp message from <strong className="text-white/70">Slip a Tip</strong> on your phone.</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="text-base mt-0.5">🔗</span>
-                    <p className="text-xs text-white/50">Tap the payment link and complete your tip securely via Instant EFT.</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="text-base mt-0.5">⏱️</span>
-                    <p className="text-xs text-white/50">You have <strong className="text-white/70">24 hours</strong> — no need to pay right now.</p>
-                  </div>
-                </div>
-                <p className="text-[10px] text-white/25 pt-1">
+
+                {whatsappUrl && (
+                  <a
+                    href={whatsappUrl}
+                    className="w-full py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-2"
+                    style={{ background: "linear-gradient(180deg, #25d366 0%, #1da851 100%)", color: "#fff" }}
+                  >
+                    {WA_ICON} Open WhatsApp again
+                  </a>
+                )}
+
+                {paymentLinkUrl && (
+                  <a
+                    href={paymentLinkUrl}
+                    className="w-full py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 text-white/60 hover:text-white/80 transition-colors"
+                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+                  >
+                    Pay directly instead →
+                  </a>
+                )}
+
+                <p className="text-[10px] text-white/25">
                   {worker?.firstName} will be notified the moment you pay. Thank you! 🙏
                 </p>
               </div>
