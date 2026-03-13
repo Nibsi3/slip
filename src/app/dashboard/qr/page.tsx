@@ -12,12 +12,15 @@ export default function QRCodePage() {
     if (!worker) return;
     const origin = window.location.origin;
     setAppUrl(origin);
-    const tipUrl = `${origin}/tip/${worker.qrCode}`;
+    const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER || "";
+    const waUrl = waNumber
+      ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`TIP ${worker.qrCode}`)}`
+      : `${origin}/tip/${worker.qrCode}`;
 
     (async () => {
       const QRCode = (await import("qrcode")).default;
       const qrSize = 800;
-      const qrDataUrl = await QRCode.toDataURL(tipUrl, {
+      const qrDataUrl = await QRCode.toDataURL(waUrl, {
         width: qrSize,
         margin: 2,
         color: { dark: "#000000", light: "#ffffff" },
@@ -65,11 +68,19 @@ export default function QRCodePage() {
     link.click();
   }
 
+  function getWaUrl() {
+    if (!worker) return "";
+    const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER || "";
+    return waNumber
+      ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`TIP ${worker.qrCode}`)}`
+      : `${appUrl}/tip/${worker.qrCode}`;
+  }
+
   function copyLink() {
     if (!worker) return;
-    const url = `${appUrl}/tip/${worker.qrCode}`;
+    const url = getWaUrl();
     navigator.clipboard.writeText(url);
-    alert("Tip link copied to clipboard!");
+    alert("WhatsApp tip link copied to clipboard!");
   }
 
   if (loading) {
@@ -80,13 +91,13 @@ export default function QRCodePage() {
     return <div className="text-red-500">Failed to load QR code.</div>;
   }
 
-  const tipUrl = `${appUrl}/tip/${worker.qrCode}`;
+  const waUrl = getWaUrl();
 
   return (
     <div className="space-y-6 max-w-lg">
       <div>
         <h1 className="text-2xl font-bold text-white">Your QR Code</h1>
-        <p className="text-muted mt-1">Customers scan this to tip you instantly</p>
+        <p className="text-muted mt-1">Customer scans → WhatsApp opens → tip in seconds</p>
       </div>
 
       {/* QR Card */}
@@ -121,7 +132,7 @@ export default function QRCodePage() {
           </div>
         )}
 
-        <p className="text-[11px] text-muted-300 break-all mb-6 px-2 font-mono">{tipUrl}</p>
+        <p className="text-[11px] text-muted-300 break-all mb-6 px-2 font-mono">{waUrl}</p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button onClick={downloadQR} className="btn-primary">
@@ -135,13 +146,14 @@ export default function QRCodePage() {
 
       {/* How to use */}
       <div className="card">
-        <h3 className="font-bold text-white mb-4">How to use your QR code</h3>
+        <h3 className="font-bold text-white mb-4">How it works</h3>
         <div className="space-y-3">
           {[
-            { n: "1", t: "Print or display", d: "Print this QR code and place it where customers can see it, or show it on your phone." },
-            { n: "2", t: "Customer scans", d: "Customers open their phone camera and scan — no app needed." },
-            { n: "3", t: "They tip", d: "They select an amount (R10–R200 or custom) and pay securely via Paystack." },
-            { n: "4", t: "You get paid", d: "The tip lands in your wallet instantly, ready to withdraw." },
+            { n: "1", t: "Print or display", d: "Print this QR code and place it where customers can see it — on your badge, car, or workspace." },
+            { n: "2", t: "Customer scans", d: "Their camera opens WhatsApp directly with a pre-filled message. No app download needed." },
+            { n: "3", t: "They tap Send", d: "One tap sends the message. They get a reply with amount buttons — they tap their tip amount." },
+            { n: "4", t: "Payment link sent", d: "A secure Stitch Instant EFT link arrives in their WhatsApp. They pay in seconds." },
+            { n: "5", t: "You get paid", d: "Funds land in your Slip a Tip wallet instantly. You'll get a WhatsApp notification too." },
           ].map((s) => (
             <div key={s.n} className="flex gap-4">
               <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold text-accent shrink-0 mt-0.5" style={{ background: "rgba(20,167,249,0.1)" }}>{s.n}</div>
