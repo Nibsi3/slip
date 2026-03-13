@@ -88,17 +88,17 @@ export default function ActivateQRPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#030306" }}>
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <div className="px-6 pt-8 pb-4 text-center">
         <Image src="/logo.png" alt="Slip a Tip" width={36} height={36} quality={95} priority className="h-9 w-9 object-contain mx-auto" />
-        <p className="text-white/40 text-xs mt-2">Activate your QR code</p>
+        <p className="text-gray-400 text-xs mt-2">Activate your QR code</p>
       </div>
 
       {/* Loading check */}
       {checking && (
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-pulse text-white/40">Checking QR code...</div>
+          <div className="animate-pulse text-gray-400">Checking QR code...</div>
         </div>
       )}
 
@@ -107,13 +107,13 @@ export default function ActivateQRPage() {
         <div className="flex-1 flex items-center justify-center px-4 pb-8">
           <div className="w-full max-w-md">
             <div className="card-glow !p-6 text-center space-y-4">
-              <div className="mx-auto w-16 h-16 rounded-full bg-green-400/10 flex items-center justify-center">
-                <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+                <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h2 className="text-xl font-bold text-white">QR Code Already Active</h2>
-              <p className="text-sm text-white/50">
+              <h2 className="text-xl font-bold text-gray-900">QR Code Already Active</h2>
+              <p className="text-sm text-gray-500">
                 This QR code is already linked to an account. Sign in with your phone number and password to access your dashboard.
               </p>
               <Link href="/auth/login" className="btn-primary inline-block !py-3 !px-8">
@@ -133,7 +133,7 @@ export default function ActivateQRPage() {
           <div
             key={s}
             className={`h-1 flex-1 max-w-[80px] rounded-full transition-all ${
-              s <= step ? "bg-accent" : "bg-white/10"
+              s <= step ? "bg-sky-500" : "bg-gray-200"
             }`}
           />
         ))}
@@ -148,14 +148,14 @@ export default function ActivateQRPage() {
               {step === 1 && (
                 <div className="space-y-4">
                   <div>
-                    <h2 className="text-xl font-bold text-white">Your details</h2>
-                    <p className="text-sm text-white/40 mt-1">
+                    <h2 className="text-xl font-bold text-gray-900">Your details</h2>
+                    <p className="text-sm text-gray-500 mt-1">
                       Enter your information to activate this QR code
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-muted mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       First name
                     </label>
                     <input
@@ -169,7 +169,7 @@ export default function ActivateQRPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-muted mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Last name
                     </label>
                     <input
@@ -182,7 +182,7 @@ export default function ActivateQRPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-muted mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Phone number
                     </label>
                     <input
@@ -196,7 +196,7 @@ export default function ActivateQRPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-muted mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Create a password
                     </label>
                     <input
@@ -231,14 +231,14 @@ export default function ActivateQRPage() {
               {step === 2 && (
                 <div className="space-y-4">
                   <div>
-                    <h2 className="text-xl font-bold text-white">Work details</h2>
-                    <p className="text-sm text-white/40 mt-1">
+                    <h2 className="text-xl font-bold text-gray-900">Work details</h2>
+                    <p className="text-sm text-gray-500 mt-1">
                       Optional — helps customers identify you
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-muted mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Employer / business name
                     </label>
                     <input
@@ -252,7 +252,7 @@ export default function ActivateQRPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-muted mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Job title
                     </label>
                     <input
@@ -287,14 +287,14 @@ export default function ActivateQRPage() {
               {step === 3 && (
                 <div className="space-y-4">
                   <div>
-                    <h2 className="text-xl font-bold text-white">Bank details</h2>
-                    <p className="text-sm text-white/40 mt-1">
+                    <h2 className="text-xl font-bold text-gray-900">Bank details</h2>
+                    <p className="text-sm text-gray-500 mt-1">
                       Optional — needed for EFT withdrawals. You can add this later in settings.
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-muted mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Bank name
                     </label>
                     <select
@@ -315,7 +315,7 @@ export default function ActivateQRPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-muted mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Account number
                     </label>
                     <input
@@ -328,7 +328,7 @@ export default function ActivateQRPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-muted mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Branch code
                     </label>
                     <input
@@ -341,7 +341,7 @@ export default function ActivateQRPage() {
                   </div>
 
                   {error && (
-                    <div className="bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">
                       {error}
                     </div>
                   )}
@@ -377,14 +377,14 @@ export default function ActivateQRPage() {
 
               {/* Error on step 1/2 */}
               {error && step < 3 && (
-                <div className="mt-4 bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+                <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">
                   {error}
                 </div>
               )}
             </form>
           </div>
 
-          <p className="text-center text-xs text-white/20 mt-6">
+          <p className="text-center text-xs text-gray-400 mt-6">
             By activating, you agree to receive digital tips through Slip a Tip.
           </p>
         </div>

@@ -117,31 +117,30 @@ export default function ApplyPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: "#030306" }}>
-        <div className="fixed inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(20,167,249,0.06) 0%, transparent 70%)" }} />
+      <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
         <div className="relative w-full max-w-lg text-center">
-          <div className="rounded-2xl p-10 ring-1 ring-white/[0.08]" style={{ background: "rgba(8,8,14,0.9)", backdropFilter: "blur(24px)" }}>
-            <div className="mx-auto mb-6 h-16 w-16 rounded-2xl flex items-center justify-center" style={{ background: "rgba(34,197,94,0.1)" }}>
-              <svg className="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <div className="rounded-2xl p-10 bg-white ring-1 ring-gray-100 shadow-lg">
+            <div className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-green-100 flex items-center justify-center">
+              <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
-            <h1 className="text-2xl font-bold text-white mb-3">Application Submitted!</h1>
-            <p className="text-sm text-white/50 leading-relaxed mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-3">Application Submitted!</h1>
+            <p className="text-sm text-gray-500 leading-relaxed mb-6">
               Thank you for applying to Slip a Tip. Our team will review your application and verify your details.
               Once approved, your personal QR code will be generated and sent to you via SMS.
             </p>
-            <div className="rounded-xl p-4 ring-1 ring-white/[0.06] mb-6" style={{ background: "rgba(255,255,255,0.02)" }}>
-              <h3 className="text-sm font-semibold text-white mb-2">What happens next?</h3>
-              <div className="space-y-2 text-xs text-white/40">
+            <div className="rounded-xl p-4 bg-gray-50 ring-1 ring-gray-100 mb-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">What happens next?</h3>
+              <div className="space-y-2 text-xs text-gray-500">
                 <div className="flex items-start gap-2">
-                  <span className="text-accent font-bold">1.</span>
+                  <span className="text-sky-600 font-bold">1.</span>
                   <span>We verify your identity and bank details (1–3 business days)</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-accent font-bold">2.</span>
+                  <span className="text-sky-600 font-bold">2.</span>
                   <span>Once approved, your QR code is generated and linked to your account</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-accent font-bold">3.</span>
+                  <span className="text-sky-600 font-bold">3.</span>
                   <span>You receive your QR code via SMS and can start accepting tips immediately</span>
                 </div>
               </div>
@@ -154,20 +153,19 @@ export default function ApplyPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: "#030306" }}>
-      <div className="fixed inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(20,167,249,0.06) 0%, transparent 70%)" }} />
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
       <div className="relative w-full max-w-lg">
-        <div className="rounded-2xl p-8 ring-1 ring-white/[0.08]" style={{ background: "rgba(8,8,14,0.9)", backdropFilter: "blur(24px)" }}>
+        <div className="rounded-2xl p-8 bg-white ring-1 ring-gray-100 shadow-lg">
           {/* Logo */}
           <div className="mb-6 flex items-center gap-3">
             <Link href="/" className="inline-flex items-center gap-3">
               <Image src="/logo.png" alt="Slip a Tip" width={44} height={44} quality={95} priority className="h-11 w-11 object-contain" />
-              <span className="text-base font-semibold text-white/70 tracking-wide">slip a tip</span>
+              <span className="text-base font-semibold text-gray-700 tracking-wide">Slip a Tip</span>
             </Link>
           </div>
 
-          <h1 className="text-2xl font-bold text-white">Apply as a Service Worker</h1>
-          <p className="mt-1 text-sm text-white/40 leading-relaxed">
+          <h1 className="text-2xl font-bold text-gray-900">Apply as a Service Worker</h1>
+          <p className="mt-1 text-sm text-gray-500 leading-relaxed">
             Don&rsquo;t have a QR code? Apply here and we&rsquo;ll set you up once approved.
           </p>
 
@@ -176,13 +174,13 @@ export default function ApplyPage() {
             <div className="flex items-center gap-1">
               {STEPS.map((s) => (
                 <div key={s.id} className="flex-1">
-                  <div className={`h-1 rounded-full transition-all ${step >= s.id ? "bg-accent" : "bg-white/[0.06]"}`} />
+                  <div className={`h-1 rounded-full transition-all ${step >= s.id ? "bg-sky-500" : "bg-gray-100"}`} />
                 </div>
               ))}
             </div>
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs text-accent font-medium">Step {step} of 4</span>
-              <span className="text-xs text-white/30">{STEPS[step - 1].label}</span>
+              <span className="text-xs text-sky-600 font-medium">Step {step} of 4</span>
+              <span className="text-xs text-gray-400">{STEPS[step - 1].label}</span>
             </div>
           </div>
 
@@ -192,33 +190,33 @@ export default function ApplyPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/50 mb-1.5">First Name *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name *</label>
                     <input type="text" required value={form.firstName} onChange={(e) => update("firstName", e.target.value)} className="input-field" placeholder="John" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/50 mb-1.5">Last Name *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Last Name *</label>
                     <input type="text" required value={form.lastName} onChange={(e) => update("lastName", e.target.value)} className="input-field" placeholder="Doe" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/50 mb-1.5">South African ID Number</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">South African ID Number</label>
                   <input type="text" value={form.idNumber} onChange={(e) => update("idNumber", e.target.value)} className="input-field" placeholder="e.g. 9001015009087" maxLength={13} />
-                  <p className="text-[11px] text-white/25 mt-1">Required for FICA verification</p>
+                  <p className="text-[11px] text-gray-400 mt-1">Required for FICA verification</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/50 mb-1.5">Phone Number *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number *</label>
                   <input type="tel" required value={form.phone} onChange={(e) => update("phone", e.target.value)} className="input-field" placeholder="e.g. 066 299 5533" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/50 mb-1.5">Email (optional)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Email (optional)</label>
                   <input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} className="input-field" placeholder="john@example.com" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/50 mb-1.5">Password *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Password *</label>
                   <input type="password" required minLength={6} value={form.password} onChange={(e) => update("password", e.target.value)} className="input-field" placeholder="min 6 characters" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/50 mb-1.5">Confirm Password *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password *</label>
                   <input type="password" required minLength={6} value={form.confirmPassword} onChange={(e) => update("confirmPassword", e.target.value)} className="input-field" placeholder="repeat your password" />
                 </div>
               </div>
@@ -228,26 +226,26 @@ export default function ApplyPage() {
             {step === 2 && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/50 mb-1.5">Employer / Business Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Employer / Business Name</label>
                   <input type="text" value={form.employerName} onChange={(e) => update("employerName", e.target.value)} className="input-field" placeholder="e.g. The Rosebank Hotel" />
-                  <p className="text-[11px] text-white/25 mt-1">Leave blank if self-employed (e.g. car guard)</p>
+                  <p className="text-[11px] text-gray-400 mt-1">Leave blank if self-employed (e.g. car guard)</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/50 mb-1.5">Your Role / Job Title *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Role / Job Title *</label>
                   <input type="text" required value={form.jobTitle} onChange={(e) => update("jobTitle", e.target.value)} className="input-field" placeholder="e.g. Waiter, Car Guard, Porter" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/50 mb-1.5">Work Location / Address</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Work Location / Address</label>
                   <input type="text" value={form.workLocation} onChange={(e) => update("workLocation", e.target.value)} className="input-field" placeholder="e.g. Sandton City Parking" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/50 mb-1.5">City *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">City *</label>
                     <input type="text" required value={form.city} onChange={(e) => update("city", e.target.value)} className="input-field" placeholder="e.g. Johannesburg" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/50 mb-1.5">Province</label>
-                    <select value={form.province} onChange={(e) => update("province", e.target.value)} className="input-field" style={{ color: form.province ? 'white' : 'rgba(255,255,255,0.3)' }}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Province</label>
+                    <select value={form.province} onChange={(e) => update("province", e.target.value)} className="input-field">
                       <option value="">Select...</option>
                       <option value="GP">Gauteng</option>
                       <option value="WC">Western Cape</option>
@@ -267,18 +265,18 @@ export default function ApplyPage() {
             {/* Step 3: Bank & FICA */}
             {step === 3 && (
               <div className="space-y-4">
-                <div className="rounded-xl p-4 ring-1 ring-accent/15 mb-2" style={{ background: "rgba(20,167,249,0.03)" }}>
+                <div className="rounded-xl p-4 bg-sky-50 ring-1 ring-sky-200 mb-2">
                   <div className="flex items-start gap-3">
-                    <svg className="h-5 w-5 text-accent shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
-                    <p className="text-xs text-white/50 leading-relaxed">
-                      Bank details are <strong className="text-white/70">optional</strong> at this stage. You can add or update them later from Dashboard &rarr; Settings before your first withdrawal.
+                    <svg className="h-5 w-5 text-sky-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+                    <p className="text-xs text-sky-700 leading-relaxed">
+                      Bank details are <strong className="text-sky-800">optional</strong> at this stage. You can add or update them later from Dashboard &rarr; Settings before your first withdrawal.
                     </p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/50 mb-1.5">Bank Name</label>
-                  <select value={form.bankName} onChange={(e) => update("bankName", e.target.value)} className="input-field" style={{ color: form.bankName ? 'white' : 'rgba(255,255,255,0.3)' }}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Bank Name</label>
+                  <select value={form.bankName} onChange={(e) => update("bankName", e.target.value)} className="input-field">
                     <option value="">Select your bank...</option>
                     <option value="ABSA">ABSA</option>
                     <option value="Capitec">Capitec</option>
@@ -294,11 +292,11 @@ export default function ApplyPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/50 mb-1.5">Account Number</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Account Number</label>
                     <input type="text" value={form.bankAccountNo} onChange={(e) => update("bankAccountNo", e.target.value)} className="input-field" placeholder="Account number" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/50 mb-1.5">Branch Code</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Branch Code</label>
                     <input type="text" value={form.bankBranchCode} onChange={(e) => update("bankBranchCode", e.target.value)} className="input-field" placeholder="Branch code" />
                   </div>
                 </div>
@@ -308,8 +306,8 @@ export default function ApplyPage() {
             {/* Step 4: Consent */}
             {step === 4 && (
               <div className="space-y-4">
-                <div className="rounded-xl p-4 ring-1 ring-amber-500/15 mb-2" style={{ background: "rgba(245,158,11,0.03)" }}>
-                  <p className="text-xs text-white/50 leading-relaxed">
+                <div className="rounded-xl p-4 bg-amber-50 ring-1 ring-amber-200 mb-2">
+                  <p className="text-xs text-amber-700 leading-relaxed">
                     Please read and accept each item below. You must scroll through and accept all consent items to submit your application.
                   </p>
                 </div>
@@ -322,14 +320,18 @@ export default function ApplyPage() {
                   { key: "consent5", text: "I consent to Slip a Tip processing my personal information (ID, bank details, biometric data) under the POPI Act, and to the creation of a Paystack Subaccount in my name for the purpose of receiving split payments." },
                   { key: "consent6", text: "I accept the Service Fee of 10% on every tip I receive, the 72-hour settlement cooldown period, and the applicable transfer fee on withdrawals. I understand that Slip a Tip reserves the right to debit my balance for any chargebacks or disputed transactions." },
                 ].map((item) => (
-                  <label key={item.key} className="flex items-start gap-3 rounded-xl p-3 ring-1 ring-white/[0.05] cursor-pointer hover:ring-white/[0.1] transition-all" style={{ background: (form as Record<string, string | boolean>)[item.key] ? "rgba(20,167,249,0.03)" : "rgba(255,255,255,0.015)" }}>
+                  <label key={item.key} className={`flex items-start gap-3 rounded-xl p-3 ring-1 cursor-pointer transition-all ${
+                      (form as Record<string, string | boolean>)[item.key]
+                        ? "ring-sky-200 bg-sky-50"
+                        : "ring-gray-100 bg-gray-50 hover:ring-gray-200"
+                    }`}>
                     <input
                       type="checkbox"
                       checked={(form as Record<string, string | boolean>)[item.key] as boolean}
                       onChange={(e) => update(item.key, e.target.checked)}
-                      className="mt-1 h-4 w-4 rounded border-white/20 bg-white/5 text-accent focus:ring-accent shrink-0"
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-sky-500 focus:ring-sky-400 shrink-0"
                     />
-                    <span className="text-xs text-white/50 leading-relaxed">{item.text}</span>
+                    <span className="text-xs text-gray-600 leading-relaxed">{item.text}</span>
                   </label>
                 ))}
               </div>
@@ -337,7 +339,7 @@ export default function ApplyPage() {
 
             {/* Error */}
             {error && (
-              <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-sm text-red-400">{error}</div>
+              <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">{error}</div>
             )}
 
             {/* Navigation */}
@@ -360,21 +362,21 @@ export default function ApplyPage() {
           </form>
 
           {/* Footer links */}
-          <div className="mt-6 pt-5 border-t border-white/[0.06]">
-            <div className="flex items-center justify-between text-xs text-white/30">
+          <div className="mt-6 pt-5 border-t border-gray-100">
+            <div className="flex items-center justify-between text-xs text-gray-400">
               <p>
                 Have a QR code?{" "}
-                <Link href="/auth/register" className="font-semibold text-accent hover:text-accent/80 transition-colors">Register here</Link>
+                <Link href="/auth/register" className="font-semibold text-sky-600 hover:text-sky-700 transition-colors">Register here</Link>
               </p>
               <p>
                 Already registered?{" "}
-                <Link href="/auth/login" className="font-semibold text-accent hover:text-accent/80 transition-colors">Sign in</Link>
+                <Link href="/auth/login" className="font-semibold text-sky-600 hover:text-sky-700 transition-colors">Sign in</Link>
               </p>
             </div>
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/20">
-              <Link href="/legal/terms" className="hover:text-white/40 transition-colors">Terms & Conditions</Link>
-              <Link href="/legal/privacy" className="hover:text-white/40 transition-colors">Privacy Policy</Link>
-              <Link href="/legal/fica" className="hover:text-white/40 transition-colors">FICA</Link>
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-400">
+              <Link href="/legal/terms" className="hover:text-gray-600 transition-colors">Terms &amp; Conditions</Link>
+              <Link href="/legal/privacy" className="hover:text-gray-600 transition-colors">Privacy Policy</Link>
+              <Link href="/legal/fica" className="hover:text-gray-600 transition-colors">FICA</Link>
             </div>
           </div>
         </div>
