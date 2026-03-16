@@ -329,10 +329,12 @@ export default function HomePage() {
                   lineHeight: 1,
                   letterSpacing: "-0.02em",
                   opacity: 0.88,
-                  whiteSpace: "nowrap",
+                  maxWidth: 980,
+                  whiteSpace: "normal",
                 }}
               >
-                Cashless Tipping
+                <span className="block">Cashless</span>
+                <span className="block">Tipping</span>
               </span>
             </div>
           </div>
