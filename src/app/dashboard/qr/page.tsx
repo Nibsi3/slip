@@ -34,9 +34,11 @@ export default function QRCodePage() {
       const ctx = canvas.getContext("2d");
       if (ctx) {
         const qrImg = new window.Image();
+        qrImg.crossOrigin = "anonymous";
         qrImg.onload = () => {
           ctx.drawImage(qrImg, 0, 0, qrSize, qrSize);
           const logo = new window.Image();
+          logo.crossOrigin = "anonymous";
           logo.onload = () => {
             const logoSize = Math.round(qrSize * 0.2);
             const padding = 12;
@@ -51,10 +53,9 @@ export default function QRCodePage() {
             setQrImage(canvas.toDataURL("image/png"));
           };
           logo.onerror = () => {
-            // Logo failed to load — still show the QR without it
             setQrImage(canvas.toDataURL("image/png"));
           };
-          logo.src = "/logo/11.png";
+          logo.src = "/logo/11.png?v=" + Date.now();
         };
         qrImg.onerror = () => setQrImage(qrDataUrl);
         qrImg.src = qrDataUrl;

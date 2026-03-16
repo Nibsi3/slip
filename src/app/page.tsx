@@ -22,6 +22,7 @@ function HeroDemoCard() {
   const [selected, setSelected] = useState(2);
   const [paid, setPaid] = useState(false);
   const [feedIdx, setFeedIdx] = useState(0);
+  const [walletToast, setWalletToast] = useState<string | null>(null);
 
   useEffect(() => {
     if (!paid) return;
@@ -34,6 +35,12 @@ function HeroDemoCard() {
     return () => clearInterval(iv);
   }, []);
 
+  useEffect(() => {
+    if (!walletToast) return;
+    const t = setTimeout(() => setWalletToast(null), 3000);
+    return () => clearTimeout(t);
+  }, [walletToast]);
+
   const amount = DEMO_AMOUNTS[selected];
 
   return (
@@ -43,6 +50,7 @@ function HeroDemoCard() {
         background: "rgba(8,8,14,0.92)",
         backdropFilter: "blur(32px)",
         boxShadow: "0 0 0 1px rgba(249,115,22,0.08), 0 32px 80px rgba(0,0,0,0.7), 0 0 120px rgba(249,115,22,0.06)",
+        minHeight: 520,
       }}
     >
       {/* ── Top bar ── */}
@@ -186,9 +194,26 @@ function HeroDemoCard() {
               </div>
             ))}
           </div>
+          {walletToast && (
+            <div
+              className="mb-3 px-3 py-2.5 rounded-xl flex items-center gap-2 text-xs font-medium text-white"
+              style={{ background: "rgba(196,80,0,0.18)", border: "1px solid rgba(196,80,0,0.35)" }}
+            >
+              <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+              {walletToast}
+            </div>
+          )}
           <div className="flex gap-2">
-            <button className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white" style={{ background: "#c45000", boxShadow: "0 0 16px rgba(196,80,0,0.35)" }}>Instant Money</button>
-            <button className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white/60" style={{ background: "rgba(255,255,255,0.05)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}>Bank EFT</button>
+            <button
+              onClick={() => setWalletToast("Instant Money withdrawals are available once your account is verified. Sign up to get started.")}
+              className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ background: "#c45000", boxShadow: "0 0 16px rgba(196,80,0,0.35)" }}
+            >Instant Money</button>
+            <button
+              onClick={() => setWalletToast("Bank EFT withdrawals are available once your banking details are linked in your profile.")}
+              className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white/60 transition-all hover:text-white"
+              style={{ background: "rgba(255,255,255,0.05)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}
+            >Bank EFT</button>
           </div>
         </div>
       )}
@@ -290,17 +315,18 @@ export default function HomePage() {
             }}
           />
 
-          {/* ── Giant Cormorant headline — BEHIND content, z-[3] ── */}
-          <div className="absolute inset-0 z-[3] flex items-center pointer-events-none overflow-hidden" aria-hidden>
+          {/* ── Giant Cormorant headline — top half only, stays behind card ── */}
+          <div className="absolute inset-0 z-[3] flex pointer-events-none overflow-hidden" aria-hidden
+            style={{ alignItems: "flex-start", paddingTop: "18vh" }}
+          >
             <span
               className="font-serif-display text-white select-none w-full text-center"
               style={{
-                fontSize: "clamp(4.5rem, 15vw, 14rem)",
+                fontSize: "clamp(4.5rem, 13vw, 12rem)",
                 lineHeight: 1,
                 letterSpacing: "-0.02em",
-                opacity: 0.92,
+                opacity: 0.88,
                 whiteSpace: "nowrap",
-                paddingTop: "0.1em",
               }}
             >
               Cashless Tipping
@@ -308,8 +334,8 @@ export default function HomePage() {
           </div>
 
           {/* ── Content sits above everything (z-10) ── */}
-          <div className="relative z-10 flex-1 flex flex-col justify-end pb-14 lg:pb-20">
-            <div className="w-full max-w-7xl mx-auto px-6 pt-28">
+          <div className="relative z-10 flex-1 flex flex-col justify-center pb-10 lg:pb-14">
+            <div className="w-full max-w-7xl mx-auto px-6 pt-20 lg:pt-24">
               <div className="grid lg:grid-cols-[1fr_400px] gap-12 xl:gap-16 items-end">
 
                 {/* Left — bottom-anchored FlowArt content */}
@@ -346,39 +372,6 @@ export default function HomePage() {
                     </div>
                   </ScrollReveal>
 
-                  {/* Stats — FlowArt bottom-right widget style */}
-                  <ScrollReveal delay={0.22}>
-                    <div className="mt-10 flex items-center gap-6">
-                      {/* 98% card */}
-                      <div
-                        className="flex items-center gap-3 px-4 py-3 rounded-2xl"
-                        style={{
-                          background: "rgba(8,8,8,0.6)",
-                          backdropFilter: "blur(12px)",
-                          border: "1px solid rgba(196,80,0,0.35)",
-                          boxShadow: "0 0 20px rgba(196,80,0,0.15)",
-                        }}
-                      >
-                        <div>
-                          <div className="text-2xl font-extrabold text-white leading-none">98%</div>
-                          <div className="text-[10px] mt-0.5" style={{ color: "#888" }}>Satisfaction Rate</div>
-                        </div>
-                      </div>
-                      <div className="h-8 w-px bg-white/[0.08]" />
-                      {/* Stars + count */}
-                      <div>
-                        <div className="flex items-center gap-0.5 mb-1">
-                          {[...Array(5)].map((_,i) => (
-                            <svg key={i} className="h-3.5 w-3.5" fill="#c45000" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                          ))}
-                        </div>
-                        <div className="text-white font-bold text-sm leading-none">9,500+</div>
-                        <div className="text-[10px] mt-0.5" style={{ color: "#888" }}>Positive Reviews</div>
-                      </div>
-                    </div>
-                  </ScrollReveal>
                 </div>
 
                 {/* Right — demo card */}
