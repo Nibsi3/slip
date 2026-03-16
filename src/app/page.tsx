@@ -318,14 +318,14 @@ export default function HomePage() {
           {/* ── Content sits above everything (z-10) ── */}
           <div className="relative z-10 flex-1 flex flex-col justify-center pb-10 lg:pb-14">
             <div className="w-full max-w-7xl mx-auto px-6 pt-20 lg:pt-24">
-              <div className="grid lg:grid-cols-[1fr_420px] gap-8 xl:gap-12 items-center">
+              <div className="grid lg:grid-cols-[1fr_420px] gap-8 xl:gap-12 items-end">
 
-                {/* Left — headline + content in normal flow */}
-                <div>
-                  {/* Big serif headline inside the grid column */}
+                {/* Left — headline fills top, text+buttons align with card bottom */}
+                <div className="flex flex-col justify-end">
+                  {/* Big serif headline pushes content down */}
                   <ScrollReveal>
                     <h1
-                      className="font-serif-display text-white leading-none mb-6"
+                      className="font-serif-display text-white leading-none mb-8"
                       style={{
                         fontSize: "clamp(4rem, 10vw, 9.5rem)",
                         letterSpacing: "-0.02em",

@@ -20,9 +20,9 @@ export default function QRCodePage() {
     (async () => {
       try {
         const QRCode = (await import("qrcode")).default;
-        const qrSize = 800;
+        const qrSize = 400;
 
-        // Step 1: get QR as data URL string
+        // Generate QR directly as data URL — simplest reliable method
         const qrDataUrl: string = await QRCode.toDataURL(waUrl, {
           width: qrSize,
           margin: 2,
@@ -30,40 +30,7 @@ export default function QRCodePage() {
           errorCorrectionLevel: "H",
         });
 
-        // Step 2: load QR data URL into Image (onload set BEFORE src)
-        const qrImg = await new Promise<HTMLImageElement>((resolve, reject) => {
-          const img = new window.Image();
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = qrDataUrl;
-        });
-
-        // Step 3: draw QR onto canvas
-        const canvas = document.createElement("canvas");
-        canvas.width = qrSize;
-        canvas.height = qrSize;
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(qrImg, 0, 0, qrSize, qrSize);
-
-        // Step 4: overlay logo (onload set BEFORE src)
-        await new Promise<void>((resolve) => {
-          const logo = new window.Image();
-          logo.onload = () => {
-            const logoSize = Math.round(qrSize * 0.2);
-            const padding = 14;
-            const bgSize = logoSize + padding * 2;
-            const bgX = (qrSize - bgSize) / 2;
-            const bgY = (qrSize - bgSize) / 2;
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(bgX, bgY, bgSize, bgSize);
-            ctx.drawImage(logo, (qrSize - logoSize) / 2, (qrSize - logoSize) / 2, logoSize, logoSize);
-            resolve();
-          };
-          logo.onerror = () => resolve();
-          logo.src = "/logo/11.png";
-        });
-
-        setQrImage(canvas.toDataURL("image/png"));
+        setQrImage(qrDataUrl);
       } catch (err) {
         console.error("QR generation failed:", err);
       }
@@ -127,11 +94,20 @@ export default function QRCodePage() {
         {qrImage ? (
           <div className="flex justify-center mb-6">
             <div className="p-3 bg-white rounded-2xl shadow-glow-sm inline-block">
-              <img
-                src={qrImage}
-                alt="Your QR Code"
-                className="w-52 h-52 sm:w-64 sm:h-64 block"
-              />
+              <div className="relative w-52 h-52 sm:w-64 sm:h-64">
+                <img
+                  src={qrImage}
+                  alt="Your QR Code"
+                  className="w-full h-full block"
+                />
+                {/* Logo overlay centered via CSS */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="bg-white p-1.5 rounded-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/logo/11.png" alt="" className="w-10 h-10 sm:w-12 sm:h-12 object-contain block" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
