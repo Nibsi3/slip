@@ -317,21 +317,19 @@ export default function HomePage() {
 
           {/* ── Giant Cormorant headline — top half only, stays behind card ── */}
           <div
-            className="absolute inset-0 z-[3] flex pointer-events-none overflow-hidden"
+            className="absolute left-0 top-0 bottom-0 right-0 lg:right-[520px] z-[3] flex pointer-events-none overflow-hidden"
             aria-hidden
             style={{ alignItems: "flex-start", paddingTop: "18vh" }}
           >
-            <div className="w-full">
+            <div className="w-full px-6">
               <span
-                className="font-serif-display text-white select-none block"
+                className="font-serif-display text-white select-none block text-center lg:text-left"
                 style={{
                   fontSize: "clamp(4.5rem, 13vw, 12rem)",
                   lineHeight: 1,
                   letterSpacing: "-0.02em",
                   opacity: 0.88,
                   whiteSpace: "nowrap",
-                  maxWidth: "calc(100% - 440px)",
-                  paddingLeft: 24,
                 }}
               >
                 Cashless Tipping
