@@ -316,21 +316,27 @@ export default function HomePage() {
           />
 
           {/* ── Giant Cormorant headline — top half only, stays behind card ── */}
-          <div className="absolute inset-0 z-[3] flex pointer-events-none overflow-hidden" aria-hidden
+          <div
+            className="absolute inset-0 z-[3] flex pointer-events-none overflow-hidden"
+            aria-hidden
             style={{ alignItems: "flex-start", paddingTop: "18vh" }}
           >
-            <span
-              className="font-serif-display text-white select-none w-full text-center"
-              style={{
-                fontSize: "clamp(4.5rem, 13vw, 12rem)",
-                lineHeight: 1,
-                letterSpacing: "-0.02em",
-                opacity: 0.88,
-                whiteSpace: "nowrap",
-              }}
-            >
-              Cashless Tipping
-            </span>
+            <div className="w-full">
+              <span
+                className="font-serif-display text-white select-none block"
+                style={{
+                  fontSize: "clamp(4.5rem, 13vw, 12rem)",
+                  lineHeight: 1,
+                  letterSpacing: "-0.02em",
+                  opacity: 0.88,
+                  whiteSpace: "nowrap",
+                  maxWidth: "calc(100% - 440px)",
+                  paddingLeft: 24,
+                }}
+              >
+                Cashless Tipping
+              </span>
+            </div>
           </div>
 
           {/* ── Content sits above everything (z-10) ── */}
