@@ -22,37 +22,46 @@ export default function QRCodePage() {
         const QRCode = (await import("qrcode")).default;
         const qrSize = 800;
 
-        // Draw QR directly onto canvas — no Image() loading chain needed
-        const canvas = document.createElement("canvas");
-        canvas.width = qrSize;
-        canvas.height = qrSize;
-        await QRCode.toCanvas(canvas, waUrl, {
+        // Step 1: get QR as data URL string
+        const qrDataUrl: string = await QRCode.toDataURL(waUrl, {
           width: qrSize,
           margin: 2,
           color: { dark: "#000000", light: "#ffffff" },
           errorCorrectionLevel: "H",
         });
 
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          // Try to overlay the logo
-          await new Promise<void>((resolve) => {
-            const logo = new window.Image();
-            logo.onload = () => {
-              const logoSize = Math.round(qrSize * 0.2);
-              const padding = 12;
-              const bgSize = logoSize + padding * 2;
-              const bgX = (qrSize - bgSize) / 2;
-              const bgY = (qrSize - bgSize) / 2;
-              ctx.fillStyle = "#ffffff";
-              ctx.fillRect(bgX, bgY, bgSize, bgSize);
-              ctx.drawImage(logo, (qrSize - logoSize) / 2, (qrSize - logoSize) / 2, logoSize, logoSize);
-              resolve();
-            };
-            logo.onerror = () => resolve();
-            logo.src = "/logo/11.png";
-          });
-        }
+        // Step 2: load QR data URL into Image (onload set BEFORE src)
+        const qrImg = await new Promise<HTMLImageElement>((resolve, reject) => {
+          const img = new window.Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = qrDataUrl;
+        });
+
+        // Step 3: draw QR onto canvas
+        const canvas = document.createElement("canvas");
+        canvas.width = qrSize;
+        canvas.height = qrSize;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(qrImg, 0, 0, qrSize, qrSize);
+
+        // Step 4: overlay logo (onload set BEFORE src)
+        await new Promise<void>((resolve) => {
+          const logo = new window.Image();
+          logo.onload = () => {
+            const logoSize = Math.round(qrSize * 0.2);
+            const padding = 14;
+            const bgSize = logoSize + padding * 2;
+            const bgX = (qrSize - bgSize) / 2;
+            const bgY = (qrSize - bgSize) / 2;
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(bgX, bgY, bgSize, bgSize);
+            ctx.drawImage(logo, (qrSize - logoSize) / 2, (qrSize - logoSize) / 2, logoSize, logoSize);
+            resolve();
+          };
+          logo.onerror = () => resolve();
+          logo.src = "/logo/11.png";
+        });
 
         setQrImage(canvas.toDataURL("image/png"));
       } catch (err) {

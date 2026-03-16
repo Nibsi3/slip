@@ -315,41 +315,29 @@ export default function HomePage() {
             }}
           />
 
-          {/* ── Giant Cormorant headline — top half only, stays behind card ── */}
-          <div
-            className="absolute left-0 top-0 bottom-0 right-0 lg:right-[520px] z-[3] flex pointer-events-none overflow-hidden"
-            aria-hidden
-            style={{ alignItems: "flex-start", paddingTop: "14vh" }}
-          >
-            <div className="w-full max-w-7xl mx-auto px-6">
-              <span
-                className="font-serif-display text-white select-none block text-center lg:text-left"
-                style={{
-                  fontSize: "clamp(4.25rem, 12vw, 11rem)",
-                  lineHeight: 0.92,
-                  letterSpacing: "-0.02em",
-                  opacity: 0.88,
-                  maxWidth: 720,
-                  whiteSpace: "normal",
-                }}
-              >
-                <span className="block">Cashless</span>
-                <span className="block">Tipping</span>
-              </span>
-            </div>
-          </div>
-
           {/* ── Content sits above everything (z-10) ── */}
           <div className="relative z-10 flex-1 flex flex-col justify-center pb-10 lg:pb-14">
             <div className="w-full max-w-7xl mx-auto px-6 pt-20 lg:pt-24">
-              <div className="grid lg:grid-cols-[1fr_420px] gap-10 xl:gap-12 items-center">
+              <div className="grid lg:grid-cols-[1fr_420px] gap-8 xl:gap-12 items-center">
 
-                {/* Left — bottom-anchored FlowArt content */}
+                {/* Left — headline + content in normal flow */}
                 <div>
+                  {/* Big serif headline inside the grid column */}
                   <ScrollReveal>
-                    <h2 className="text-white font-bold text-3xl sm:text-4xl mb-3 leading-tight">
-                      Our Platform
-                    </h2>
+                    <h1
+                      className="font-serif-display text-white leading-none mb-6"
+                      style={{
+                        fontSize: "clamp(4rem, 10vw, 9.5rem)",
+                        letterSpacing: "-0.02em",
+                        lineHeight: 0.92,
+                      }}
+                    >
+                      <span className="block">Cashless</span>
+                      <span className="block">Tipping</span>
+                    </h1>
+                  </ScrollReveal>
+
+                  <ScrollReveal delay={0.08}>
                     <p className="text-sm leading-relaxed max-w-xs" style={{ color: "#aaaaaa" }}>
                       Workers get a personal QR code. Customers scan, pick an amount,
                       and tip directly via WhatsApp. Tips land instantly.
