@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
         termsIpAddress: ip,
         worker: {
           create: {
-            phoneForIM: phone,
+            whatsappPhone: phone,
           },
         },
       },

@@ -116,18 +116,18 @@ async function handlePaymentPaid(payload: StitchWebhookPayload) {
     return;
   }
 
-  // Look up tip by merchantReference (our paymentId) or by stored stitchPaymentId (paystackRef field)
+  // Look up tip by merchantReference (our paymentId) or by stored stitchPaymentId (gatewayRef field)
   const tip = await db.tip.findFirst({
     where: {
       OR: [
         ...(merchantReference ? [{ paymentId: merchantReference }] : []),
-        { paystackRef: stitchPaymentId },
+        { gatewayRef: stitchPaymentId },
       ],
     },
     include: {
       worker: {
         select: {
-          phoneForIM: true,
+          whatsappPhone: true,
           user: { select: { firstName: true, lastName: true } },
         },
       },
@@ -182,7 +182,7 @@ async function handlePaymentPaid(payload: StitchWebhookPayload) {
 
     await db.tip.update({
       where: { id: tip.id },
-      data: { paystackRef: stitchRef },
+      data: { gatewayRef: stitchRef },
     });
 
     const capWorkerUser = await db.user.findFirst({ where: { worker: { id: tip.workerId } } });
@@ -234,7 +234,7 @@ async function handlePaymentPaid(payload: StitchWebhookPayload) {
   await db.$transaction(async (tx) => {
     await tx.tip.update({
       where: { id: tip.id },
-      data: { status: "COMPLETED", paystackRef: stitchRef },
+      data: { status: "COMPLETED", gatewayRef: stitchRef },
     });
 
     await tx.ledgerEntry.create({
@@ -320,9 +320,9 @@ async function handlePaymentPaid(payload: StitchWebhookPayload) {
   }
 
   // 2. Notify the car guard they received a tip (if they have a phone on record)
-  if (tip.worker.phoneForIM) {
+  if (tip.worker.whatsappPhone) {
     sendWorkerTipNotification({
-      workerPhone: tip.worker.phoneForIM,
+      workerPhone: tip.worker.whatsappPhone,
       workerFirstName: tip.worker.user.firstName,
       amountZAR: Number(tip.amount),
       netAmountZAR: netAmount,
@@ -348,7 +348,7 @@ async function handlePaymentFailed(payload: StitchWebhookPayload) {
     where: {
       OR: [
         ...(merchantReference ? [{ paymentId: merchantReference }] : []),
-        { paystackRef: stitchPaymentId },
+        { gatewayRef: stitchPaymentId },
       ],
       status: "PENDING",
     },

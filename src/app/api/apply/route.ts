@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
             bankName: data.bankName || null,
             bankAccountNo: data.bankAccountNo || null,
             bankBranchCode: data.bankBranchCode || null,
-            phoneForIM: phone,
+            whatsappPhone: phone,
             isActive: false, // Pending admin approval
           },
         },

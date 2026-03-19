@@ -8,7 +8,7 @@ interface WorkerData {
   qrCode: string;
   employerName?: string;
   jobTitle?: string;
-  phoneForIM?: string;
+  whatsappPhone?: string;
   bankName?: string;
   bankAccountNo?: string;
   bankBranchCode?: string;

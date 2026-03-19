@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
         feeGateway,
         netAmount,
         paymentId,
-        paymentMethod: "paystack",
+        paymentMethod: "stitch",
         customerName: data.customerName,
         customerEmail: data.customerEmail,
         customerMessage: data.customerMessage,
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
     // Store the Stitch payment link ID on the tip for webhook reconciliation
     await db.tip.update({
       where: { id: tip.id },
-      data: { paystackRef: stitch.id },
+      data: { gatewayRef: stitch.id },
     });
 
     // --- Record velocity events only after payment gateway confirms ---

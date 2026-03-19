@@ -413,7 +413,7 @@ async function handleAmountSelected(from: string, amount: number) {
       netAmount,
       paymentId,
       paymentMethod: "stitch",
-      paystackRef: stitch.id,
+      gatewayRef: stitch.id,
       customerPhone: from,
       paymentLinkUrl: stitch.link,
       whatsappLinkSentAt: new Date(),

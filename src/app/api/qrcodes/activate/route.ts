@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
               bankName: data.bankName,
               bankAccountNo: data.bankAccountNo,
               bankBranchCode: data.bankBranchCode,
-              phoneForIM: phone,
+              whatsappPhone: phone,
             },
           },
         },

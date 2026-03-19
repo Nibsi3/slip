@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
         netAmount,
         paymentId,
         paymentMethod: "stitch",
-        paystackRef: stitch.id,
+        gatewayRef: stitch.id,
         customerName: data.customerName,
         customerPhone: data.customerPhone,
         customerMessage: data.customerMessage,

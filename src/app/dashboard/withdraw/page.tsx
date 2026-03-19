@@ -70,7 +70,7 @@ export default function WithdrawPage() {
   useEffect(() => {
     if (worker && !initialized && banks.length > 0) {
       if (worker.bankAccountNo) setBankAccountNo(worker.bankAccountNo);
-      if (worker.phoneForIM) setOttMobile(worker.phoneForIM);
+      if (worker.whatsappPhone) setOttMobile(worker.whatsappPhone);
       if (worker.bankName) {
         const saved = banks.find(
           (b) => b.name.toLowerCase() === (worker.bankName || "").toLowerCase()

@@ -3,7 +3,6 @@ import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   allowedDevOrigins: [
-    "https://83a1-165-73-118-27.ngrok-free.app",
     "*.ngrok-free.app",
   ],
   experimental: {
@@ -102,6 +101,8 @@ export default withSentryConfig(nextConfig, {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   widenClientFileUpload: true,
-  disableLogger: true,
   hideSourceMaps: true,
+  treeshake: {
+    removeDebugLogging: true,
+  },
 });

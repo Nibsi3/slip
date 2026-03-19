@@ -314,7 +314,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Send PIN via WhatsApp (best-effort, non-blocking)
-        const workerPhone = worker.phoneForIM;
+        const workerPhone = worker.whatsappPhone;
         if (workerPhone) {
           sendOttVoucherPin({
             workerPhone,

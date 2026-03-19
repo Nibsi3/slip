@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
         netAmount,
         paymentId,
         paymentMethod: "stitch",
-        paystackRef: stitch.id,
+        gatewayRef: stitch.id,
         paymentLinkUrl: stitch.link,
         status: "PENDING",
       },

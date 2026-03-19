@@ -11,7 +11,7 @@ export default function SettingsPage() {
     bankName: "",
     bankAccountNo: "",
     bankBranchCode: "",
-    phoneForIM: "",
+    whatsappPhone: "",
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -25,7 +25,7 @@ export default function SettingsPage() {
         bankName: worker.bankName || "",
         bankAccountNo: worker.bankAccountNo || "",
         bankBranchCode: worker.bankBranchCode || "",
-        phoneForIM: worker.phoneForIM || "",
+        whatsappPhone: worker.whatsappPhone || "",
       });
       setInitialized(true);
     }
@@ -87,11 +87,11 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-muted mb-1">Phone for Instant Money</label>
+              <label className="block text-sm font-medium text-muted mb-1">WhatsApp Phone</label>
               <input
                 type="tel"
-                value={form.phoneForIM}
-                onChange={(e) => setForm((p) => ({ ...p, phoneForIM: e.target.value }))}
+                value={form.whatsappPhone}
+                onChange={(e) => setForm((p) => ({ ...p, whatsappPhone: e.target.value }))}
                 className="input-field"
                 placeholder="e.g. 066 299 5533"
               />

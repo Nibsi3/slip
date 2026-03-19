@@ -48,7 +48,7 @@ model Worker {
   bankName           String?
   bankAccountNo      String?
   bankBranchCode     String?
-  phoneForIM         String?
+  whatsappPhone      String?
   isActive           Boolean             @default(true)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
@@ -103,9 +103,9 @@ model Tip {
   netAmount       Decimal         @db.Decimal(12, 2)
   currency        String          @default("ZAR")
   status          TipStatus       @default(PENDING)
-  paymentMethod   String          @default("paystack")
+  paymentMethod   String          @default("stitch")
   paymentId       String          @unique
-  paystackRef     String?
+  gatewayRef      String?
   customerName       String?
   customerEmail      String?
   customerPhone      String?
@@ -118,6 +118,8 @@ model Tip {
   ledgerEntry     LedgerEntry?
   settlementHold  SettlementHold?
   worker          Worker          @relation(fields: [workerId], references: [id])
+
+  @@index([workerId])
 }
 
 model LedgerEntry {
@@ -137,6 +139,8 @@ model LedgerEntry {
   tip             Tip?            @relation(fields: [tipId], references: [id])
   withdrawal      Withdrawal?     @relation(fields: [withdrawalId], references: [id])
   worker          Worker          @relation(fields: [workerId], references: [id])
+
+  @@index([workerId])
 }
 
 model Withdrawal {
@@ -160,6 +164,8 @@ model Withdrawal {
   updatedAt      DateTime         @updatedAt
   ledgerEntry    LedgerEntry?
   worker         Worker           @relation(fields: [workerId], references: [id])
+
+  @@index([workerId])
 }
 
 model Session {
@@ -169,6 +175,8 @@ model Session {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model AuditLog {
@@ -181,6 +189,8 @@ model AuditLog {
   ipAddress String?
   createdAt DateTime @default(now())
   user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model QRCode {
@@ -194,6 +204,8 @@ model QRCode {
   cancelReason String?
   cancelledAt  DateTime?
   worker       Worker?      @relation(fields: [workerId], references: [id])
+
+  @@index([workerId])
 }
 
 model FraudEvent {
