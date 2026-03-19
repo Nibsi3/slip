@@ -35,7 +35,6 @@ const updateSchema = z.object({
   bankName: z.string().max(100).optional(),
   bankAccountNo: z.string().max(20).optional(),
   bankBranchCode: z.string().max(10).optional(),
-  whatsappPhone: z.string().max(20).optional(),
 });
 
 export async function PUT(request: NextRequest) {
