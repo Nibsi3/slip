@@ -101,7 +101,7 @@ function AmountScreen() {
 
 function PaymentScreen() {
   return (
-    <PhoneFrame label="Paystack secure checkout">
+    <PhoneFrame label="Stitch secure checkout">
       <div className="px-4 pt-6">
         <div className="w-full rounded-lg p-3.5 ring-1 ring-white/[0.08]" style={{ background: "rgba(255,255,255,0.03)" }}>
           <div className="flex items-center gap-1.5 mb-3">
@@ -125,7 +125,7 @@ function PaymentScreen() {
             </div>
           </div>
           <div className="mt-3 w-full py-2 text-center text-[9px] font-semibold text-white rounded-md bg-green-500/80">Pay R50.00</div>
-          <div className="mt-2 text-center text-[7px] text-white/20">Powered by Paystack &middot; 3D Secure</div>
+          <div className="mt-2 text-center text-[7px] text-white/20">Powered by Stitch &middot; 3D Secure</div>
         </div>
         <div className="mt-4 flex items-center justify-center gap-3">
           <div className="flex items-center gap-1"><svg className="h-3 w-3 text-green-400/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg><span className="text-[7px] text-white/25">PCI-DSS L1</span></div>
@@ -171,19 +171,19 @@ const stepData = [
   { num: "01", title: "Open Your Camera", desc: "Use your phone's built-in camera app. No need to download anything — works on iPhone and Android." },
   { num: "02", title: "Scan the QR Code", desc: "Point your camera at the worker's QR code. A link will pop up — tap it. It opens their personal tip page in your browser." },
   { num: "03", title: "Choose an Amount", desc: "Tap a quick amount — R15, R20, R50, R100, or R200. You'll see the worker's name and employer so you know it's the right person." },
-  { num: "04", title: "Enter Card Details", desc: "Enter your bank card number, expiry date, and CVV. All card data is handled by Paystack — Slip a Tip never sees or stores your card. Payment is secured with 3D Secure authentication via your banking app." },
+  { num: "04", title: "Enter Card Details", desc: "Enter your bank card number, expiry date, and CVV. All card data is handled by Stitch — Slip a Tip never sees or stores your card. Payment is secured with 3D Secure authentication via your banking app." },
   { num: "05", title: "Done! Tip Sent", desc: "That's it. The worker receives your tip instantly in their digital wallet. You'll see a confirmation screen. The whole process takes about 30 seconds." },
 ];
 
 const faqs = [
   { q: "Do I need to download an app?", a: "No. You scan the QR code with your normal phone camera and the tip page opens in your browser. No app required." },
-  { q: "Is my card information safe?", a: "Yes. All payment processing is handled by Paystack (PCI-DSS Level 1 certified). Slip a Tip never sees or stores your card details. Payments are authenticated with 3D Secure through your bank." },
+  { q: "Is my card information safe?", a: "Yes. All payment processing is handled by Stitch (PCI-DSS compliant). Slip a Tip never sees or stores your card details. Payments are authenticated with 3D Secure through your bank." },
   { q: "Can I tip using EFT or e-wallet?", a: "Currently we support bank card payments only (Visa, Mastercard). This ensures instant delivery to the worker." },
   { q: "Do I need to create an account?", a: "No. Customers don't need an account. You just scan, tap, pay, and go." },
   { q: "What payment amounts can I choose?", a: "Quick amounts of R15, R20, R50, R100, and R200 are available." },
   { q: "Can I get a receipt?", a: "You'll see a confirmation page after payment. Your bank statement will also show the transaction." },
   { q: "What if I tipped the wrong person?", a: "Tips are non-refundable once completed. If there was an error, please contact your bank directly for a chargeback." },
-  { q: "Does the full tip go to the worker?", a: "90% of your tip goes directly to the worker. A total 10% fee (Paystack processing + Slip a Tip) is deducted from the tip at the time of payment. There are no withdrawal fees." },
+  { q: "Does the full tip go to the worker?", a: "90% of your tip goes directly to the worker. A total 10% fee (Stitch processing + Slip a Tip platform) is deducted from the tip at the time of payment." },
 ];
 
 export default function CustomerGuidePage() {
@@ -243,7 +243,7 @@ export default function CustomerGuidePage() {
               <div>
                 <h3 className="text-base font-bold text-white">Your payment is secure</h3>
                 <p className="mt-2 text-sm text-white/40 leading-relaxed">
-                  All payments are processed by <strong className="text-white/60">Paystack</strong>, Africa&rsquo;s leading payment processor (PCI-DSS Level 1). Your card details are never shared with Slip a Tip. Every transaction is authenticated with <strong className="text-white/60">3D Secure</strong> through your bank.
+                  All payments are processed by <strong className="text-white/60">Stitch</strong>, a PCI-DSS compliant South African payment provider. Your card details are never shared with Slip a Tip. Every transaction is authenticated with <strong className="text-white/60">3D Secure</strong> through your bank.
                 </p>
               </div>
             </div>

@@ -2,20 +2,21 @@
  * Payout provider abstraction.
  *
  * DEV/TEST    → MockPayoutProvider  (set PAYOUT_PROVIDER=mock or leave unset)
- * PRODUCTION  → PaystackPayoutProvider (set PAYOUT_PROVIDER=paystack)
+ * PRODUCTION  → StitchPayoutProvider (set PAYOUT_PROVIDER=stitch)
  *
- * Paystack Transfers API handles EFT payouts. Payout confirmation arrives
- * via the Paystack transfer webhook (transfer.success / transfer.failed).
+ * EFT payouts go through the Stitch Payouts API (R2 flat fee deducted).
+ * OTT_VOUCHER is handled directly in the withdrawal route (not via this module).
  *
- * Required env vars for Paystack:
- *   PAYSTACK_SECRET_KEY
+ * Required env vars for Stitch:
+ *   STITCH_PAYOUT_CLIENT_ID / STITCH_PAYOUT_CLIENT_SECRET
+ *   (falls back to STITCH_CLIENT_ID / STITCH_CLIENT_SECRET if not set)
  */
 
-import { createTransferRecipient, initiateTransfer } from "./paystack";
+import { initiateStitchPayout } from "./stitch-payouts";
 
 export interface PayoutRequest {
   withdrawalId: string;
-  method: "INSTANT_MONEY" | "EFT";
+  method: "INSTANT_MONEY" | "EFT" | "OTT_VOUCHER";
   amount: number;
   phoneNumber?: string;
   bankName?: string;
@@ -29,6 +30,8 @@ export interface PayoutResult {
   success: boolean;
   reference: string;
   providerRef?: string;
+  netAmountSent?: number;
+  feePlatform?: number;
   error?: string;
   pending?: boolean;
 }
@@ -60,9 +63,11 @@ class MockPayoutProvider implements PayoutProvider {
       if (!request.bankAccountNo) {
         return { success: false, reference: "", error: "Bank account required for EFT" };
       }
+      const fee = 2;
+      const net = Number((request.amount - fee).toFixed(2));
       const ref = `EFT-${Date.now().toString(36).toUpperCase()}`;
-      console.log(`[MockPayout] EFT R${request.amount.toFixed(2)} → ${request.bankName} ${request.bankAccountNo} | Ref: ${ref}`);
-      return { success: true, reference: ref, providerRef: `MOCK-EFT-${Date.now()}` };
+      console.log(`[MockPayout] EFT R${net.toFixed(2)} (fee R${fee}) → ${request.bankName} ${request.bankAccountNo} | Ref: ${ref}`);
+      return { success: true, reference: ref, providerRef: `MOCK-EFT-${Date.now()}`, netAmountSent: net, feePlatform: fee };
     }
 
     return { success: false, reference: "", error: `Unknown method: ${request.method}` };
@@ -70,18 +75,18 @@ class MockPayoutProvider implements PayoutProvider {
 }
 
 // ---------------------------------------------------------------------------
-// Paystack provider — production EFT via Paystack Transfers API
-// Completion is confirmed asynchronously via transfer webhook.
+// Stitch provider — production EFT via Stitch Payouts API
+// R2 flat fee deducted inside initiateStitchPayout.
 // ---------------------------------------------------------------------------
-class PaystackPayoutProvider implements PayoutProvider {
-  name = "paystack";
+class StitchPayoutProvider implements PayoutProvider {
+  name = "stitch";
 
   async sendPayout(request: PayoutRequest): Promise<PayoutResult> {
     if (request.method !== "EFT") {
       return {
         success: false,
         reference: "",
-        error: "Paystack provider only supports EFT. Use a different provider for Instant Money.",
+        error: "Stitch payout provider only handles EFT. OTT_VOUCHER is processed separately.",
       };
     }
 
@@ -89,74 +94,18 @@ class PaystackPayoutProvider implements PayoutProvider {
       return { success: false, reference: "", error: "Bank account number and recipient name required for EFT" };
     }
 
-    const bankCode = request.bankCode || deriveBankCode(request.bankName || "");
-    if (!bankCode) {
-      return {
-        success: false,
-        reference: "",
-        error: `Could not determine bank code for "${request.bankName}". Please provide a valid bank name.`,
-      };
-    }
+    const result = await initiateStitchPayout({
+      withdrawalId: request.withdrawalId,
+      grossAmountZAR: request.amount,
+      recipientName: request.recipientName,
+      bankAccountNo: request.bankAccountNo,
+      bankBranchCode: request.bankBranchCode,
+      bankName: request.bankName,
+      bankCode: request.bankCode,
+    });
 
-    try {
-      // Create transfer recipient
-      const recipientCode = await createTransferRecipient({
-        name: request.recipientName,
-        accountNumber: request.bankAccountNo,
-        bankCode,
-        currency: "ZAR",
-      });
-
-      // Initiate transfer — completion confirmed via webhook
-      const { transferCode, status } = await initiateTransfer({
-        amount: request.amount,
-        recipientCode,
-        reference: request.withdrawalId,
-        reason: `Slip a Tip withdrawal ${request.withdrawalId}`,
-      });
-
-      console.log(`[PaystackPayout] Transfer initiated: ${transferCode} (status: ${status})`);
-
-      return {
-        success: true,
-        reference: transferCode,
-        providerRef: transferCode,
-        pending: status !== "success",
-      };
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Paystack payout failed";
-      console.error("[PaystackPayout] Error:", msg);
-      return { success: false, reference: "", error: msg };
-    }
+    return result;
   }
-}
-
-// ---------------------------------------------------------------------------
-// Common South African bank codes (Paystack uses these)
-// ---------------------------------------------------------------------------
-function deriveBankCode(bankName: string): string {
-  const lower = bankName.toLowerCase().trim();
-  const codes: Record<string, string> = {
-    "absa": "632005",
-    "standard bank": "051001",
-    "fnb": "250655",
-    "first national bank": "250655",
-    "nedbank": "198765",
-    "capitec": "470010",
-    "investec": "580105",
-    "african bank": "430000",
-    "bidvest bank": "462005",
-    "discovery bank": "679000",
-    "tyme bank": "678910",
-    "access bank": "410506",
-    "old mutual": "462005",
-  };
-
-  for (const [key, code] of Object.entries(codes)) {
-    if (lower.includes(key)) return code;
-  }
-
-  return "";
 }
 
 // ---------------------------------------------------------------------------
@@ -166,8 +115,8 @@ function getPayoutProvider(): PayoutProvider {
   const provider = process.env.PAYOUT_PROVIDER || "mock";
 
   switch (provider) {
-    case "paystack":
-      return new PaystackPayoutProvider();
+    case "stitch":
+      return new StitchPayoutProvider();
     case "mock":
     default:
       return new MockPayoutProvider();

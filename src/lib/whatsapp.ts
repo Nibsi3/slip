@@ -177,6 +177,35 @@ export interface SendFollowUpReminderParams {
   paymentId: string;
 }
 
+// ---------------------------------------------------------------------------
+// 5. OTT Voucher PIN — sent to worker after successful OTT withdrawal
+// ---------------------------------------------------------------------------
+export interface SendOttVoucherPinParams {
+  workerPhone: string;
+  workerFirstName: string;
+  pin: string;
+  amountZAR: number;
+  withdrawalId: string;
+}
+
+export async function sendOttVoucherPin(params: SendOttVoucherPinParams): Promise<{ messageId: string } | null> {
+  const to = normalisePhone(params.workerPhone);
+  const amount = `R${params.amountZAR.toFixed(2)}`;
+
+  return sendMessage({
+    to,
+    type: "text",
+    text: {
+      body:
+        `🎟️ *Your Slip a Tip voucher PIN is: ${params.pin}*\n\n` +
+        `💰 Amount: *${amount}*\n\n` +
+        `Redeem at any OTT outlet. Valid for 30 days.\n\n` +
+        `_Ref: ${params.withdrawalId}_\n\n` +
+        `Powered by *Slip a Tip* 🤝`,
+    },
+  });
+}
+
 export async function sendFollowUpReminder(params: SendFollowUpReminderParams): Promise<{ messageId: string } | null> {
   const to = normalisePhone(params.customerPhone);
   const amount = `R${params.amountZAR.toFixed(2)}`;

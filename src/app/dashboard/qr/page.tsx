@@ -9,6 +9,7 @@ const QR_SIZE = 256;
 export default function QRCodePage() {
   const { worker, loading } = useWorker();
   const [appUrl, setAppUrl] = useState("");
+  const [copyToast, setCopyToast] = useState(false);
   const qrContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,8 +70,10 @@ export default function QRCodePage() {
   function copyLink() {
     const url = getWaUrl();
     if (!url) return;
-    navigator.clipboard.writeText(url);
-    alert("WhatsApp tip link copied to clipboard!");
+    navigator.clipboard.writeText(url).then(() => {
+      setCopyToast(true);
+      setTimeout(() => setCopyToast(false), 2500);
+    });
   }
 
   if (loading) {
@@ -133,9 +136,14 @@ export default function QRCodePage() {
             Download QR
           </button>
           <button onClick={copyLink} className="btn-secondary">
-            Copy Link
+            {copyToast ? "Copied!" : "Copy Link"}
           </button>
         </div>
+        {copyToast && (
+          <div className="mt-3 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20 text-xs text-green-400 text-center">
+            WhatsApp tip link copied to clipboard!
+          </div>
+        )}
       </div>
 
       {/* How to use */}

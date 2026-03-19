@@ -53,12 +53,13 @@ export default function TermsPage() {
                 <p><strong className="text-white/70">&ldquo;Service Fee&rdquo;</strong> means the 10% fee charged by Slip a Tip on each transaction for the use of the platform, payment gateway fees, and administration.</p>
                 <p><strong className="text-white/70">&ldquo;Net Tip&rdquo;</strong> means the gross tip amount minus the Service Fee.</p>
                 <p><strong className="text-white/70">&ldquo;Customer Money Ledger&rdquo;</strong> means the segregated account in which tip funds are held on behalf of Users, separate from Slip a Tip&rsquo;s operating account.</p>
-                <p><strong className="text-white/70">&ldquo;Paystack Subaccount&rdquo;</strong> means the individual account created for each User on the Paystack payment platform for the purpose of receiving split payments.</p>
+                <p><strong className="text-white/70">&ldquo;Stitch Wallet&rdquo;</strong> means the virtual wallet balance maintained on the Slip a Tip platform, representing the User&rsquo;s net earnings available for withdrawal via Stitch Payouts or OTT Voucher.</p>
                 <p><strong className="text-white/70">&ldquo;Split Payment&rdquo;</strong> means the automated division of each tip at the point of payment, whereby 90% is allocated to the User&rsquo;s Subaccount and 10% is allocated to Slip a Tip as the Service Fee.</p>
                 <p><strong className="text-white/70">&ldquo;Cooldown Period&rdquo;</strong> means the 72-hour settlement hold applied to all tips before they become available for withdrawal.</p>
                 <p><strong className="text-white/70">&ldquo;Chargeback&rdquo;</strong> means a reversal of a transaction initiated by a Customer or their bank.</p>
-                <p><strong className="text-white/70">&ldquo;3D Secure&rdquo;</strong> means the authentication protocol used by Paystack requiring Customers to approve transactions via their banking app or OTP, triggering a liability shift to the card issuer for unauthorised transactions.</p>
-                <p><strong className="text-white/70">&ldquo;Transfer Fee&rdquo;</strong> means the bank transfer fee charged per withdrawal to cover the cost of sending funds from the Subaccount to the User&rsquo;s bank account.</p>
+                <p><strong className="text-white/70">&ldquo;3D Secure&rdquo;</strong> means the authentication protocol used by Stitch requiring Customers to approve transactions via their banking app or OTP, triggering a liability shift to the card issuer for unauthorised transactions.</p>
+                <p><strong className="text-white/70">&ldquo;EFT Withdrawal Fee&rdquo;</strong> means the flat R2 fee charged per EFT withdrawal to cover bank transfer costs via Stitch Payouts.</p>
+                <p><strong className="text-white/70">&ldquo;OTT Voucher Fee&rdquo;</strong> means the 6% service fee charged on OTT Voucher withdrawals, covering OTT Mobile processing and WhatsApp delivery.</p>
               </div>
             </section>
 
@@ -140,8 +141,9 @@ export default function TermsPage() {
                     "The User must have completed the applicable FICA verification tier.",
                     "All tips are subject to a 24–72 hour settlement hold before funds become available.",
                     "A chargeback reserve of 5–10% may be withheld to cover potential payment reversals.",
-                    "Withdrawal methods include Instant Money (collect at any ATM) and EFT to a verified bank account.",
-                    "Velocity limits apply: maximum 3 withdrawals per day, R2,000 per day withdrawal cap.",
+                    "Minimum withdrawal is R20 (twenty Rand).",
+                    "Withdrawal methods: EFT to a verified bank account (R2 flat fee, via Stitch Payouts, 1\u20132 business days) or OTT Voucher (6% fee, PIN delivered via WhatsApp, redeemable at any OTT outlet).",
+                    "Velocity limits apply: maximum 3 withdrawals per hour, maximum 3 per day, R2,000 per day withdrawal cap.",
                     "A balance cap of R2,000 applies. Funds exceeding this cap will be held pending review.",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-3">
@@ -245,14 +247,14 @@ export default function TermsPage() {
               </div>
             </section>
 
-            {/* 12. Paystack Marketplace & Split Payments */}
+            {/* 12. Stitch Payments & Split Payments */}
             <section className="rounded-2xl p-6 sm:p-8 ring-1 ring-accent/15" style={{ background: "rgba(249,115,22,0.02)" }}>
-              <h2 className="text-xl font-bold text-white mb-4">12. Paystack Marketplace & Split Payments</h2>
+              <h2 className="text-xl font-bold text-white mb-4">12. Stitch Payments, OTT Mobile & Split Payments</h2>
               <div className="text-sm text-white/45 leading-relaxed space-y-4">
-                <p><strong className="text-white/70">12.1.</strong> Slip a Tip utilises Paystack (a PCI-DSS Level 1 Service Provider owned by Stripe) to facilitate payments. By using the Platform, the User agrees to the creation of a <strong className="text-white/70">Paystack Subaccount</strong> in their name.</p>
-                <p><strong className="text-white/70">12.2.</strong> Slip a Tip acts solely as a <strong className="text-white/70">technical marketplace interface</strong> and does not provide financial services or hold deposits. The Service Fee of 10% is automatically deducted from every transaction via Paystack&rsquo;s Split Payment feature at the point of sale. This fee is non-refundable and covers the technical cost of maintaining the QR network, payment processing, fraud prevention, and administration.</p>
-                <p><strong className="text-white/70">12.3.</strong> The User acknowledges that because Paystack processes the split at the gateway level, Slip a Tip never holds the User&rsquo;s portion of funds in its own bank account. The User&rsquo;s earnings are held in their Paystack Subaccount until withdrawn.</p>
-                <p><strong className="text-white/70">12.4.</strong> A <strong className="text-white/70">Transfer Fee</strong> applies to every withdrawal to cover bank transfer costs. This fee will be deducted from the User&rsquo;s available balance at the time of payout.</p>
+                <p><strong className="text-white/70">12.1.</strong> Slip a Tip utilises <strong className="text-white/70">Stitch Money</strong> (a PCI-DSS compliant payment service provider) to facilitate pay-in transactions and EFT payouts. By using the Platform, the User agrees to Stitch&rsquo;s terms of service as they apply to the processing of tip payments.</p>
+                <p><strong className="text-white/70">12.2.</strong> Slip a Tip acts solely as a <strong className="text-white/70">technical marketplace interface</strong> and does not provide financial services or hold deposits. The Service Fee of 10% is automatically deducted from every transaction at the point of sale. This fee is non-refundable and covers payment processing, fraud prevention, FICA verification, and administration.</p>
+                <p><strong className="text-white/70">12.3.</strong> The User&rsquo;s net earnings are held in a segregated Customer Money Ledger on the Slip a Tip platform until withdrawn. The User may withdraw via <strong className="text-white/70">EFT</strong> (R2 flat fee, via Stitch Payouts) or <strong className="text-white/70">OTT Voucher</strong> (6% fee, via OTT Mobile — a licensed financial services provider and Meta Business Partner for WhatsApp delivery).</p>
+                <p><strong className="text-white/70">12.4.</strong> A withdrawal fee applies to every payout as described above. EFT withdrawals are subject to Stitch Payouts processing times (typically 1&ndash;2 business days). OTT Voucher PINs are delivered via WhatsApp and are valid for 30 days from issuance.</p>
               </div>
             </section>
 
@@ -261,9 +263,9 @@ export default function TermsPage() {
               <h2 className="text-xl font-bold text-white mb-4">13. Chargebacks & Disputed Transactions</h2>
               <div className="text-sm text-white/45 leading-relaxed space-y-4">
                 <p><strong className="text-white/70">13.1.</strong> The User acknowledges that a Customer or their bank may dispute a transaction (a &ldquo;Chargeback&rdquo;). All transactions are processed with 3D Secure authentication, which triggers a liability shift to the card issuer for unauthorised transactions.</p>
-                <p><strong className="text-white/70">13.2.</strong> In the event of a Chargeback, Slip a Tip is required by its banking partners to return the funds to the Customer. The User agrees that Slip a Tip and Paystack shall have the <strong className="text-white/70">absolute right</strong> to:</p>
+                <p><strong className="text-white/70">13.2.</strong> In the event of a Chargeback, Slip a Tip is required by its banking partners to return the funds to the Customer. The User agrees that Slip a Tip and Stitch shall have the <strong className="text-white/70">absolute right</strong> to:</p>
                 <div className="ml-4 space-y-2">
-                  <p>(a) Deduct the full amount of the Chargeback (plus any bank-imposed fines) from the User&rsquo;s Virtual Wallet and/or Paystack Subaccount.</p>
+                  <p>(a) Deduct the full amount of the Chargeback (plus any bank-imposed fines) from the User&rsquo;s Virtual Wallet balance.</p>
                   <p>(b) Place a temporary hold on the User&rsquo;s account during a dispute investigation.</p>
                   <p>(c) Set off any negative balance against future tips received by the User.</p>
                 </div>
@@ -271,7 +273,7 @@ export default function TermsPage() {
                 <p><strong className="text-white/70">13.4.</strong> If a Chargeback occurs after a payout has been made, the resulting <strong className="text-white/70">negative balance</strong> constitutes a debt owed by the User to Slip a Tip. The User will be required to earn new tips to offset this debt before any further withdrawals are permitted.</p>
                 <div className="rounded-xl p-4 ring-1 ring-red-500/20 mt-2" style={{ background: "rgba(239,68,68,0.04)" }}>
                   <p className="text-xs text-white/50 leading-relaxed">
-                    <strong className="text-red-400/80">Proof of Service:</strong> In the event of a Chargeback dispute, Slip a Tip will submit evidence to Paystack including: the GPS location of the QR code scan, the unique Worker ID, the 3D Secure authorisation code, and the digital receipt. This evidence chain is typically sufficient to win disputes.
+                    <strong className="text-red-400/80">Proof of Service:</strong> In the event of a Chargeback dispute, Slip a Tip will submit evidence to Stitch including: the GPS location of the QR code scan, the unique Worker ID, the 3D Secure authorisation code, and the digital receipt. This evidence chain is typically sufficient to win disputes.
                   </p>
                 </div>
               </div>

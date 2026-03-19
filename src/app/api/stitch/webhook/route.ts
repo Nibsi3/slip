@@ -23,6 +23,7 @@ import {
 } from "@/lib/security";
 import { sendBalanceCapOverflowEmail } from "@/lib/email";
 import { sendPaymentConfirmation, sendWorkerTipNotification, normalisePhone } from "@/lib/whatsapp";
+import { sendPushToWorker } from "@/lib/push-notifications";
 
 // ---------------------------------------------------------------------------
 // Signature verification
@@ -328,6 +329,14 @@ async function handlePaymentPaid(payload: StitchWebhookPayload) {
       paymentId: tip.paymentId,
     }).catch((err) => console.error("[Stitch webhook] WA worker notification error:", err));
   }
+
+  // 3. Push notification to Android app (if FCM token registered)
+  sendPushToWorker(
+    tip.workerId,
+    "💰 New tip received!",
+    `R${Number(tip.amount).toFixed(2)} tip from a customer. R${netAmount.toFixed(2)} added to your wallet.`,
+    { url: "/dashboard", tipId: tip.id }
+  ).catch((err) => console.error("[Stitch webhook] FCM push error:", err));
 }
 
 async function handlePaymentFailed(payload: StitchWebhookPayload) {

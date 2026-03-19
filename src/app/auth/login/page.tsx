@@ -1,10 +1,18 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
+import {
+  isNative,
+  isBiometricAvailable,
+  authenticateWithBiometrics,
+  getBiometricPhone,
+  setBiometricEnabled,
+  registerPushNotifications,
+} from "@/lib/capacitor";
 
 function LoginForm() {
   const router = useRouter();
@@ -15,11 +23,63 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [offerBiometric, setOfferBiometric] = useState(false);
+  const [lastLoginPhone, setLastLoginPhone] = useState("");
 
   // 2FA state
   const [pending2FA, setPending2FA] = useState(false);
   const [pending2FAUserId, setPending2FAUserId] = useState("");
   const [totpCode, setTotpCode] = useState("");
+
+  useEffect(() => {
+    async function checkBiometric() {
+      if (!isNative()) return;
+      const available = await isBiometricAvailable();
+      if (!available) return;
+      setBiometricAvailable(true);
+      const storedPhone = await getBiometricPhone();
+      if (!storedPhone) return;
+      // Auto-prompt biometric login
+      setIdentifier(storedPhone);
+      const ok = await authenticateWithBiometrics("Sign in to Slip a Tip");
+      if (ok) {
+        // Re-authenticate via login endpoint with stored phone (session cookie refresh)
+        setLoading(true);
+        try {
+          const res = await fetch("/api/auth/biometric-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone: storedPhone }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Biometric login failed");
+          await registerFcmToken();
+          router.push(redirect);
+          router.refresh();
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Biometric login failed");
+          setLoading(false);
+        }
+      }
+    }
+    checkBiometric();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function registerFcmToken() {
+    if (!isNative()) return;
+    await registerPushNotifications(
+      async (token) => {
+        await fetch("/api/workers/me/fcm-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        });
+      },
+      () => {},
+    );
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -51,6 +111,17 @@ function LoginForm() {
         return;
       }
 
+      // Register FCM push token (native only)
+      await registerFcmToken();
+
+      // Offer biometric for next time (native only, workers only)
+      if (isNative() && biometricAvailable && data.role === "WORKER") {
+        setLastLoginPhone(identifier);
+        setLoading(false);
+        setOfferBiometric(true);
+        return;
+      }
+
       router.push(data.role === "ADMIN" || data.role === "SUPER_ADMIN" ? "/admin" : redirect);
       router.refresh();
     } catch (err: unknown) {
@@ -58,6 +129,17 @@ function LoginForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function enableBiometricAndContinue() {
+    await setBiometricEnabled(lastLoginPhone);
+    router.push(redirect);
+    router.refresh();
+  }
+
+  function skipBiometricAndContinue() {
+    router.push(redirect);
+    router.refresh();
   }
 
   async function handle2FAVerify(e: FormEvent) {
@@ -97,7 +179,31 @@ function LoginForm() {
             </Link>
           </div>
 
-          {!pending2FA ? (
+          {offerBiometric ? (
+            <>
+              <h1 className="text-2xl font-bold text-white">Enable Fingerprint Login?</h1>
+              <p className="mt-1 text-sm text-muted">Sign in faster next time using your fingerprint or face ID.</p>
+              <div className="mt-8 rounded-xl p-5 ring-1 ring-white/[0.08] flex items-center gap-4" style={{ background: "rgba(249,115,22,0.05)" }}>
+                <div className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: "rgba(249,115,22,0.1)" }}>
+                  <svg className="h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 01-3.6 9.75m6.633-4.596a18.666 18.666 0 01-2.485 5.33" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-white">Biometric Login</div>
+                  <div className="text-xs text-white/40 mt-0.5">One tap to access your dashboard. Stored securely on this device only.</div>
+                </div>
+              </div>
+              <div className="mt-6 flex flex-col gap-3">
+                <button onClick={enableBiometricAndContinue} className="btn-primary w-full">
+                  Enable Fingerprint Login
+                </button>
+                <button onClick={skipBiometricAndContinue} className="w-full text-sm text-white/40 hover:text-white/60 transition-colors py-2">
+                  Not now
+                </button>
+              </div>
+            </>
+          ) : !pending2FA ? (
             <>
               <h1 className="text-2xl font-bold text-white">Welcome to Slip a Tip</h1>
               <p className="mt-1 text-sm text-muted">Digital tipping made simple</p>

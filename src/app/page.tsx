@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import ScrollReveal from "@/components/ScrollReveal";
 import GuidesDropdown from "@/components/GuidesDropdown";
 import AnimatedDemo from "@/components/AnimatedDemo";
+import HeroBackground from "@/components/HeroBackground";
 
 const DEMO_AMOUNTS = [15, 30, 50, 75, 100, 200];
 
@@ -50,26 +51,25 @@ function HeroDemoCard() {
         background: "rgba(8,8,14,0.92)",
         backdropFilter: "blur(32px)",
         boxShadow: "0 0 0 1px rgba(249,115,22,0.08), 0 32px 80px rgba(0,0,0,0.7), 0 0 120px rgba(249,115,22,0.06)",
-        minHeight: 520,
       }}
     >
       {/* ── Top bar ── */}
-      <div className="px-5 pt-5 pb-3 border-b border-white/[0.06] flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg overflow-hidden ring-1 ring-white/10 shrink-0">
-            <Image src="/logo/11.png" alt="" width={32} height={32} className="w-full h-full object-contain" />
+      <div className="px-4 pt-4 pb-3 border-b border-white/[0.06] flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="h-7 w-7 rounded-lg overflow-hidden ring-1 ring-white/10 shrink-0">
+            <Image src="/logo/11.png" alt="" width={28} height={28} className="w-full h-full object-contain" />
           </div>
           <div>
-            <div className="text-xs font-bold text-white leading-none">Slip a Tip</div>
-            <div className="text-[10px] text-white/30 mt-0.5">Live demo</div>
+            <div className="text-[11px] font-bold text-white leading-none">Slip a Tip</div>
+            <div className="text-[9px] text-white/30 mt-0.5">Live demo</div>
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           {(["tip", "wallet", "activity"] as const).map(t => (
             <button
               key={t}
               onClick={() => { setTab(t); setPaid(false); }}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold capitalize transition-all duration-200 ${
+              className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold capitalize transition-all duration-200 ${
                 tab === t ? "text-white" : "text-white/35 hover:text-white/60"
               }`}
               style={tab === t ? { background: "rgba(249,115,22,0.15)", boxShadow: "inset 0 0 0 1px rgba(249,115,22,0.25)" } : {}}
@@ -205,15 +205,15 @@ function HeroDemoCard() {
           )}
           <div className="flex gap-2">
             <button
-              onClick={() => setWalletToast("Instant Money withdrawals are available once your account is verified. Sign up to get started.")}
+              onClick={() => setWalletToast("EFT withdrawals are available once your account is verified. R2 flat fee via Stitch Payouts. 1–2 business days.")}
               className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-90"
               style={{ background: "#c45000", boxShadow: "0 0 16px rgba(196,80,0,0.35)" }}
-            >Instant Money</button>
+            >EFT</button>
             <button
-              onClick={() => setWalletToast("Bank EFT withdrawals are available once your banking details are linked in your profile.")}
+              onClick={() => setWalletToast("OTT Voucher withdrawals deliver your PIN via WhatsApp. 6% service fee. Redeem at any OTT outlet.")}
               className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white/60 transition-all hover:text-white"
               style={{ background: "rgba(255,255,255,0.05)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}
-            >Bank EFT</button>
+            >OTT Voucher</button>
           </div>
         </div>
       )}
@@ -292,42 +292,22 @@ export default function HomePage() {
         {/* ===== HERO ===== */}
         <section className="relative min-h-screen flex flex-col overflow-hidden" style={{ background: "#080808" }}>
 
-          {/* ── EXACT FlowArt background: radial orange orb ── */}
-          <div
-            className="absolute inset-0 z-0"
-            style={{ background: "radial-gradient(circle at 62% 45%, #c45000 0%, #6b2200 35%, #080808 68%)" }}
-          />
-
-          {/* ── Vignette overlay (transparent centre → dark edges) ── */}
-          <div
-            className="absolute inset-0 z-[1]"
-            style={{ background: "radial-gradient(ellipse 90% 90% at 50% 50%, transparent 40%, rgba(0,0,0,0.7) 100%)" }}
-          />
-
-          {/* ── Circle ring outline centred on glow ── */}
-          <div
-            className="absolute z-[2] pointer-events-none rounded-full"
-            style={{
-              width: 520, height: 520,
-              top: "50%", left: "62%",
-              transform: "translate(-50%, -50%)",
-              border: "1px solid rgba(255,140,60,0.25)",
-            }}
-          />
+          {/* ── Animated 3-D sun / planet background ── */}
+          <HeroBackground />
 
           {/* ── Content sits above everything (z-10) ── */}
           <div className="relative z-10 flex-1 flex flex-col justify-center pb-10 lg:pb-14">
-            <div className="w-full max-w-7xl mx-auto px-6 pt-20 lg:pt-24">
-              <div className="grid lg:grid-cols-[1fr_420px] gap-8 xl:gap-12 items-end">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 pt-20 lg:pt-24">
+              <div className="grid lg:grid-cols-[1fr_420px] gap-6 sm:gap-8 xl:gap-12 items-end">
 
                 {/* Left — headline fills top, text+buttons align with card bottom */}
                 <div className="flex flex-col justify-end">
                   {/* Big serif headline pushes content down */}
                   <ScrollReveal>
                     <h1
-                      className="font-serif-display text-white leading-none mb-8"
+                      className="font-serif-display text-white leading-none mb-6 sm:mb-8"
                       style={{
-                        fontSize: "clamp(4rem, 10vw, 9.5rem)",
+                        fontSize: "clamp(3rem, 10vw, 9.5rem)",
                         letterSpacing: "-0.02em",
                         lineHeight: 0.92,
                       }}
@@ -338,14 +318,17 @@ export default function HomePage() {
                   </ScrollReveal>
 
                   <ScrollReveal delay={0.08}>
-                    <p className="text-sm leading-relaxed max-w-xs" style={{ color: "#aaaaaa" }}>
+                    <p className="text-xs leading-snug max-w-[220px] mb-5 sm:hidden" style={{ color: "#888888" }}>
+                      QR code → scan → tip via WhatsApp. No app needed.
+                    </p>
+                    <p className="text-sm leading-relaxed max-w-xs hidden sm:block" style={{ color: "#aaaaaa" }}>
                       Workers get a personal QR code. Customers scan, pick an amount,
                       and tip directly via WhatsApp. Tips land instantly.
                     </p>
                   </ScrollReveal>
 
                   <ScrollReveal delay={0.12}>
-                    <div className="mt-7 flex items-center gap-4">
+                    <div className="mt-5 sm:mt-7 flex items-center gap-3 sm:gap-4">
                       <Link
                         href="/auth/register"
                         className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white transition-all hover:scale-[1.03]"
@@ -441,7 +424,7 @@ export default function HomePage() {
                   {[
                     { step: "01", title: "Scan QR code", desc: "Customer opens their phone camera and scans the worker's unique QR code. No app installs needed." },
                     { step: "02", title: "Pick an amount", desc: "Choose from quick amounts — R15, R20, R50, R100, or R200. Quick, simple, no fuss." },
-                    { step: "03", title: "Pay securely", desc: "Secure 3D Secure checkout via Paystack. A small total fee (up to 10%) is deducted from the tip — Paystack takes their processing fee, Slip a Tip takes the remainder." },
+                    { step: "03", title: "Pay securely", desc: "Secure 3D Secure checkout via Stitch. A small total fee (up to 10%) is deducted from the tip — Stitch takes their processing fee, Slip a Tip takes the remainder." },
                   ].map((item, i) => (
                     <ScrollReveal key={item.step} delay={i * 0.12}>
                       <div className="flex gap-5">
@@ -483,10 +466,10 @@ export default function HomePage() {
                   <h2 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight">Completely free<br />to get started</h2>
                   <p className="mt-5 text-white/40 max-w-md leading-relaxed">
                     No monthly fees. No hidden costs. Sign up, get your QR code, and start receiving tips immediately.
-                    A small total fee (up to 10%) is deducted from tips to cover Paystack processing and the Slip a Tip platform.
+                    A small total fee (up to 10%) is deducted from tips to cover Stitch payment processing and the Slip a Tip platform.
                   </p>
 
-                  <div className="mt-10 grid grid-cols-3 gap-6 max-w-xs">
+                  <div className="mt-8 sm:mt-10 grid grid-cols-3 gap-3 sm:gap-6 max-w-xs">
                     {[
                       { value: "R0", sub: "to sign up" },
                       { value: "Up to 10%", sub: "total fee on tips" },
@@ -494,8 +477,8 @@ export default function HomePage() {
                     ].map((s, i) => (
                       <div key={s.sub} className="relative">
                         {i !== 0 && <div className="absolute -left-3 top-1 bottom-1 w-px bg-white/[0.08]" />}
-                        <div className="text-3xl font-extrabold text-white">{s.value}</div>
-                        <div className="mt-1 text-xs text-white/35 uppercase tracking-wider">{s.sub}</div>
+                        <div className="text-xl sm:text-3xl font-extrabold text-white leading-tight">{s.value}</div>
+                        <div className="mt-1 text-[10px] sm:text-xs text-white/35 uppercase tracking-wider">{s.sub}</div>
                       </div>
                     ))}
                   </div>
@@ -515,13 +498,13 @@ export default function HomePage() {
                   <div className="space-y-4 text-sm mb-8">
                     {[
                       "Personal QR code & tip page",
-                      "Paystack 3D Secure checkout",
+                      "Stitch 3D Secure checkout",
                       "Worker dashboard & wallet",
                       "Full tip history & audit trail",
-                      "Withdraw via Instant Money or EFT",
+                      "Withdraw via EFT (R2) or OTT Voucher (6%)",
                       "Total fees capped at 10%",
                       "No monthly fees, ever",
-                      "No platform withdrawal fees",
+                      "Minimum withdrawal R20",
                     ].map((x) => (
                       <div key={x} className="flex items-center gap-3">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full shrink-0" style={{ background: "rgba(249,115,22,0.12)" }}>
@@ -570,12 +553,12 @@ export default function HomePage() {
               </ScrollReveal>
 
               {/* Right — questions */}
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
                 {[
                   { q: "Do customers need an app?", a: "No. They scan the QR code with their phone camera and tip directly in the browser. Zero friction." },
-                  { q: "Is it secure?", a: "All payments are handled by Paystack (PCI-DSS Level 1) with 3D Secure authentication. Slip a Tip never sees or stores card details. Liability shifts to the card issuer." },
-                  { q: "How do withdrawals work?", a: "Request a withdrawal from your dashboard. Choose Instant Money (collect at any ATM) or EFT to your bank. No platform withdrawal fees." },
-                  { q: "What does it cost?", a: "Signing up is completely free. A small total fee (up to 10%) is deducted from tips to cover Paystack processing and the Slip a Tip platform." },
+                  { q: "Is it secure?", a: "All payments are handled by Stitch (PCI-DSS compliant) with 3D Secure authentication. Slip a Tip never sees or stores card details. Liability shifts to the card issuer." },
+                  { q: "How do withdrawals work?", a: "Request a withdrawal from your dashboard. Choose EFT to your bank (R2 flat fee, via Stitch Payouts) or an OTT Voucher redeemable at any OTT outlet (6% fee, PIN delivered via WhatsApp). Minimum withdrawal is R20." },
+                  { q: "What does it cost?", a: "Signing up is completely free. A small total fee (up to 10%) is deducted from tips to cover Stitch payment processing and the Slip a Tip platform." },
                   { q: "Who can use Slip a Tip?", a: "Any worker in the service industry — waiters, baristas, porters, car guards, delivery riders, and more." },
                   { q: "How fast do tips arrive?", a: "Tips appear in your wallet instantly. Funds become available for withdrawal after a 72-hour settlement cooldown period for fraud protection." },
                 ].map((item, i) => (
@@ -688,11 +671,15 @@ export default function HomePage() {
           </div>
 
           {/* Bottom bar */}
-          <div className="border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <span className="text-xs text-white/40">&copy; {new Date().getFullYear()} <strong className="text-white/60">Slip a Tip (Pty) Ltd.</strong> All rights reserved.</span>
-            <div className="flex items-center gap-4">
+          <div className="border-t border-white/[0.06] pt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+            <span className="text-xs text-white/40 text-center sm:text-left">&copy; {new Date().getFullYear()} <strong className="text-white/60">Slip a Tip (Pty) Ltd.</strong> All rights reserved.</span>
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
               <span className="text-[10px] text-white/15">Secured by</span>
-              <span className="text-[10px] text-white/30 font-medium">Paystack</span>
+              <span className="text-[10px] text-white/30 font-medium">Stitch</span>
+              <span className="text-[10px] text-white/15">&middot;</span>
+              <span className="text-[10px] text-white/30 font-medium">OTT Mobile</span>
+              <span className="text-[10px] text-white/15">&middot;</span>
+              <span className="text-[10px] text-white/30 font-medium">Meta</span>
               <span className="text-[10px] text-white/15">&middot;</span>
               <span className="text-[10px] text-white/15">Built in South Africa</span>
             </div>

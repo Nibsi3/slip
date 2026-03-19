@@ -9,6 +9,7 @@ import {
   MAX_TIPS_PER_HOUR,
   MAX_TIPS_PER_DAY,
   MAX_TIPS_PER_WEEK,
+  MAX_WITHDRAWALS_PER_HOUR,
   MAX_WITHDRAWALS_PER_DAY,
   MAX_TIPS_RECEIVED_PER_HOUR,
   MAX_TIPS_RECEIVED_PER_DAY,
@@ -22,6 +23,7 @@ export interface VelocityCheckResult {
     tipsLastHour: number;
     tipsLastDay: number;
     tipsLastWeek: number;
+    withdrawalsLastHour: number;
     withdrawalsToday: number;
     dailyWithdrawalTotal: number;
   };
@@ -75,6 +77,7 @@ export async function checkTipReceivedVelocity(workerId: string): Promise<Veloci
     tipsLastHour,
     tipsLastDay,
     tipsLastWeek,
+    withdrawalsLastHour: 0,
     withdrawalsToday: 0,
     dailyWithdrawalTotal: 0,
   };
@@ -143,6 +146,7 @@ export async function checkTipSentVelocity(ipAddress: string): Promise<VelocityC
     tipsLastHour,
     tipsLastDay,
     tipsLastWeek,
+    withdrawalsLastHour: 0,
     withdrawalsToday: 0,
     dailyWithdrawalTotal: 0,
   };
@@ -191,6 +195,7 @@ export async function checkWithdrawalVelocity(
   requestedAmount: number
 ): Promise<VelocityCheckResult> {
   const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   // Fetch worker to check account age for progressive limits
@@ -208,11 +213,14 @@ export async function checkWithdrawalVelocity(
     return {
       allowed: false,
       reason: `Withdrawals are not available for the first 7 days after registration. ${limits.waitDays} day(s) remaining.`,
-      counts: { tipsLastHour: 0, tipsLastDay: 0, tipsLastWeek: 0, withdrawalsToday: 0, dailyWithdrawalTotal: 0 },
+      counts: { tipsLastHour: 0, tipsLastDay: 0, tipsLastWeek: 0, withdrawalsLastHour: 0, withdrawalsToday: 0, dailyWithdrawalTotal: 0 },
     };
   }
 
-  const [withdrawalsToday, dailyAgg] = await Promise.all([
+  const [withdrawalsLastHour, withdrawalsToday, dailyAgg] = await Promise.all([
+    db.velocityRecord.count({
+      where: { workerId, action: "WITHDRAWAL", createdAt: { gte: oneHourAgo } },
+    }),
     db.velocityRecord.count({
       where: { workerId, action: "WITHDRAWAL", createdAt: { gte: startOfDay } },
     }),
@@ -228,9 +236,14 @@ export async function checkWithdrawalVelocity(
     tipsLastHour: 0,
     tipsLastDay: 0,
     tipsLastWeek: 0,
+    withdrawalsLastHour,
     withdrawalsToday,
     dailyWithdrawalTotal,
   };
+
+  if (withdrawalsLastHour >= MAX_WITHDRAWALS_PER_HOUR) {
+    return { allowed: false, reason: `Max withdrawals per hour exceeded (${MAX_WITHDRAWALS_PER_HOUR})`, counts };
+  }
 
   if (withdrawalsToday >= limits.maxWithdrawalsPerDay) {
     return { allowed: false, reason: `Max withdrawals per day exceeded (${limits.maxWithdrawalsPerDay})`, counts };

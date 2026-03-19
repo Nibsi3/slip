@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { createSession } from "@/lib/auth";
 import { sendNewRegistrationEmail } from "@/lib/email";
 import { checkRegisterIpLimit } from "@/lib/rate-limit";
+import { getOtpPhone } from "@/lib/otp";
 
 const TERMS_VERSION = "v1.0";
 
@@ -21,6 +22,7 @@ const registerSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character (e.g. !@#$%)"),
   termsAccepted: z.boolean().refine((v) => v === true, { message: "You must accept the terms and conditions" }),
+  otpSessionKey: z.string().min(1, "Phone verification session is required"),
 });
 
 function normalisePhone(raw: string): string {
@@ -45,7 +47,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // --- Verify OTP session: the sessionKey must still exist in Redis and match the phone ---
+    const verifiedPhone = await getOtpPhone(data.otpSessionKey);
+    if (!verifiedPhone) {
+      return NextResponse.json(
+        { error: "Phone verification expired or invalid. Please go back and verify your phone again." },
+        { status: 400 }
+      );
+    }
+
     const phone = normalisePhone(data.phone);
+    const verifiedNormalised = normalisePhone(verifiedPhone);
+
+    if (phone !== verifiedNormalised) {
+      return NextResponse.json(
+        { error: "Phone number does not match the verified number. Please restart registration." },
+        { status: 400 }
+      );
+    }
 
     const existingPhone = await db.user.findUnique({
       where: { phone },

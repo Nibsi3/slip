@@ -64,6 +64,7 @@ model Worker {
   docReviewedAt      DateTime?
   docReviewedBy      String?
   physicalQrCount    Int                 @default(0)
+  fcmToken           String?
   amlAlerts          AmlAlert[]
   fraudEvents        FraudEvent[]
   ledgerEntries      LedgerEntry[]
@@ -150,6 +151,9 @@ model Withdrawal {
   bankAccountNo  String?
   bankBranchCode String?
   phoneNumber    String?
+  ottVoucherId     String?
+  ottVoucherAmount Decimal?         @db.Decimal(12, 2)
+  ottUniqueRef     String?          @unique
   reference      String?
   processedAt    DateTime?
   createdAt      DateTime         @default(now())
@@ -330,6 +334,7 @@ enum LedgerStatus {
 enum WithdrawalMethod {
   INSTANT_MONEY
   EFT
+  OTT_VOUCHER
 }
 
 enum WithdrawalStatus {

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
+import CapacitorInit from "@/components/CapacitorInit";
 
 const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
 const cormorant = Cormorant_Garamond({
@@ -34,7 +35,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${cormorant.variable}`}>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <CapacitorInit />
+        {children}
+      </body>
     </html>
   );
 }

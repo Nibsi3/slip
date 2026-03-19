@@ -7,9 +7,11 @@
 // Balance & Account Limits
 // ---------------------------------------------------------------------------
 export const BALANCE_CAP_ZAR = 2000;
-export const MIN_WITHDRAWAL_ZAR = 100;
+export const MIN_WITHDRAWAL_ZAR = 20;
 export const MAX_WITHDRAWAL_PER_TX_ZAR = 2000;
 export const WITHDRAWAL_FEE_PERCENT = 0;
+export const EFT_FEE_FLAT_ZAR = 2;
+export const OTT_FEE_PERCENT = 0.06;
 export const MAX_DAILY_WITHDRAWAL_ZAR = 2000;
 
 // ---------------------------------------------------------------------------
@@ -32,6 +34,7 @@ export const CHARGEBACK_RESERVE_PERCENT_DEFAULT = 0.075;
 export const MAX_TIPS_PER_HOUR = 10;
 export const MAX_TIPS_PER_DAY = 50;
 export const MAX_TIPS_PER_WEEK = 200;
+export const MAX_WITHDRAWALS_PER_HOUR = 3;
 export const MAX_WITHDRAWALS_PER_DAY = 3;
 export const MAX_TIPS_RECEIVED_PER_HOUR = 20;
 export const MAX_TIPS_RECEIVED_PER_DAY = 100;

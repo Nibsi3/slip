@@ -11,7 +11,7 @@ const applySchema = z.object({
   idNumber: z.string().optional(),
   phone: z.string().min(9, "Valid phone number is required"),
   email: z.string().email().optional().or(z.literal("")),
-  password: z.string().min(6, "Password must be at least 6 characters").max(100),
+  password: z.string().min(8, "Password must be at least 8 characters").max(100),
   employerName: z.string().optional(),
   jobTitle: z.string().min(1, "Job title is required"),
   workLocation: z.string().optional(),

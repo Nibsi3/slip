@@ -6,3 +6,12 @@ out/
 .env.production.local
 *.tsbuildinfo
 next-env.d.ts
+
+# Android
+android/app/google-services.json
+android/app/*.jks
+android/app/*.keystore
+android/local.properties
+android/.gradle/
+android/app/build/
+android/build/

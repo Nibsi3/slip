@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 import { Decimal } from "@prisma/client/runtime/library";
 import { processPayout } from "@/lib/payouts";
+import { remitVoucher, checkRemitVoucher, mapOttError } from "@/lib/ott";
+import { sendOttVoucherPin } from "@/lib/whatsapp";
 import {
   scoreWithdrawalTransaction,
   recordFraudEvent,
@@ -16,17 +18,28 @@ import {
   runAmlChecks,
   MAX_WITHDRAWAL_PER_TX_ZAR,
   getWithdrawalDailyCap,
-  WITHDRAWAL_FEE_PERCENT,
+  MIN_WITHDRAWAL_ZAR,
+  EFT_FEE_FLAT_ZAR,
+  OTT_FEE_PERCENT,
 } from "@/lib/security";
+import { normalisePhone } from "@/lib/whatsapp";
+import { sendPushToWorker } from "@/lib/push-notifications";
 
-const withdrawSchema = z.object({
-  amount: z.number().min(100),
-  method: z.literal("EFT"),
-  bankName: z.string().min(1, "Bank name is required"),
-  bankAccountNo: z.string().min(1, "Account number is required"),
-  bankBranchCode: z.string().optional(),
-  bankCode: z.string().optional(),
-});
+const withdrawSchema = z.discriminatedUnion("method", [
+  z.object({
+    method: z.literal("EFT"),
+    amount: z.number().min(MIN_WITHDRAWAL_ZAR, `Minimum withdrawal is R${MIN_WITHDRAWAL_ZAR}`),
+    bankName: z.string().min(1, "Bank name is required"),
+    bankAccountNo: z.string().min(1, "Account number is required"),
+    bankBranchCode: z.string().optional(),
+    bankCode: z.string().optional(),
+  }),
+  z.object({
+    method: z.literal("OTT"),
+    amount: z.number().min(MIN_WITHDRAWAL_ZAR, `Minimum withdrawal is R${MIN_WITHDRAWAL_ZAR}`),
+    mobile: z.string().min(1, "Mobile number is required for OTT voucher"),
+  }),
+]);
 
 export async function POST(request: NextRequest) {
   try {
@@ -174,33 +187,47 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!data.bankName || !data.bankAccountNo) {
-      return NextResponse.json(
-        { error: "Bank details required for EFT withdrawal" },
-        { status: 400 }
-      );
-    }
+    // -----------------------------------------------------------------------
+    // Method-specific fee & field resolution
+    // -----------------------------------------------------------------------
+    const isEFT = data.method === "EFT";
+    const isOTT = data.method === "OTT";
 
-    const fee = Number((data.amount * WITHDRAWAL_FEE_PERCENT).toFixed(2));
+    const fee = isEFT
+      ? EFT_FEE_FLAT_ZAR
+      : isOTT
+        ? Number((data.amount * OTT_FEE_PERCENT).toFixed(2))
+        : 0;
     const netAmount = Number((data.amount - fee).toFixed(2));
-    const bank = data.bankName || worker.bankName || "";
-    const accountNo = data.bankAccountNo || worker.bankAccountNo || "";
-    const branchCode = data.bankBranchCode || worker.bankBranchCode || "";
-    const bankCode = data.bankCode || "";
 
-    // Step 1: Create withdrawal + deduct BOTH walletBalance and availableBalance atomically
-    const withdrawal = await db.$transaction(async (tx: Parameters<Parameters<typeof db.$transaction>[0]>[0]) => {
+    // EFT-specific fields (only accessible when method === "EFT" thanks to discriminatedUnion)
+    const bank        = isEFT ? (data as { method: "EFT"; bankName: string; bankAccountNo: string; bankBranchCode?: string; bankCode?: string }).bankName || worker.bankName || "" : "";
+    const accountNo   = isEFT ? (data as { method: "EFT"; bankAccountNo: string }).bankAccountNo || worker.bankAccountNo || "" : "";
+    const branchCode  = isEFT ? ((data as { method: "EFT"; bankBranchCode?: string }).bankBranchCode || worker.bankBranchCode || "") : "";
+    const bankCode    = isEFT ? ((data as { method: "EFT"; bankCode?: string }).bankCode || "") : "";
+
+    // OTT-specific fields
+    const ottMobile = isOTT
+      ? normalisePhone((data as { method: "OTT"; mobile: string }).mobile)
+      : "";
+    const ottRef = isOTT ? crypto.randomUUID() : "";
+
+    type TxType = Parameters<Parameters<typeof db.$transaction>[0]>[0];
+
+    // -----------------------------------------------------------------------
+    // Step 1: Create withdrawal record + deduct balances atomically
+    // -----------------------------------------------------------------------
+    const withdrawal = await db.$transaction(async (tx: TxType) => {
       const w = await tx.withdrawal.create({
         data: {
           workerId: worker.id,
           amount: data.amount,
           fee,
           netAmount,
-          method: data.method,
+          method: isOTT ? "OTT_VOUCHER" : "EFT",
           status: "PROCESSING",
-          bankName: bank,
-          bankAccountNo: accountNo,
-          bankBranchCode: branchCode,
+          ...(isEFT ? { bankName: bank, bankAccountNo: accountNo, bankBranchCode: branchCode } : {}),
+          ...(isOTT ? { phoneNumber: ottMobile, ottUniqueRef: ottRef } : {}),
         },
       });
 
@@ -229,46 +256,105 @@ export async function POST(request: NextRequest) {
       return w;
     });
 
-    // Step 2: Auto-process payout via provider
-    const recipientName = `${worker.user.firstName} ${worker.user.lastName}`;
-    const payoutResult = await processPayout({
-      withdrawalId: withdrawal.id,
-      method: data.method,
-      amount: netAmount,
-      bankName: bank,
-      bankAccountNo: accountNo,
-      bankBranchCode: branchCode,
-      bankCode: bankCode || undefined,
-      recipientName,
-    });
+    // -----------------------------------------------------------------------
+    // Step 2: Dispatch payout via the appropriate path
+    // -----------------------------------------------------------------------
+    let payoutSuccess = false;
+    let payoutReference = "";
+    let payoutProviderRef: string | undefined;
+    let payoutError: string | undefined;
 
-    if (payoutResult.success) {
-      // --- Record velocity event only after successful payout ---
+    if (isEFT) {
+      const recipientName = `${worker.user.firstName} ${worker.user.lastName}`;
+      const payoutResult = await processPayout({
+        withdrawalId: withdrawal.id,
+        method: "EFT",
+        amount: data.amount,    // gross — StitchPayoutProvider deducts the R2 internally
+        bankName: bank,
+        bankAccountNo: accountNo,
+        bankBranchCode: branchCode,
+        bankCode: bankCode || undefined,
+        recipientName,
+      });
+      payoutSuccess    = payoutResult.success;
+      payoutReference  = payoutResult.reference;
+      payoutProviderRef = payoutResult.providerRef;
+      payoutError      = payoutResult.error;
+    } else if (isOTT) {
+      let ottResult = await remitVoucher({
+        amount: netAmount,
+        mobile: ottMobile,
+        uniqueReference: ottRef,
+      });
+
+      // Timeout safety: if system error, wait 30s and check status once
+      if (!ottResult.success && ottResult.errorCode !== undefined) {
+        const mapped = mapOttError(ottResult.errorCode);
+        if (mapped.kind === "system") {
+          await new Promise((r) => setTimeout(r, 30_000));
+          const check = await checkRemitVoucher(ottRef);
+          if (check.success) {
+            ottResult = { success: true, voucherId: check.voucherId, pin: check.pin };
+          }
+        }
+      }
+
+      if (ottResult.success && ottResult.pin) {
+        payoutSuccess   = true;
+        payoutReference = ottResult.voucherId || ottRef;
+        payoutProviderRef = ottResult.voucherId;
+
+        // Store OTT voucher details on the withdrawal record
+        await db.withdrawal.update({
+          where: { id: withdrawal.id },
+          data: {
+            ottVoucherId: ottResult.voucherId,
+            ottVoucherAmount: new Decimal(netAmount),
+          },
+        });
+
+        // Send PIN via WhatsApp (best-effort, non-blocking)
+        const workerPhone = worker.phoneForIM;
+        if (workerPhone) {
+          sendOttVoucherPin({
+            workerPhone,
+            workerFirstName: worker.user.firstName,
+            pin: ottResult.pin,
+            amountZAR: netAmount,
+            withdrawalId: withdrawal.id,
+          }).catch((e) => console.error("[OTT] WhatsApp PIN send failed:", e));
+        }
+      } else {
+        payoutSuccess = false;
+        payoutError   = ottResult.errorMessage || "OTT voucher issuance failed.";
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // Step 3: Finalize or refund
+    // -----------------------------------------------------------------------
+    if (payoutSuccess) {
       await recordVelocityEvent(worker.id, "WITHDRAWAL", data.amount, ipAddress);
 
-      // Payout succeeded → mark COMPLETED, store voucher/reference
-      await db.$transaction(async (tx: Parameters<Parameters<typeof db.$transaction>[0]>[0]) => {
+      await db.$transaction(async (tx: TxType) => {
         await tx.withdrawal.update({
           where: { id: withdrawal.id },
           data: {
             status: "COMPLETED",
-            reference: payoutResult.reference,
+            reference: payoutReference,
             processedAt: new Date(),
           },
         });
 
-        const ledger = await tx.ledgerEntry.findFirst({
-          where: { withdrawalId: withdrawal.id },
-        });
+        const ledger = await tx.ledgerEntry.findFirst({ where: { withdrawalId: withdrawal.id } });
         if (ledger) {
           await tx.ledgerEntry.update({
             where: { id: ledger.id },
-            data: { status: "COMPLETED", reference: payoutResult.reference },
+            data: { status: "COMPLETED", reference: payoutReference },
           });
         }
       });
 
-      // --- Security: Recalculate chargeback reserve after withdrawal ---
       await recalculateReserve();
 
       await db.auditLog.create({
@@ -281,8 +367,9 @@ export async function POST(request: NextRequest) {
             amount: data.amount,
             method: data.method,
             netAmount,
-            reference: payoutResult.reference,
-            providerRef: payoutResult.providerRef,
+            fee,
+            reference: payoutReference,
+            providerRef: payoutProviderRef,
             fraudScore: fraudResult.score,
           },
           ipAddress,
@@ -290,23 +377,28 @@ export async function POST(request: NextRequest) {
       });
 
       const updated = await db.withdrawal.findUnique({ where: { id: withdrawal.id } });
+
+      // Push notification to Android app (fire-and-forget)
+      const methodLabel = data.method === "EFT" ? "EFT bank transfer" : "OTT Voucher";
+      sendPushToWorker(
+        worker.id,
+        "✅ Withdrawal processed",
+        `R${netAmount.toFixed(2)} ${methodLabel} withdrawal is being processed.`,
+        { url: "/dashboard/withdraw" }
+      ).catch(() => {});
+
       return NextResponse.json({ withdrawal: updated });
     } else {
-      // Payout failed → refund BOTH walletBalance and availableBalance, mark FAILED
-      await db.$transaction(async (tx: Parameters<Parameters<typeof db.$transaction>[0]>[0]) => {
+      // Refund both balances
+      await db.$transaction(async (tx: TxType) => {
         await tx.withdrawal.update({
           where: { id: withdrawal.id },
-          data: { status: "FAILED", reference: payoutResult.error || "Payout failed" },
+          data: { status: "FAILED", reference: payoutError || "Payout failed" },
         });
 
-        const ledger = await tx.ledgerEntry.findFirst({
-          where: { withdrawalId: withdrawal.id },
-        });
+        const ledger = await tx.ledgerEntry.findFirst({ where: { withdrawalId: withdrawal.id } });
         if (ledger) {
-          await tx.ledgerEntry.update({
-            where: { id: ledger.id },
-            data: { status: "FAILED" },
-          });
+          await tx.ledgerEntry.update({ where: { id: ledger.id }, data: { status: "FAILED" } });
         }
 
         await tx.worker.update({
@@ -319,7 +411,7 @@ export async function POST(request: NextRequest) {
       });
 
       return NextResponse.json(
-        { error: "Payout failed. Your balance has been restored. Please try again." },
+        { error: payoutError || "Payout failed. Your balance has been restored. Please try again." },
         { status: 500 }
       );
     }

@@ -137,7 +137,7 @@ export default function SettingsPage() {
 
         {message && (
           <div
-            className={`mt-4 p-3 text-sm ${
+            className={`mt-4 p-3 rounded-lg text-sm ${
               message.includes("success")
                 ? "bg-green-500/10 border border-green-500/20 text-green-400"
                 : "bg-red-500/10 border border-red-500/20 text-red-400"

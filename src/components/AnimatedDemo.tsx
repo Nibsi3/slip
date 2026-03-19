@@ -6,8 +6,8 @@ import Image from "next/image";
 const STEPS = [
   { id: 1, title: "Scan the QR Code", sub: "Customer opens their camera", desc: "No app needed — just point and scan. The QR links directly to the worker's personal tip page." },
   { id: 2, title: "Choose a Tip", sub: "Quick preset amounts", desc: "Pick from R15, R30, R50, R75, R100, or R200. Quick, simple, no fuss." },
-  { id: 3, title: "Pay Securely", sub: "3D Secure via Paystack", desc: "Card details handled by Paystack (PCI-DSS Level 1). Slip a Tip never sees your card." },
-  { id: 4, title: "Worker Gets Paid", sub: "Tip lands in their wallet", desc: "90% goes to the worker. Total fees capped at 10%. They withdraw via Instant Money or EFT anytime." },
+  { id: 3, title: "Pay Securely", sub: "3D Secure via Stitch", desc: "Card details handled by Stitch (PCI-DSS compliant). Slip a Tip never sees your card." },
+  { id: 4, title: "Worker Gets Paid", sub: "Tip lands in their wallet", desc: "90% goes to the worker. Total fees capped at 10%. They withdraw via EFT (R2 flat fee) or OTT Voucher (6% fee) anytime." },
 ];
 
 function DemoPhone({ step, progress }: { step: number; progress: number }) {
@@ -174,7 +174,7 @@ function DemoPhone({ step, progress }: { step: number; progress: number }) {
                 </div>
               </div>
             </div>
-            <div className="mt-3 text-center text-[9px] text-white/20">Powered by Paystack &middot; 3D Secure</div>
+            <div className="mt-3 text-center text-[9px] text-white/20">Powered by Stitch &middot; 3D Secure</div>
           </div>
           <div className="mt-5 flex items-center gap-2">
             <div className="relative h-4 w-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { isNative, capturePhoto, dataUrlToFile } from "@/lib/capacitor";
 
 interface DocData {
   docIdUrl: string | null;
@@ -29,10 +30,22 @@ export default function DocumentsPage() {
   const idRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
   const selfieRef = useRef<HTMLInputElement>(null);
+  const native = isNative();
 
   const [idFile, setIdFile] = useState<File | null>(null);
   const [addressFile, setAddressFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
+
+  async function captureNative(type: "id" | "address" | "selfie") {
+    const source = type === "selfie" ? "camera" : "gallery";
+    const photo = await capturePhoto(source);
+    if (!photo) return;
+    const filename = `${type}-${Date.now()}.${photo.format}`;
+    const file = await dataUrlToFile(photo.dataUrl, filename);
+    if (type === "id") setIdFile(file);
+    else if (type === "address") setAddressFile(file);
+    else setSelfieFile(file);
+  }
 
   useEffect(() => {
     fetch("/api/workers/me/documents")
@@ -159,11 +172,11 @@ export default function DocumentsPage() {
             </div>
             <input ref={idRef} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => setIdFile(e.target.files?.[0] || null)} />
             <button
-              onClick={() => idRef.current?.click()}
+              onClick={() => native ? captureNative("id") : idRef.current?.click()}
               className="w-full py-3 rounded-lg text-xs font-medium text-white/50 ring-1 ring-white/[0.08] hover:ring-accent/30 hover:text-white transition-all"
               style={{ background: "rgba(255,255,255,0.03)" }}
             >
-              {idFile ? idFile.name : "Choose file..."}
+              {idFile ? idFile.name : native ? "Open Camera / Gallery" : "Choose file..."}
             </button>
           </div>
 
@@ -178,11 +191,11 @@ export default function DocumentsPage() {
             </div>
             <input ref={addressRef} type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => setAddressFile(e.target.files?.[0] || null)} />
             <button
-              onClick={() => addressRef.current?.click()}
+              onClick={() => native ? captureNative("address") : addressRef.current?.click()}
               className="w-full py-3 rounded-lg text-xs font-medium text-white/50 ring-1 ring-white/[0.08] hover:ring-accent/30 hover:text-white transition-all"
               style={{ background: "rgba(255,255,255,0.03)" }}
             >
-              {addressFile ? addressFile.name : "Choose file..."}
+              {addressFile ? addressFile.name : native ? "Open Camera / Gallery" : "Choose file..."}
             </button>
           </div>
 
@@ -197,11 +210,11 @@ export default function DocumentsPage() {
             </div>
             <input ref={selfieRef} type="file" accept="image/*" className="hidden" onChange={(e) => setSelfieFile(e.target.files?.[0] || null)} />
             <button
-              onClick={() => selfieRef.current?.click()}
+              onClick={() => native ? captureNative("selfie") : selfieRef.current?.click()}
               className="w-full py-3 rounded-lg text-xs font-medium text-white/50 ring-1 ring-white/[0.08] hover:ring-accent/30 hover:text-white transition-all"
               style={{ background: "rgba(255,255,255,0.03)" }}
             >
-              {selfieFile ? selfieFile.name : "Choose file..."}
+              {selfieFile ? selfieFile.name : native ? "Take Selfie" : "Choose file..."}
             </button>
           </div>
 

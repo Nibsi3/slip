@@ -3,6 +3,18 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --cap-safe-top: env(safe-area-inset-top, 0px);
+  }
+
+  html.cap-native body {
+    padding-top: var(--cap-safe-top);
+  }
+
+  html.cap-native header.fixed {
+    top: var(--cap-safe-top);
+  }
+
   body {
     @apply text-white antialiased;
     background: #080808;

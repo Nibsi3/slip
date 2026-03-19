@@ -38,13 +38,13 @@ export default function DashboardPage() {
           <p className="mt-3 text-4xl font-extrabold text-white">
             R<span>{balance.toFixed(2)}</span>
           </p>
-          {balance >= 100 ? (
+          {balance >= 20 ? (
             <Link href="/dashboard/withdraw" className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent-300 transition-colors">
               Withdraw funds
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
             </Link>
           ) : (
-            <p className="mt-3 text-xs text-muted-300">Min. R100 to withdraw</p>
+            <p className="mt-3 text-xs text-muted-300">Min. R20 to withdraw</p>
           )}
         </div>
 

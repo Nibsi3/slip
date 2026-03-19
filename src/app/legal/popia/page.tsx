@@ -139,7 +139,8 @@ export default function PopiaPage() {
             </p>
             <div className="space-y-3">
               {[
-                { party: "Payment Gateway (Paystack)", purpose: "To process payments and payouts securely via Split Payments and Subaccounts. PCI-DSS Level 1 certified with 3D Secure authentication." },
+                { party: "Payment Gateway (Stitch)", purpose: "To process payments and EFT payouts securely. PCI-DSS compliant with 3D Secure authentication." },
+                { party: "OTT Mobile", purpose: "To issue OTT Vouchers for cash-out withdrawals delivered via WhatsApp (Meta Business Partner)." },
                 { party: "Department of Home Affairs", purpose: "To verify identity documents (real-time ID validation for FICA Tier 1)." },
                 { party: "South African Revenue Service (SARS)", purpose: "Only if required by law or lawful demand." },
                 { party: "Financial Intelligence Centre (FIC)", purpose: "To report suspicious transactions as required under the FIC Act." },

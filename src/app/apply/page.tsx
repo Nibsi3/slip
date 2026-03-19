@@ -55,8 +55,8 @@ export default function ApplyPage() {
         setError("Passwords do not match");
         return;
       }
-      if (form.password.length < 6) {
-        setError("Password must be at least 6 characters");
+      if (form.password.length < 8) {
+        setError("Password must be at least 8 characters");
         return;
       }
     }
@@ -215,11 +215,11 @@ export default function ApplyPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/50 mb-1.5">Password *</label>
-                  <input type="password" required minLength={6} value={form.password} onChange={(e) => update("password", e.target.value)} className="input-field" placeholder="min 6 characters" />
+                  <input type="password" required minLength={8} value={form.password} onChange={(e) => update("password", e.target.value)} className="input-field" placeholder="Min 8 chars, upper + lower + number" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/50 mb-1.5">Confirm Password *</label>
-                  <input type="password" required minLength={6} value={form.confirmPassword} onChange={(e) => update("confirmPassword", e.target.value)} className="input-field" placeholder="repeat your password" />
+                  <input type="password" required minLength={8} value={form.confirmPassword} onChange={(e) => update("confirmPassword", e.target.value)} className="input-field" placeholder="Repeat your password" />
                 </div>
               </div>
             )}
@@ -317,10 +317,10 @@ export default function ApplyPage() {
                 {[
                   { key: "consent1", text: "I confirm I am a South African citizen or have a valid work permit." },
                   { key: "consent2", text: "I agree that I am an Independent Contractor and not an employee of Slip a Tip. Slip a Tip provides a technology platform only and does not provide a salary, benefits, or insurance." },
-                  { key: "consent3", text: "I understand that I cannot withdraw money until I have completed FICA verification (ID photo, selfie, and proof of address). The minimum withdrawal amount is R100." },
+                  { key: "consent3", text: "I understand that I cannot withdraw money until I have completed FICA verification (ID photo, selfie, and proof of address). The minimum withdrawal amount is R20." },
                   { key: "consent4", text: "I acknowledge that if I do not provide my FICA documents within 60 days of receiving my first tip, my funds will be forfeited and donated to a nominated registered charity." },
-                  { key: "consent5", text: "I consent to Slip a Tip processing my personal information (ID, bank details, biometric data) under the POPI Act, and to the creation of a Paystack Subaccount in my name for the purpose of receiving split payments." },
-                  { key: "consent6", text: "I accept the Service Fee of 10% on every tip I receive, the 72-hour settlement cooldown period, and the applicable transfer fee on withdrawals. I understand that Slip a Tip reserves the right to debit my balance for any chargebacks or disputed transactions." },
+                  { key: "consent5", text: "I consent to Slip a Tip processing my personal information (ID, bank details, biometric data) under the POPI Act, and to the use of Stitch for payment processing and payouts, and OTT Mobile / Meta (WhatsApp) for OTT Voucher withdrawal delivery." },
+                  { key: "consent6", text: "I accept the Service Fee of 10% on every tip I receive, the 72-hour settlement cooldown period, and the applicable withdrawal fees (R2 flat for EFT via Stitch, or 6% for OTT Voucher). I understand that Slip a Tip reserves the right to debit my balance for any chargebacks or disputed transactions." },
                 ].map((item) => (
                   <label key={item.key} className="flex items-start gap-3 rounded-xl p-3 ring-1 ring-white/[0.05] cursor-pointer hover:ring-white/[0.1] transition-all" style={{ background: (form as Record<string, string | boolean>)[item.key] ? "rgba(249,115,22,0.03)" : "rgba(255,255,255,0.015)" }}>
                     <input

@@ -132,7 +132,8 @@ export default function PrivacyPage() {
               </p>
               <div className="space-y-4">
                 {[
-                  { party: "Payment Gateway (Paystack)", purpose: "Processing payments and payouts securely via Split Payments. PCI-DSS Level 1 certified with 3D Secure — we never touch card data." },
+                  { party: "Payment Gateway (Stitch)", purpose: "Processing payments and EFT payouts securely. PCI-DSS compliant with 3D Secure — we never touch card data." },
+                  { party: "OTT Mobile / Meta (WhatsApp)", purpose: "Issuing OTT Vouchers and delivering withdrawal PINs via WhatsApp for cash-out withdrawals." },
                   { party: "Department of Home Affairs", purpose: "Real-time ID validation for FICA Tier 1 verification." },
                   { party: "South African Revenue Service (SARS)", purpose: "Only when required by law or lawful demand." },
                   { party: "Financial Intelligence Centre (FIC)", purpose: "Reporting suspicious transactions as required under the FIC Act." },
