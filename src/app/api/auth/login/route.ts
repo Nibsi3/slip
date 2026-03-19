@@ -34,15 +34,7 @@ export async function POST(request: NextRequest) {
 
     // --- Rate limiting: IP-based ---
     const ipLimit = await checkLoginIpLimit(ip);
-    if (!ipLimit.allowed) {
-      return NextResponse.json(
-        { error: "Too many login attempts. Please try again later." },
-        {
-          status: 429,
-          headers: { "Retry-After": Math.ceil((ipLimit.resetAt.getTime() - Date.now()) / 1000).toString() },
-        }
-      );
-    }
+    const ipRateLimited = !ipLimit.allowed;
 
     // --- Rate limiting: identifier-based ---
     const identifierLimit = await checkLoginIdentifierLimit(identifierKey);
@@ -69,6 +61,15 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       console.warn(`[Login] No user found for identifier: ${data.identifier.slice(0, 6)}***`);
+      if (ipRateLimited) {
+        return NextResponse.json(
+          { error: "Too many login attempts. Please try again later." },
+          {
+            status: 429,
+            headers: { "Retry-After": Math.ceil((ipLimit.resetAt.getTime() - Date.now()) / 1000).toString() },
+          }
+        );
+      }
       if (identifierRateLimited) {
         return NextResponse.json(
           { error: "Too many failed attempts for this account. Please wait 30 minutes before trying again." },
@@ -97,6 +98,15 @@ export async function POST(request: NextRequest) {
         where: { id: user.id },
         data: { loginAttempts: attempts, lockedUntil: lockUntil },
       });
+      if (ipRateLimited) {
+        return NextResponse.json(
+          { error: "Too many login attempts. Please try again later." },
+          {
+            status: 429,
+            headers: { "Retry-After": Math.ceil((ipLimit.resetAt.getTime() - Date.now()) / 1000).toString() },
+          }
+        );
+      }
       if (identifierRateLimited) {
         return NextResponse.json(
           { error: "Too many failed attempts for this account. Please wait 30 minutes before trying again." },
