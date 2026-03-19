@@ -20,8 +20,11 @@ export default function QRCodePage() {
     if (!worker) return "";
     const waNumber = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER || "";
     const origin = appUrl || window.location.origin;
+    const firstName = worker.user.firstName;
+    const lastName = worker.user.lastName;
+    const tipMsg = `TIP ${worker.qrCode} - I'd like to tip ${firstName} ${lastName} 👋`;
     return waNumber
-      ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`TIP ${worker.qrCode}`)}`
+      ? `https://wa.me/${waNumber}?text=${encodeURIComponent(tipMsg)}`
       : `${origin}/tip/${worker.qrCode}`;
   }
 

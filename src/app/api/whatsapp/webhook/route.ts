@@ -267,8 +267,8 @@ async function handleIncomingMessage(message: WaIncomingMessage, contactName?: s
   if (message.type === "text" && message.text?.body) {
     const text = message.text.body.trim();
 
-    // Check if this is a TIP [qrCode] initiation message
-    const tipMatch = text.match(/^TIP[\s_-]+([a-zA-Z0-9]+)$/i);
+    // Check if this is a TIP [qrCode] initiation message (with optional personalized suffix)
+    const tipMatch = text.match(/^TIP[\s_-]+([a-zA-Z0-9]+)(?:\s*[-–—].*)?$/i);
     if (tipMatch) {
       await handleTipInitiation(from, tipMatch[1]);
       return;
