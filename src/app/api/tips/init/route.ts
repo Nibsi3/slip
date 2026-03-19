@@ -11,20 +11,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { createStitchPaymentLink } from "@/lib/stitch";
-import { generatePaymentId, calculateFees, getAppUrl } from "@/lib/utils";
-import {
-  scoreTipTransaction,
-  recordFraudEvent,
-  recordVelocityEvent,
-  recordFingerprint,
-  extractFingerprintFromRequest,
-  checkBalanceCap,
-  checkTipSentVelocity,
-  checkTipReceivedVelocity,
-  checkTipperToWorkerVelocity,
-  runAmlChecks,
-} from "@/lib/security";
+import { createTip, tipFactoryErrorMessage } from "@/lib/tip-factory";
 
 const schema = z.object({
   qrCode: z.string().min(1),
@@ -44,158 +31,22 @@ export async function POST(request: NextRequest) {
       request.headers.get("x-real-ip") ||
       "unknown";
 
-    const worker = await db.worker.findUnique({
-      where: { qrCode: data.qrCode, isActive: true },
-      include: { user: { select: { firstName: true, lastName: true } } },
-    });
-
-    if (!worker) {
-      return NextResponse.json({ error: "Worker not found or inactive" }, { status: 404 });
-    }
-
-    // --- Velocity checks ---
-    const sentVelocity = await checkTipSentVelocity(ipAddress);
-    if (!sentVelocity.allowed) {
-      return NextResponse.json(
-        { error: sentVelocity.reason || "Too many tips from this network. Please try again later." },
-        { status: 429 }
-      );
-    }
-
-    const receivedVelocity = await checkTipReceivedVelocity(worker.id);
-    if (!receivedVelocity.allowed) {
-      return NextResponse.json(
-        { error: "This worker is temporarily unable to receive tips." },
-        { status: 429 }
-      );
-    }
-
-    const tipperWorkerVelocity = await checkTipperToWorkerVelocity(ipAddress, worker.id);
-    if (!tipperWorkerVelocity.allowed) {
-      return NextResponse.json(
-        { error: tipperWorkerVelocity.reason || "You have reached the tip limit for this recipient today." },
-        { status: 429 }
-      );
-    }
-
-    // --- Device fingerprint ---
-    const fpData = extractFingerprintFromRequest(request.headers, body);
-    fpData.tipperSessionId = `tipper-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const fingerprintHash = await recordFingerprint(fpData);
-
-    // --- Balance cap ---
-    const { feePlatform, feeGateway, netAmount } = calculateFees(data.amount);
-    const capCheck = await checkBalanceCap(worker.id, netAmount);
-    if (!capCheck.allowed) {
-      await db.auditLog.create({
-        data: {
-          action: "TIP_BALANCE_CAP_REJECTED",
-          entity: "Tip",
-          details: { workerId: worker.id, amount: data.amount, netAmount },
-          ipAddress,
-        },
-      });
-      return NextResponse.json(
-        { error: "This worker's account has reached its balance limit." },
-        { status: 400 }
-      );
-    }
-
-    // --- Fraud scoring ---
-    const fraudResult = await scoreTipTransaction({
-      workerId: worker.id,
+    const outcome = await createTip(request, {
+      qrCode: data.qrCode,
       amount: data.amount,
-      ipAddress,
-      fingerprintHash,
+      fingerprintFields: { platform: data.platform, screenRes: data.screenRes, timezone: data.timezone },
+      linkTtlMs: 24 * 60 * 60 * 1000,
+      returnPath: `/tip/s`,
     });
 
-    if (fraudResult.blocked) {
-      await recordFraudEvent({
-        type: "TIP_FLAGGED",
-        workerId: worker.id,
-        ipAddress,
-        deviceId: fingerprintHash,
-        riskScore: fraudResult.score,
-        action: "BLOCK",
-        details: { factors: fraudResult.factors, amount: data.amount },
-      });
+    if (!outcome.ok) {
       return NextResponse.json(
-        { error: "This transaction cannot be processed at this time." },
-        { status: 403 }
+        { error: tipFactoryErrorMessage(outcome.error) },
+        { status: outcome.error.status }
       );
     }
 
-    if (fraudResult.action !== "ALLOW") {
-      await recordFraudEvent({
-        type: "TIP_FLAGGED",
-        workerId: worker.id,
-        ipAddress,
-        deviceId: fingerprintHash,
-        riskScore: fraudResult.score,
-        action: fraudResult.action,
-        details: { factors: fraudResult.factors, amount: data.amount },
-      });
-    }
-
-    // --- AML ---
-    const amlResult = await runAmlChecks(worker.id, data.amount, "TIP");
-    if (amlResult.blocked) {
-      await recordFraudEvent({
-        type: "AML_ALERT",
-        workerId: worker.id,
-        ipAddress,
-        deviceId: fingerprintHash,
-        riskScore: 85,
-        action: "BLOCK",
-        details: { alerts: amlResult.alerts, amount: data.amount, autoBlocked: true },
-      });
-      return NextResponse.json(
-        { error: "This account has been flagged for suspicious activity." },
-        { status: 403 }
-      );
-    }
-
-    const paymentId = generatePaymentId();
-    const appUrl = getAppUrl();
-
-    const returnUrl = new URL(`/tip/s/${paymentId}`, appUrl);
-
-    // Payment link valid for 24 hours
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-    let stitch;
-    try {
-      stitch = await createStitchPaymentLink({
-        amountZAR: data.amount,
-        merchantReference: paymentId,
-        payerName: "Guest",
-        redirectUrl: returnUrl.toString(),
-        expiresAt,
-      });
-    } catch (stitchErr) {
-      console.error("[tips/init] Stitch error:", stitchErr);
-      return NextResponse.json({ error: "Payment gateway unavailable. Please try again." }, { status: 502 });
-    }
-
-    // Create tip record
-    const tip = await db.tip.create({
-      data: {
-        workerId: worker.id,
-        amount: data.amount,
-        feePlatform,
-        feeGateway,
-        netAmount,
-        paymentId,
-        paymentMethod: "stitch",
-        gatewayRef: stitch.id,
-        paymentLinkUrl: stitch.link,
-        status: "PENDING",
-      },
-    });
-
-    // Record velocity
-    await recordVelocityEvent(worker.id, "TIP_RECEIVED", data.amount, ipAddress, fingerprintHash);
-    await recordVelocityEvent(worker.id, "TIP_SENT", data.amount, ipAddress, fingerprintHash);
+    const { tip, stitch, worker } = outcome.result;
 
     await db.auditLog.create({
       data: {
@@ -207,14 +58,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Build WhatsApp deeplink — the customer opens WA with the payment link pre-filled
-    const workerFirstName = worker.user.firstName;
-    const workerLastName = worker.user.lastName;
     const amountFormatted = `R${data.amount.toFixed(0)}`;
     const waMessage =
-      `Hi! I'd like to send ${workerFirstName} ${workerLastName} a tip of ${amountFormatted} via Slip a Tip.\n\n` +
+      `Hi! I'd like to send ${worker.firstName} ${worker.lastName} a tip of ${amountFormatted} via Slip a Tip.\n\n` +
       `Here is my secure payment link:\n${stitch.link}\n\n` +
-      `Ref: ${paymentId}`;
+      `Ref: ${tip.paymentId}`;
     const waDeeplink = `https://wa.me/?text=${encodeURIComponent(waMessage)}`;
 
     return NextResponse.json({

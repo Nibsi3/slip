@@ -16,14 +16,14 @@ export function generatePaymentId(): string {
 
 export function calculateFees(amount: number) {
   const totalFeeCapRate = 0.10;
-  // Paystack ZA fee: 2.9% + R1.00 (approx; Paystack may apply caps/variations)
+  // Stitch Express fee: ~2.9% + R1.00 flat
   const gatewayFeeRate = 0.029;
   const gatewayFeeFixed = 1.0;
 
   const feeGateway = Math.round((amount * gatewayFeeRate + gatewayFeeFixed) * 100) / 100;
   const totalFeeCap = Math.round(amount * totalFeeCapRate * 100) / 100;
 
-  // Platform earns the remainder up to the 10% total cap (Paystack fee is deducted first)
+  // Platform earns the remainder up to the 10% total cap (gateway fee deducted first)
   const feePlatform = Math.max(0, Math.round((totalFeeCap - feeGateway) * 100) / 100);
   const netAmount = Math.round((amount - feeGateway - feePlatform) * 100) / 100;
 
@@ -31,13 +31,7 @@ export function calculateFees(amount: number) {
 }
 
 export function getAppUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "http://localhost:3000";
+  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
 export function cn(...classes: (string | undefined | false | null)[]): string {
