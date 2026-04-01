@@ -1,8 +1,17 @@
 # slip-a-tip
 
+![status](https://img.shields.io/badge/status-active-16a34a)
+![stack](https://img.shields.io/badge/stack-next.js%20%7C%20prisma%20%7C%20capacitor-111827)
+![type](https://img.shields.io/badge/type-fintech-0ea5e9)
+
 ![slip-a-tip preview](public/qr-slipatip.png)
 
-Digital tipping and payment web app with QR-driven flows, auth, admin tooling, and mobile packaging via Capacitor.
+QR-based tipping platform for service teams, with fast payment entry, account management, and mobile-ready delivery.
+
+## Snapshot
+- **Core value:** let users tip in seconds from scan to checkout.
+- **Architecture:** Next.js web app + Prisma data model + Redis-backed fast operations.
+- **Delivery model:** shared codebase with web and Android packaging via Capacitor.
 
 ## What it does
 - Generates and serves QR-based tipping entry points.
