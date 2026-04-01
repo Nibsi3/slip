@@ -1,34 +1,40 @@
 # slip
 
-## Overview
-This repository contains active product code and implementation details for the **slip** project.
+Digital tipping and payment web app with QR-driven flows, auth, admin tooling, and mobile packaging via Capacitor.
 
-## Highlights
-- Clean project structure with separated app/data/config concerns.
-- Production-oriented setup with environment-driven configuration.
-- Ready for extension with tests, CI checks, and deployment workflows.
+## What it does
+- Generates and serves QR-based tipping entry points.
+- Handles authenticated user and dashboard experiences.
+- Includes admin/apply/legal flows and API routes for operational tasks.
+- Supports push notifications, biometric auth, and mobile builds through Capacitor plugins.
 
-## Tech Stack
-- Node.js
-- TypeScript
-- React
-- Tailwind CSS
+## Stack
+- Next.js 15 + React + TypeScript
+- Prisma + relational database workflows
+- Redis (`ioredis`) for fast state/session operations
+- Capacitor (Android/mobile wrapper), Sentry, AWS S3 SDK
 
-## Run Locally
-1. Clone the repository and move into the project folder.
-2. Install dependencies (`npm install`, `pnpm install`, or the package manager used by the project).
-3. Create a local `.env` file if environment variables are required.
-4. Start the development server and verify the main flow works end-to-end.
+## Local development
+```bash
+npm install
+npm run db:generate
+npm run dev
+```
 
-## Repository Layout
-- `android/`
-- `docs/`
-- `Documents/`
-- `prisma/`
-- `public/`
-- `scripts/`
+Database commands:
+```bash
+npm run db:push
+npm run db:migrate
+npm run db:seed
+```
 
-## Security Notes
-- Keep credentials in environment variables, never in tracked files.
-- Rotate and replace any key immediately if exposure is suspected.
-- Use least-privilege tokens for third-party integrations.
+## Repository structure
+- `src/app/` route groups (`dashboard`, `tip`, `qr`, `admin`, `auth`)
+- `prisma/` schema and seed scripts
+- `scripts/` utilities (including QR generation)
+- `android/` Capacitor Android project
+
+## Practical next improvements
+- Add end-to-end tests for tip payment and redemption flows.
+- Add rate-limit instrumentation for public QR endpoints.
+- Add release checklist for web + Android builds.
